@@ -34,21 +34,30 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
+        /* 滚动动画核心样式 */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, transform;
+        }
+        
+        /* 元素进入视口时的状态 */
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 元素离开视口上方时的淡出效果 */
+        .scroll-animate.fade-out {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        
         /* 全局动画 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes hoverEffect {
-            0% { transform: translateY(0); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
-            50% { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(230, 57, 70, 0.3); }
-            100% { transform: translateY(0); box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); }
-        }
-        
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-12px); }
         }
         
         body {
@@ -72,23 +81,23 @@
         }
         
         .shape-1 {
-            width: 400px;
-            height: 400px;
-            border-radius: 50%;
+            width: 250px;
+            height: 250px;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
             background-color: var(--primary-color);
-            bottom: -200px;
-            left: -100px;
-            animation: float 30s ease-in-out infinite;
+            top: 20%;
+            left: 5%;
+            animation: float 28s ease-in-out infinite;
         }
         
         .shape-2 {
-            width: 250px;
-            height: 250px;
-            clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%);
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
             background-color: var(--accent);
-            top: 10%;
+            bottom: -150px;
             right: 5%;
-            animation: float 25s ease-in-out infinite 7s;
+            animation: float 32s ease-in-out infinite 8s;
         }
         
         .overlay {
@@ -107,6 +116,12 @@
             top: 0;
             z-index: 100;
             box-shadow: var(--shadow);
+            transition: background-color 0.3s ease, padding 0.3s ease;
+        }
+        
+        header.scrolled {
+            background-color: rgba(13, 13, 13, 0.98);
+            padding: 15px 0;
         }
         
         .header-container {
@@ -123,6 +138,7 @@
             color: var(--primary-color);
             text-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
             font-family: 'Georgia', serif;
+            animation: float 6s ease-in-out infinite;
             position: relative;
         }
         
@@ -206,14 +222,11 @@
             max-width: 1200px;
             margin: 0 auto;
             padding: 80px 20px 40px;
-            position: relative;
-            z-index: 2;
         }
         
         .team-header {
             text-align: center;
             margin-bottom: 80px;
-            animation: fadeIn 1s ease-out;
         }
         
         .team-header h1 {
@@ -249,21 +262,13 @@
             border-radius: 10px;
             border: 1px solid var(--dark-red);
             margin-bottom: 80px;
-            animation: fadeIn 1s ease-out 0.3s both;
-            position: relative;
+            box-shadow: var(--shadow);
         }
         
-        /* 装饰性元素 */
-        .team-description::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            width: 40px;
-            height: 40px;
-            border-top: 3px solid var(--accent);
-            border-right: 3px solid var(--accent);
-            border-radius: 5px;
+        .team-description h2 {
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8em;
         }
         
         .team-description p {
@@ -277,8 +282,10 @@
         }
         
         .team-members h2 {
+            color: var(--primary-color);
             text-align: center;
-            animation: fadeIn 1s ease-out 0.5s both;
+            margin-bottom: 60px;
+            font-size: 2.2em;
         }
         
         .members-grid {
@@ -294,20 +301,12 @@
             transition: all 0.4s ease;
             border: 1px solid #330000;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            animation: fadeIn 1s ease-out;
             position: relative;
         }
         
-        /* 为每个卡片设置不同的动画延迟 */
-        .member-card:nth-child(1) { animation-delay: 0.6s; }
-        .member-card:nth-child(2) { animation-delay: 0.7s; }
-        .member-card:nth-child(3) { animation-delay: 0.8s; }
-        .member-card:nth-child(4) { animation-delay: 0.9s; }
-        .member-card:nth-child(5) { animation-delay: 1s; }
-        .member-card:nth-child(6) { animation-delay: 1.1s; }
-        
         .member-card:hover {
-            animation: hoverEffect 2s ease infinite;
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(230, 57, 70, 0.3);
         }
         
         .member-photo {
@@ -354,7 +353,7 @@
         }
         
         .member-role {
-            color: var(--accent);
+            color: #bbb;
             margin-bottom: 15px;
             font-style: italic;
             font-size: 0.95em;
@@ -366,14 +365,12 @@
             line-height: 1.6;
         }
         
-        .university-badge {
-            display: inline-block;
-            background-color: rgba(255, 183, 3, 0.1);
+        .member-major {
+            font-size: 0.9em;
             color: var(--accent);
-            padding: 3px 10px;
-            border-radius: 12px;
-            font-size: 0.8em;
             margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px dashed rgba(255, 183, 3, 0.2);
         }
         
         footer {
@@ -381,8 +378,6 @@
             padding: 40px 20px;
             border-top: 2px solid var(--dark-red);
             text-align: center;
-            animation: fadeIn 1s ease-out 1.3s both;
-            position: relative;
         }
         
         .footer-logo {
@@ -450,7 +445,7 @@
     <div class="decor-shape shape-2"></div>
     
     <div class="overlay">
-        <header>
+        <header id="mainHeader">
             <div class="header-container">
                 <div class="logo">13号</div>
                 <nav>
@@ -465,109 +460,109 @@
         </header>
         
         <main>
-            <section class="team-header">
-                <h1>大学生开发团队</h1>
-                <p>一群热爱游戏开发的大学生，共同打造《13号病房》恐怖解密体验</p>
+            <section class="team-header scroll-animate">
+                <h1>开发团队</h1>
+                <p>一群热爱恐怖游戏的大学生开发者，携手打造沉浸式的13号病房逃生体验</p>
             </section>
             
-            <section class="team-description">
+            <section class="team-description scroll-animate">
                 <h2 class="section-title">关于我们</h2>
-                <p>我们是来自计算机科学与技术专业的大学生开发团队，由6名对游戏开发充满热情的同学组成。《13号病房》是我们的课程设计项目，始于对恐怖游戏叙事方式的探索。</p>
-                <p>作为大学生开发者，我们利用课余时间和专业知识，零开始构建这个游戏。团队成员各有分工，但都参与到创意讨论中，确保每个环节都融入多元视角。</p>
-                <p>我们希望通过《13号病房》探索"规则怪谈"与"心理恐怖"的结合，创造出既紧张刺激又富有思考空间的游戏体验。尽管作为学生团队资源有限，但我们致力于打磨细节，让每个玩家都能感受到13号病房的诡异氛围。</p>
+                <p>我们是来自计算机与设计专业的大学生开发团队，对恐怖游戏和互动叙事有着浓厚兴趣。《13号病房》是我们的课程设计与毕业设计结合项目，灵感来源于校园怪谈和都市传说。</p>
+                <p>作为学生开发者，我们利用课余时间完成了这款游戏的设计与开发，希望通过独特的叙事方式和沉浸式体验，让玩家感受心理恐怖的魅力。我们相信真正的恐怖不仅来自视觉冲击，更源于对未知的恐惧和对人性的思考。</p>
+                <p>团队成员各有所长，从创意构思到技术实现，每个人都为项目贡献了自己的专业知识和热情。通过这个项目，我们不仅提升了专业技能，更学会了团队协作和项目管理。</p>
             </section>
             
-            <section class="team-members">
+            <section class="team-members scroll-animate">
                 <h2 class="section-title">团队成员</h2>
                 <div class="members-grid">
                     <!-- 组长 -->
-                    <div class="member-card">
+                    <div class="member-card scroll-animate">
                         <div class="member-photo">
                             <img src="images/leader-liuhanlin.jpg" alt="刘翰霖照片，团队组长">
                             <div class="member-badge">组长</div>
                         </div>
                         <div class="member-info">
                             <h3>刘翰霖</h3>
-                            <div class="member-role">项目负责人 / 大二</div>
-                            <p class="member-bio">负责项目整体规划与团队协调，对恐怖游戏有深入研究。主导《13号病房》的故事设定和核心玩法设计，平衡游戏难度与恐怖氛围。</p>
-                            <span class="university-badge">人工智能专业</span>
+                            <div class="member-role">项目负责人 / 创意总监</div>
+                            <p class="member-bio">人工智能专业大二学生，负责项目整体规划与创意指导，主导《13号病房》的故事设定和核心玩法设计。</p>
+                            <div class="member-major">主修：人工智能</div>
                         </div>
                     </div>
                     
                     <!-- 组员1 -->
-                    <div class="member-card">
+                    <div class="member-card scroll-animate">
                         <div class="member-photo">
                             <img src="images/member-wuchangrong.jpg" alt="吴昌融照片，团队组员">
                             <div class="member-badge">组员</div>
                         </div>
                         <div class="member-info">
                             <h3>吴昌融</h3>
-                            <div class="member-role">程序开发 / 大二</div>
-                            <p class="member-bio">负责游戏的程序实现，擅长C#和Unity引擎。实现了13号病房的动态环境变化机制和谜题逻辑，确保游戏流畅运行。</p>
-                            <span class="university-badge">人工智能专业</span>
+                            <div class="member-role">程序开发</div>
+                            <p class="member-bio">人工智能专业大二学生，负责游戏的程序开发与技术实现，实现了游戏中的核心机制、谜题逻辑和AI行为。</p>
+                            <div class="member-major">主修：人工智能</div>
                         </div>
                     </div>
                     
                     <!-- 组员2 -->
-                    <div class="member-card">
+                    <div class="member-card scroll-animate">
                         <div class="member-photo">
                             <img src="images/member-wujingpeng.jpg" alt="吴京澎照片，团队组员">
                             <div class="member-badge">组员</div>
                         </div>
                         <div class="member-info">
                             <h3>吴京澎</h3>
-                            <div class="member-role">美术设计 / 大二</div>
-                            <p class="member-bio">负责游戏视觉设计，擅长恐怖氛围营造。设计了13号病房的场景布局和角色形象，通过视觉元素强化游戏的诡异感。</p>
-                            <span class="university-badge">人工智能专业</span>
+                            <div class="member-role">人工智能</div>
+                            <p class="member-bio">人工智能专业大三学生，负责游戏的视觉设计与美术资源制作，擅长恐怖氛围的视觉表达与场景设计。</p>
+                            <div class="member-major">主修：人工智能</div>
                         </div>
                     </div>
                     
                     <!-- 组员3 -->
-                    <div class="member-card">
+                    <div class="member-card scroll-animate">
                         <div class="member-photo">
                             <img src="images/member-zhangxinnan.jpg" alt="张星南照片，团队组员">
                             <div class="member-badge">组员</div>
                         </div>
                         <div class="member-info">
                             <h3>张星南</h3>
-                            <div class="member-role">音效设计 / 大二</div>
-                            <p class="member-bio">负责游戏音效与音乐创作，对声音心理学有研究。为13号病房设计了环境音效和紧张时刻的音乐，增强恐怖沉浸感。</p>
-                            <span class="university-badge">人工智能专业</span>
+                            <div class="member-role">人工智能</div>
+                            <p class="member-bio">人工智能专业大二学生，负责游戏的音效设计与音乐创作，深谙声音对恐怖氛围的影响与塑造。</p>
+                            <div class="member-major">主修：人工智能</div>
                         </div>
                     </div>
                     
                     <!-- 组员4 -->
-                    <div class="member-card">
+                    <div class="member-card scroll-animate">
                         <div class="member-photo">
                             <img src="images/member-wangshiying.jpg" alt="王诗颖照片，团队组员">
                             <div class="member-badge">组员</div>
                         </div>
                         <div class="member-info">
                             <h3>王诗颖</h3>
-                            <div class="member-role">剧本写作 / 大二</div>
-                            <p class="member-bio">负责游戏剧情与文本创作，喜爱悬疑故事。创作了13号病房的背景故事和规则怪谈内容，设计了多重结局的叙事分支。</p>
-                            <span class="university-badge">计算机科学与技术专业</span>
+                            <div class="member-role">剧本写作</div>
+                            <p class="member-bio">计算机科学与技术专业大三学生，负责游戏的剧情创作与文本撰写，擅长悬疑故事的构建与规则怪谈设计。</p>
+                            <div class="member-major">主修：计算机科学与技术</div>
                         </div>
                     </div>
                     
                     <!-- 组员5 -->
-                    <div class="member-card">
+                    <div class="member-card scroll-animate">
                         <div class="member-photo">
                             <img src="images/member-wangzexian.jpg" alt="王泽贤照片，团队组员">
                             <div class="member-badge">组员</div>
                         </div>
                         <div class="member-info">
                             <h3>王泽贤</h3>
-                            <div class="member-role">测试与优化 / 大二</div>
-                            <p class="member-bio">负责游戏测试与体验优化，注重细节打磨。通过多轮测试调整13号病房的谜题难度和节奏，提升整体游戏体验。</p>
-                            <span class="university-badge">计算机科学与技术专业</span>
+                            <div class="member-role">测试与优化</div>
+                            <p class="member-bio">计算机科学与技术专业大二学生，负责游戏的测试与体验优化，注重玩家的游戏感受与流程顺畅度。</p>
+                            <div class="member-major">主修：计算机科学与技术</div>
                         </div>
                     </div>
                 </div>
             </section>
         </main>
         
-        <footer>
+        <footer class="scroll-animate">
             <div class="footer-logo">13号病房</div>
             <div class="footer-links">
                 <a href="index.html">主页</a>
@@ -604,6 +599,70 @@
                     });
                 }
             });
+            
+            // 滚动时导航栏变化
+            const header = document.getElementById('mainHeader');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // 滚动动画实现
+            // 节流函数，优化滚动性能
+            function throttle(func, delay = 100) {
+                let lastTime = 0;
+                return function(...args) {
+                    const now = Date.now();
+                    if (now - lastTime >= delay) {
+                        func.apply(this, args);
+                        lastTime = now;
+                    }
+                };
+            }
+
+            // 检查元素是否在视口中
+            function isInViewport(element) {
+                const rect = element.getBoundingClientRect();
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                
+                // 元素顶部进入视口底部80%以内，或元素底部进入视口顶部
+                return (
+                    rect.top <= windowHeight * 0.8 && // 顶部在视口下方80%位置以内
+                    rect.bottom >= 0 // 底部在视口顶部以上
+                );
+            }
+
+            // 检查元素是否在视口上方（已滚动过去）
+            function isAboveViewport(element) {
+                const rect = element.getBoundingClientRect();
+                return rect.bottom < 0;
+            }
+
+            // 处理滚动动画
+            function handleScrollAnimation() {
+                const animatedElements = document.querySelectorAll('.scroll-animate');
+                
+                animatedElements.forEach(element => {
+                    if (isInViewport(element)) {
+                        element.classList.add('visible');
+                        element.classList.remove('fade-out');
+                    } else if (isAboveViewport(element)) {
+                        element.classList.add('fade-out');
+                        element.classList.remove('visible');
+                    } else {
+                        element.classList.remove('visible', 'fade-out');
+                    }
+                });
+            }
+
+            // 初始检查可见元素
+            handleScrollAnimation();
+            
+            // 监听滚动事件（使用节流优化）
+            window.addEventListener('scroll', throttle(handleScrollAnimation));
         });
     </script>
 </body>

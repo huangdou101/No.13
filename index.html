@@ -34,20 +34,35 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
+        /* 滚动动画核心样式 */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, transform;
+        }
+        
+        /* 元素进入视口时的状态 */
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 元素离开视口上方时的淡出效果 */
+        .scroll-animate.fade-out {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        
         /* 全局动画 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
         }
         
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-12px); }
         }
         
         @keyframes glitch {
@@ -56,6 +71,11 @@
             40% { transform: translate(-2px, -2px); }
             60% { transform: translate(2px, 2px); }
             80% { transform: translate(2px, -2px); }
+        }
+        
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
         }
         
         body {
@@ -123,6 +143,12 @@
             top: 0;
             z-index: 100;
             box-shadow: var(--shadow);
+            transition: background-color 0.3s ease, padding 0.3s ease;
+        }
+        
+        header.scrolled {
+            background-color: rgba(13, 13, 13, 0.98);
+            padding: 15px 0;
         }
         
         .header-container {
@@ -243,13 +269,13 @@
             opacity: 0.12;
             filter: blur(3px);
             z-index: 0;
+            animation: flicker 20s infinite;
         }
         
         .hero-content {
             max-width: 900px;
             position: relative;
             z-index: 1;
-            animation: fadeIn 1.2s ease-out;
         }
         
         .ward-number {
@@ -295,6 +321,28 @@
             border: none;
             cursor: pointer;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* 按钮点击波纹效果 */
+        .btn::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease;
+        }
+        
+        .btn:active::after {
+            width: 300px;
+            height: 300px;
+            opacity: 0;
         }
         
         /* 强调开始游戏按钮 */
@@ -348,7 +396,6 @@
             max-width: 1200px;
             margin: 0 auto 100px;
             padding: 0 20px;
-            animation: fadeIn 1.5s ease-out 0.3s both;
         }
         
         .brief-content {
@@ -359,32 +406,6 @@
             box-shadow: var(--shadow);
             line-height: 1.9;
             font-size: 1.1em;
-            position: relative;
-        }
-        
-        /* 装饰性元素 */
-        .brief-content::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: -10px;
-            width: 40px;
-            height: 40px;
-            border-top: 3px solid var(--accent);
-            border-left: 3px solid var(--accent);
-            border-radius: 5px;
-        }
-        
-        .brief-content::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            right: -10px;
-            width: 40px;
-            height: 40px;
-            border-bottom: 3px solid var(--accent);
-            border-right: 3px solid var(--accent);
-            border-radius: 5px;
         }
         
         .brief-content p {
@@ -399,7 +420,13 @@
             max-width: 1200px;
             margin: 0 auto 100px;
             padding: 0 20px;
-            animation: fadeIn 1.5s ease-out 0.6s both;
+        }
+        
+        .snippets-title {
+            text-align: center;
+            margin-bottom: 60px;
+            color: var(--primary-color);
+            font-size: 2.2em;
         }
         
         .snippets-grid {
@@ -476,8 +503,7 @@
             padding: 40px 20px;
             border-top: 2px solid var(--dark-red);
             text-align: center;
-            animation: fadeIn 1.5s ease-out 0.9s both;
-            position: relative;
+            margin-top: 80px;
         }
         
         .footer-logo {
@@ -521,12 +547,12 @@
                 justify-content: center;
             }
             
-            .ward-number {
-                font-size: 5em;
-            }
-            
             .hero h1 {
                 font-size: 2.5em;
+            }
+            
+            .ward-number {
+                font-size: 6em;
             }
             
             .hero p {
@@ -557,7 +583,7 @@
     <div class="decor-shape shape-3"></div>
     
     <div class="overlay">
-        <header>
+        <header id="mainHeader">
             <div class="header-container">
                 <div class="logo">13号</div>
                 <nav>
@@ -574,8 +600,8 @@
         <section class="hero">
             <div class="hero-content">
                 <div class="ward-number">13</div>
-                <h1>病房 - 医院逃生</h1>
-                <p>在冰冷的病床上惊醒，记忆如同被浓雾笼罩。你发现自己身处13号病房，枕头下的泛黄纸条写着令人不安的规则。医生的笑容诡异，病友的眼神恐惧，这座医院隐藏着提取"记忆因子"的恐怖秘密。你必须逃离这里，在被永远困在13号病房之前。</p>
+                <h1>病房</h1>
+                <p>在冰冷的病床上惊醒，刺鼻的消毒水气味弥漫。你什么都不记得了，唯一的线索是枕头下那张泛黄的纸条，上面用诡异的字迹写着"病房规则"。门外传来拖沓的脚步声，越来越近...</p>
                 <div class="cta-buttons">
                     <a href="login.html" class="btn btn-primary">开始游戏</a>
                     <a href="team.html" class="btn btn-secondary">关于团队</a>
@@ -583,60 +609,57 @@
             </div>
         </section>
         
-        <section class="game-brief">
+        <section class="game-brief scroll-animate">
             <h2 class="section-title">游戏核心</h2>
             <div class="brief-content">
-                <p>13号病房是这家神秘医院中最特殊的房间——所有被安置在这里的病人，都会在一周内"康复出院"，但再也没有人见过他们。你在这个房间醒来，失去了所有记忆，唯一的线索是枕头下的纸条，上面写着几条生存规则：</p>
-                <p><strong>"1. 晚上10点后绝对不要离开13号病房"</strong></p>
-                <p><strong>"2. 穿白大褂的人询问时，永远说你感觉'好多了'"</strong></p>
-                <p><strong>"3. 看到戴着红色手环的病人，立刻躲藏"</strong></p>
-                <p><strong>"4. 不要尝试理解医院的布局，它会自己改变"</strong></p>
-                <p>随着探索深入，你发现医院在秘密进行着可怕的实验——提取病人的"记忆因子"卖给富人，为他们延续生命。而你，就是下一个实验品。</p>
+                <p>你在<strong>13号病房</strong>醒来，失去了所有记忆。枕头下的纸条写着令人不安的规则："晚上10点后不要离开病房"、"不要相信穿白大褂的人"、"听到走廊有脚步声时务必躲藏"。</p>
+                <p>随着探索深入，你发现这家医院根本不是治病救人的场所——病人会在"治疗"后神秘消失，手术室深夜传来奇怪的机器声，档案室里的病历记录着令人毛骨悚然的实验数据。逐渐拼凑的线索指向一个可怕的真相：医院在秘密提取病人的"记忆因子"，卖给富人为其延长寿命，而被提取因子的病人，最终都会被"处理"。</p>
+                <p>你需要在不被发现的情况下破解谜题、躲避危险，揭开医院的恐怖阴谋。不同的选择将导向不同的结局，但记住——在13号病房，真相往往比死亡更可怕。</p>
             </div>
         </section>
         
-        <section class="feature-snippets">
-            <h2 class="section-title">游戏特色</h2>
+        <section class="feature-snippets scroll-animate">
+            <h2 class="section-title snippets-title">游戏特色</h2>
             <div class="snippets-grid">
-                <div class="snippet-card">
-                    <div class="snippet-icon">🔍</div>
+                <div class="snippet-card scroll-animate">
+                    <div class="snippet-icon">📜</div>
                     <h3>规则怪谈</h3>
-                    <p>解开纸条上的规则谜团，遵守还是打破？每一个选择都可能带来致命后果。</p>
+                    <p>通过发现各种规则纸条，逐渐拼凑医院的运作规律和逃生方法，但并非所有规则都可以信任。</p>
                 </div>
                 
-                <div class="snippet-card">
-                    <div class="snippet-icon">🧩</div>
-                    <h3>环境解谜</h3>
-                    <p>在昏暗的病房和走廊中寻找线索，破解与医院历史相关的复杂谜题。</p>
+                <div class="snippet-card scroll-animate">
+                    <div class="snippet-icon">🔍</div>
+                    <h3>环境探索</h3>
+                    <p>探索病房、走廊、手术室等多个区域，寻找隐藏的线索和道具，解开医院的层层谜团。</p>
                 </div>
                 
-                <div class="snippet-card">
-                    <div class="snippet-icon">👻</div>
-                    <h3>心理恐怖</h3>
-                    <p>没有廉价的jump scare，而是通过氛围、声音和未知营造深入骨髓的恐惧。</p>
+                <div class="snippet-card scroll-animate">
+                    <div class="snippet-icon">🧠</div>
+                    <h3>记忆阴谋</h3>
+                    <p>揭开医院提取"记忆因子"的恐怖真相，发现富人们延长寿命的秘密代价是无数病人的生命。</p>
                 </div>
                 
-                <div class="snippet-card">
+                <div class="snippet-card scroll-animate">
+                    <div class="snippet-icon">🕵️</div>
+                    <h3>躲避追踪</h3>
+                    <p>小心行为诡异的医生和护士，被发现将面临可怕后果，你必须学会躲藏和潜行。</p>
+                </div>
+                
+                <div class="snippet-card scroll-animate">
+                    <div class="snippet-icon">🔑</div>
+                    <h3>谜题解密</h3>
+                    <p>破解各种机关和密码，打开紧锁的门和箱子，获取关键道具和信息。</p>
+                </div>
+                
+                <div class="snippet-card scroll-animate">
                     <div class="snippet-icon">🔄</div>
                     <h3>多重结局</h3>
-                    <p>你的选择将决定最终命运，是成功逃脱还是永远被困在13号病房？</p>
-                </div>
-                
-                <div class="snippet-card">
-                    <div class="snippet-icon">🏥</div>
-                    <h3>动态环境</h3>
-                    <p>医院似乎有自己的意识，房间布局会随时间变化，增加探索难度。</p>
-                </div>
-                
-                <div class="snippet-card">
-                    <div class="snippet-icon">🕵️</div>
-                    <h3>隐藏真相</h3>
-                    <p>收集散落在各处的文件和录音，拼凑出医院和13号病房的完整秘密。</p>
+                    <p>你的选择将决定最终命运，不同的行动会导向完全不同的结局，包括逃脱、死亡或更可怕的循环。</p>
                 </div>
             </div>
         </section>
         
-        <footer>
+        <footer class="scroll-animate">
             <div class="footer-logo">13号病房</div>
             <div class="footer-links">
                 <a href="index.html">主页</a>
@@ -673,6 +696,70 @@
                     });
                 }
             });
+            
+            // 滚动时导航栏变化
+            const header = document.getElementById('mainHeader');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // 滚动动画实现
+            // 节流函数，优化滚动性能
+            function throttle(func, delay = 100) {
+                let lastTime = 0;
+                return function(...args) {
+                    const now = Date.now();
+                    if (now - lastTime >= delay) {
+                        func.apply(this, args);
+                        lastTime = now;
+                    }
+                };
+            }
+
+            // 检查元素是否在视口中
+            function isInViewport(element) {
+                const rect = element.getBoundingClientRect();
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                
+                // 元素顶部进入视口底部80%以内，或元素底部进入视口顶部
+                return (
+                    rect.top <= windowHeight * 0.8 && // 顶部在视口下方80%位置以内
+                    rect.bottom >= 0 // 底部在视口顶部以上
+                );
+            }
+
+            // 检查元素是否在视口上方（已滚动过去）
+            function isAboveViewport(element) {
+                const rect = element.getBoundingClientRect();
+                return rect.bottom < 0;
+            }
+
+            // 处理滚动动画
+            function handleScrollAnimation() {
+                const animatedElements = document.querySelectorAll('.scroll-animate');
+                
+                animatedElements.forEach(element => {
+                    if (isInViewport(element)) {
+                        element.classList.add('visible');
+                        element.classList.remove('fade-out');
+                    } else if (isAboveViewport(element)) {
+                        element.classList.add('fade-out');
+                        element.classList.remove('visible');
+                    } else {
+                        element.classList.remove('visible', 'fade-out');
+                    }
+                });
+            }
+
+            // 初始检查可见元素
+            handleScrollAnimation();
+            
+            // 监听滚动事件（使用节流优化）
+            window.addEventListener('scroll', throttle(handleScrollAnimation));
         });
     </script>
 </body>

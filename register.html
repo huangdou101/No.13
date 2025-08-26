@@ -34,15 +34,30 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* 全局动画 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* 滚动动画核心样式 */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, transform;
         }
         
+        /* 元素进入视口时的状态 */
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 元素离开视口上方时的淡出效果 */
+        .scroll-animate.fade-out {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        
+        /* 全局动画 */
         @keyframes float {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-12px); }
         }
         
         body {
@@ -115,6 +130,7 @@
             text-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
             font-family: 'Georgia', serif;
             position: relative;
+            animation: float 6s ease-in-out infinite;
         }
         
         .logo::after {
@@ -294,7 +310,7 @@
             font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -410,7 +426,7 @@
             </div>
         </header>
         
-        <div class="register-container">
+        <div class="register-container scroll-animate">
             <div class="register-header">
                 <h1>注册账号</h1>
                 <p>创建你的账号，准备进入13号病房</p>
@@ -450,7 +466,7 @@
             </div>
         </div>
         
-        <footer>
+        <footer class="scroll-animate">
             <div class="footer-logo">13号病房</div>
             <div class="footer-links">
                 <a href="index.html">主页</a>
@@ -487,6 +503,60 @@
                     });
                 }
             });
+
+            // 处理滚动动画
+            // 节流函数，优化滚动性能
+            function throttle(func, delay = 100) {
+                let lastTime = 0;
+                return function(...args) {
+                    const now = Date.now();
+                    if (now - lastTime >= delay) {
+                        func.apply(this, args);
+                        lastTime = now;
+                    }
+                };
+            }
+
+            // 检查元素是否在视口中
+            function isInViewport(element) {
+                const rect = element.getBoundingClientRect();
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                
+                // 元素顶部进入视口底部80%以内，或元素底部进入视口顶部
+                return (
+                    rect.top <= windowHeight * 0.8 && // 顶部在视口下方80%位置以内
+                    rect.bottom >= 0 // 底部在视口顶部以上
+                );
+            }
+
+            // 检查元素是否在视口上方（已滚动过去）
+            function isAboveViewport(element) {
+                const rect = element.getBoundingClientRect();
+                return rect.bottom < 0;
+            }
+
+            // 处理滚动动画
+            function handleScrollAnimation() {
+                const animatedElements = document.querySelectorAll('.scroll-animate');
+                
+                animatedElements.forEach(element => {
+                    if (isInViewport(element)) {
+                        element.classList.add('visible');
+                        element.classList.remove('fade-out');
+                    } else if (isAboveViewport(element)) {
+                        element.classList.add('fade-out');
+                        element.classList.remove('visible');
+                    } else {
+                        element.classList.remove('visible', 'fade-out');
+                    }
+                });
+            }
+
+            // 初始检查可见元素
+            handleScrollAnimation();
+            
+            // 监听滚动事件（使用节流优化）
+            window.addEventListener('scroll', throttle(handleScrollAnimation));
             
             // 注册表单处理
             const registerForm = document.getElementById('registerForm');

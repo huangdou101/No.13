@@ -34,20 +34,35 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
+        /* 滚动动画核心样式 */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, transform;
+        }
+        
+        /* 元素进入视口时的状态 */
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 元素离开视口上方时的淡出效果 */
+        .scroll-animate.fade-out {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        
         /* 全局动画 */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(30px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
         }
         
         @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.03); }
-        }
-        
-        @keyframes float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(230, 57, 70, 0.3); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(230, 57, 70, 0.5); }
         }
         
         body {
@@ -71,23 +86,23 @@
         }
         
         .shape-1 {
-            width: 350px;
-            height: 350px;
-            border-radius: 50%;
+            width: 200px;
+            height: 200px;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
             background-color: var(--primary-color);
-            top: 20%;
-            right: -150px;
-            animation: float 28s ease-in-out infinite;
+            top: 30%;
+            right: 5%;
+            animation: float 22s ease-in-out infinite;
         }
         
         .shape-2 {
-            width: 200px;
-            height: 200px;
-            clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
             background-color: var(--accent);
             bottom: 10%;
-            left: 5%;
-            animation: float 22s ease-in-out infinite 5s;
+            left: -100px;
+            animation: float 28s ease-in-out infinite 7s;
         }
         
         .overlay {
@@ -120,6 +135,7 @@
             text-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
             font-family: 'Georgia', serif;
             position: relative;
+            animation: float 6s ease-in-out infinite;
         }
         
         .logo::after {
@@ -207,7 +223,6 @@
             padding: 50px;
             border: 1px solid var(--dark-red);
             box-shadow: var(--shadow);
-            animation: fadeIn 1s ease-out;
             position: relative;
             flex-grow: 1;
             display: flex;
@@ -216,11 +231,11 @@
         
         /* 装饰性元素 */
         .login-container::before {
-            content: '13';
+            content: '!';
             position: absolute;
-            top: -20px;
-            left: -20px;
-            font-size: 80px;
+            top: -15px;
+            right: -15px;
+            font-size: 100px;
             font-weight: bold;
             color: rgba(230, 57, 70, 0.1);
             z-index: -1;
@@ -287,7 +302,6 @@
             font-size: 0.9em;
             margin-top: 5px;
             min-height: 20px;
-            animation: fadeIn 0.3s ease;
         }
         
         .btn {
@@ -300,7 +314,7 @@
             font-size: 1.1em;
             font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.4s ease;
             margin-bottom: 20px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -332,6 +346,16 @@
         .register-link a:hover {
             color: #ff6b6b;
             text-decoration: underline;
+        }
+        
+        .form-notice {
+            background-color: rgba(93, 0, 30, 0.2);
+            border-left: 3px solid var(--accent);
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+            color: var(--text-gray);
+            font-size: 0.9em;
         }
         
         footer {
@@ -408,10 +432,14 @@
             </div>
         </header>
         
-        <div class="login-container">
+        <div class="login-container scroll-animate">
             <div class="login-header">
-                <h1>进入13号病房</h1>
-                <p>输入你的账号信息，开始这场恐怖之旅</p>
+                <h1>进入病房</h1>
+                <p>输入你的账号信息，准备开始13号病房的旅程</p>
+            </div>
+            
+            <div class="form-notice">
+                <p>警告：一旦进入13号病房，你将无法轻易退出。请确保你已做好心理准备。</p>
             </div>
             
             <form id="loginForm" class="login-form">
@@ -429,15 +457,15 @@
                     <div class="error-message" id="passwordError"></div>
                 </div>
                 
-                <button type="submit" class="btn">开始游戏</button>
+                <button type="submit" class="btn">进入13号病房</button>
             </form>
             
             <div class="register-link">
-                <p>还没有账号？<a href="register.html">注册进入13号病房</a></p>
+                <p>还没有账号？<a href="register.html">注册账号</a></p>
             </div>
         </div>
         
-        <footer>
+        <footer class="scroll-animate">
             <div class="footer-logo">13号病房</div>
             <div class="footer-links">
                 <a href="index.html">主页</a>
@@ -474,6 +502,60 @@
                     });
                 }
             });
+
+            // 处理滚动动画
+            // 节流函数，优化滚动性能
+            function throttle(func, delay = 100) {
+                let lastTime = 0;
+                return function(...args) {
+                    const now = Date.now();
+                    if (now - lastTime >= delay) {
+                        func.apply(this, args);
+                        lastTime = now;
+                    }
+                };
+            }
+
+            // 检查元素是否在视口中
+            function isInViewport(element) {
+                const rect = element.getBoundingClientRect();
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                
+                // 元素顶部进入视口底部80%以内，或元素底部进入视口顶部
+                return (
+                    rect.top <= windowHeight * 0.8 && // 顶部在视口下方80%位置以内
+                    rect.bottom >= 0 // 底部在视口顶部以上
+                );
+            }
+
+            // 检查元素是否在视口上方（已滚动过去）
+            function isAboveViewport(element) {
+                const rect = element.getBoundingClientRect();
+                return rect.bottom < 0;
+            }
+
+            // 处理滚动动画
+            function handleScrollAnimation() {
+                const animatedElements = document.querySelectorAll('.scroll-animate');
+                
+                animatedElements.forEach(element => {
+                    if (isInViewport(element)) {
+                        element.classList.add('visible');
+                        element.classList.remove('fade-out');
+                    } else if (isAboveViewport(element)) {
+                        element.classList.add('fade-out');
+                        element.classList.remove('visible');
+                    } else {
+                        element.classList.remove('visible', 'fade-out');
+                    }
+                });
+            }
+
+            // 初始检查可见元素
+            handleScrollAnimation();
+            
+            // 监听滚动事件（使用节流优化）
+            window.addEventListener('scroll', throttle(handleScrollAnimation));
             
             // 登录表单处理
             const loginForm = document.getElementById('loginForm');
@@ -485,10 +567,14 @@
             loginForm.addEventListener('submit', function(e) {
                 e.preventDefault();
                 let isValid = true;
+                const users = JSON.parse(localStorage.getItem('users') || '[]');
                 
                 // 验证用户名
                 if (usernameInput.value.trim() === '') {
                     usernameError.textContent = '请输入账号名';
+                    isValid = false;
+                } else if (!users.some(u => u.username === usernameInput.value)) {
+                    usernameError.textContent = '该账号名不存在';
                     isValid = false;
                 } else {
                     usernameError.textContent = '';
@@ -499,34 +585,33 @@
                     passwordError.textContent = '请输入密码';
                     isValid = false;
                 } else {
-                    passwordError.textContent = '';
+                    const user = users.find(u => u.username === usernameInput.value);
+                    if (user && user.password !== passwordInput.value) {
+                        passwordError.textContent = '密码不正确';
+                        isValid = false;
+                    } else {
+                        passwordError.textContent = '';
+                    }
                 }
                 
-                // 如果验证通过，检查本地存储
+                // 如果验证通过，登录成功
                 if (isValid) {
-                    const users = JSON.parse(localStorage.getItem('users') || '[]');
-                    const user = users.find(u => u.username === usernameInput.value && u.password === passwordInput.value);
+                    // 保存当前登录用户
+                    localStorage.setItem('currentUser', usernameInput.value);
                     
-                    if (user) {
-                        // 登录成功，保存当前用户
-                        localStorage.setItem('currentUser', usernameInput.value);
-                        
-                        // 添加登录成功动画
-                        loginForm.innerHTML = `
-                            <div style="text-align: center; padding: 20px 0;">
-                                <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
-                                <p style="font-size: 1.2em; color: var(--primary-color);">登录成功</p>
-                                <p style="color: var(--text-gray); margin-top: 10px;">正在进入13号病房...</p>
-                            </div>
-                        `;
-                        
-                        // 延迟后跳转到游戏页面（这里暂时跳回主页）
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 2000);
-                    } else {
-                        passwordError.textContent = '账号名或密码不正确';
-                    }
+                    // 登录成功动画
+                    loginForm.innerHTML = `
+                        <div style="text-align: center; padding: 20px 0;">
+                            <div style="font-size: 50px; margin-bottom: 20px;">🚪</div>
+                            <p style="font-size: 1.2em; color: var(--primary-color);">登录成功</p>
+                            <p style="color: var(--text-gray); margin-top: 10px;">正在打开13号病房的门...</p>
+                        </div>
+                    `;
+                    
+                    // 延迟后跳转到游戏页面（这里暂时跳回主页）
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 2000);
                 }
             });
         });
