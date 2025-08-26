@@ -1,0 +1,679 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13号病房 - 医院逃生恐怖解密游戏</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        :root {
+            --primary-color: #e63946;
+            --dark-red: #5d001e;
+            --bg-dark: #0d0d0d;
+            --bg-overlay: rgba(0, 0, 0, 0.88);
+            --text-light: #f8f9fa;
+            --text-gray: #d6d6d6;
+            --accent: #ffb703;
+            --shadow: 0 0 25px rgba(230, 57, 70, 0.25);
+        }
+        
+        /* 页面切换动画 */
+        .page-transition {
+            animation: pageFadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 全局动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            background-image: url('images/hospital-main-bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        /* 装饰性形状元素 */
+        .decor-shape {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.05;
+            filter: blur(2px);
+        }
+        
+        .shape-1 {
+            width: 300px;
+            height: 300px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            top: 10%;
+            left: -150px;
+            animation: float 25s ease-in-out infinite;
+        }
+        
+        .shape-2 {
+            width: 400px;
+            height: 400px;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            background-color: var(--accent);
+            bottom: -200px;
+            right: -100px;
+            animation: float 30s ease-in-out infinite 5s;
+        }
+        
+        .shape-3 {
+            width: 200px;
+            height: 200px;
+            clip-path: polygon(0% 0%, 100% 0%, 100% 75%, 75% 75%, 75% 100%, 50% 75%, 0% 75%);
+            background-color: var(--dark-red);
+            top: 60%;
+            right: 10%;
+            animation: float 20s ease-in-out infinite 3s;
+        }
+        
+        .overlay {
+            background-color: var(--bg-overlay);
+            min-height: 100vh;
+            padding-bottom: 50px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            padding: 25px 0;
+            background-color: rgba(13, 13, 13, 0.95);
+            border-bottom: 2px solid var(--dark-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 2.8em;
+            color: var(--primary-color);
+            text-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
+            font-family: 'Georgia', serif;
+            animation: float 6s ease-in-out infinite;
+            position: relative;
+        }
+        
+        .logo::after {
+            content: '病房';
+            font-size: 0.4em;
+            position: absolute;
+            bottom: 5px;
+            right: -30px;
+            color: var(--accent);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 35px;
+        }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        nav a:hover {
+            color: var(--primary-color);
+            background-color: rgba(93, 0, 30, 0.2);
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        nav a.active {
+            background-color: var(--dark-red);
+            color: var(--text-light);
+        }
+        
+        nav a.active::after {
+            width: 100%;
+            background-color: var(--text-light);
+        }
+        
+        /* 统一二级标题样式 */
+        .section-title {
+            color: var(--primary-color);
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent);
+            border-radius: 3px;
+        }
+        
+        .hero {
+            height: 75vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 0 20px;
+            position: relative;
+            margin-bottom: 80px;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url('images/hospital-hero-blur.jpg');
+            background-size: cover;
+            background-position: center;
+            opacity: 0.12;
+            filter: blur(3px);
+            z-index: 0;
+        }
+        
+        .hero-content {
+            max-width: 900px;
+            position: relative;
+            z-index: 1;
+            animation: fadeIn 1.2s ease-out;
+        }
+        
+        .ward-number {
+            font-size: 8em;
+            font-weight: bold;
+            color: var(--primary-color);
+            text-shadow: 0 0 25px rgba(230, 57, 70, 0.5);
+            margin-bottom: 20px;
+            letter-spacing: -5px;
+            animation: glitch 8s infinite;
+        }
+        
+        .hero h1 {
+            font-size: 3.5em;
+            color: var(--text-light);
+            margin-bottom: 30px;
+        }
+        
+        .hero p {
+            font-size: 1.3em;
+            line-height: 1.8;
+            margin-bottom: 60px;
+            color: var(--text-gray);
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .btn {
+            padding: 16px 35px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.2em;
+            font-weight: bold;
+            transition: all 0.4s ease;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        /* 强调开始游戏按钮 */
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+            padding: 20px 45px;
+            font-size: 1.3em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 3s infinite;
+        }
+        
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            transition: left 0.6s ease;
+        }
+        
+        .btn-primary:hover {
+            background-color: #d62828;
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(230, 57, 70, 0.4);
+            animation: none;
+        }
+        
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-secondary {
+            background-color: transparent;
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
+        }
+        
+        .btn-secondary:hover {
+            background-color: rgba(230, 57, 70, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(230, 57, 70, 0.2);
+        }
+        
+        .game-brief {
+            max-width: 1200px;
+            margin: 0 auto 100px;
+            padding: 0 20px;
+            animation: fadeIn 1.5s ease-out 0.3s both;
+        }
+        
+        .brief-content {
+            background-color: rgba(13, 13, 13, 0.8);
+            border-radius: 10px;
+            padding: 40px;
+            border: 1px solid var(--dark-red);
+            box-shadow: var(--shadow);
+            line-height: 1.9;
+            font-size: 1.1em;
+            position: relative;
+        }
+        
+        /* 装饰性元素 */
+        .brief-content::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -10px;
+            width: 40px;
+            height: 40px;
+            border-top: 3px solid var(--accent);
+            border-left: 3px solid var(--accent);
+            border-radius: 5px;
+        }
+        
+        .brief-content::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            right: -10px;
+            width: 40px;
+            height: 40px;
+            border-bottom: 3px solid var(--accent);
+            border-right: 3px solid var(--accent);
+            border-radius: 5px;
+        }
+        
+        .brief-content p {
+            margin-bottom: 25px;
+        }
+        
+        .brief-content strong {
+            color: var(--primary-color);
+        }
+        
+        .feature-snippets {
+            max-width: 1200px;
+            margin: 0 auto 100px;
+            padding: 0 20px;
+            animation: fadeIn 1.5s ease-out 0.6s both;
+        }
+        
+        .snippets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+        
+        .snippet-card {
+            background-color: rgba(13, 13, 13, 0.8);
+            border-radius: 8px;
+            padding: 30px;
+            border: 1px solid var(--dark-red);
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .snippet-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        .snippet-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 30px rgba(230, 57, 70, 0.2);
+            background-color: rgba(13, 13, 13, 0.95);
+        }
+        
+        .snippet-card:hover::before {
+            width: 100%;
+            opacity: 0.1;
+        }
+        
+        .snippet-icon {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(93, 0, 30, 0.3);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            color: var(--primary-color);
+            font-size: 1.8em;
+            transition: all 0.3s ease;
+        }
+        
+        .snippet-card:hover .snippet-icon {
+            background-color: var(--dark-red);
+            color: var(--text-light);
+            transform: scale(1.1);
+        }
+        
+        .snippet-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            font-size: 1.5em;
+        }
+        
+        .snippet-card p {
+            color: var(--text-gray);
+            line-height: 1.7;
+        }
+        
+        footer {
+            background-color: rgba(10, 10, 10, 0.95);
+            padding: 40px 20px;
+            border-top: 2px solid var(--dark-red);
+            text-align: center;
+            animation: fadeIn 1.5s ease-out 0.9s both;
+            position: relative;
+        }
+        
+        .footer-logo {
+            font-size: 1.8em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(230, 57, 70, 0.5);
+        }
+        
+        .footer-links {
+            margin-bottom: 25px;
+        }
+        
+        .footer-links a {
+            color: var(--text-gray);
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .copyright {
+            color: #777;
+            font-size: 0.9em;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            nav ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .ward-number {
+                font-size: 5em;
+            }
+            
+            .hero h1 {
+                font-size: 2.5em;
+            }
+            
+            .hero p {
+                font-size: 1.1em;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            .brief-content {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 装饰性形状元素 -->
+    <div class="decor-shape shape-1"></div>
+    <div class="decor-shape shape-2"></div>
+    <div class="decor-shape shape-3"></div>
+    
+    <div class="overlay">
+        <header>
+            <div class="header-container">
+                <div class="logo">13号</div>
+                <nav>
+                    <ul>
+                        <li><a href="index.html" class="active">主页</a></li>
+                        <li><a href="login.html">登录</a></li>
+                        <li><a href="register.html">注册</a></li>
+                        <li><a href="team.html">开发团队</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        
+        <section class="hero">
+            <div class="hero-content">
+                <div class="ward-number">13</div>
+                <h1>病房 - 医院逃生</h1>
+                <p>在冰冷的病床上惊醒，记忆如同被浓雾笼罩。你发现自己身处13号病房，枕头下的泛黄纸条写着令人不安的规则。医生的笑容诡异，病友的眼神恐惧，这座医院隐藏着提取"记忆因子"的恐怖秘密。你必须逃离这里，在被永远困在13号病房之前。</p>
+                <div class="cta-buttons">
+                    <a href="login.html" class="btn btn-primary">开始游戏</a>
+                    <a href="team.html" class="btn btn-secondary">关于团队</a>
+                </div>
+            </div>
+        </section>
+        
+        <section class="game-brief">
+            <h2 class="section-title">游戏核心</h2>
+            <div class="brief-content">
+                <p>13号病房是这家神秘医院中最特殊的房间——所有被安置在这里的病人，都会在一周内"康复出院"，但再也没有人见过他们。你在这个房间醒来，失去了所有记忆，唯一的线索是枕头下的纸条，上面写着几条生存规则：</p>
+                <p><strong>"1. 晚上10点后绝对不要离开13号病房"</strong></p>
+                <p><strong>"2. 穿白大褂的人询问时，永远说你感觉'好多了'"</strong></p>
+                <p><strong>"3. 看到戴着红色手环的病人，立刻躲藏"</strong></p>
+                <p><strong>"4. 不要尝试理解医院的布局，它会自己改变"</strong></p>
+                <p>随着探索深入，你发现医院在秘密进行着可怕的实验——提取病人的"记忆因子"卖给富人，为他们延续生命。而你，就是下一个实验品。</p>
+            </div>
+        </section>
+        
+        <section class="feature-snippets">
+            <h2 class="section-title">游戏特色</h2>
+            <div class="snippets-grid">
+                <div class="snippet-card">
+                    <div class="snippet-icon">🔍</div>
+                    <h3>规则怪谈</h3>
+                    <p>解开纸条上的规则谜团，遵守还是打破？每一个选择都可能带来致命后果。</p>
+                </div>
+                
+                <div class="snippet-card">
+                    <div class="snippet-icon">🧩</div>
+                    <h3>环境解谜</h3>
+                    <p>在昏暗的病房和走廊中寻找线索，破解与医院历史相关的复杂谜题。</p>
+                </div>
+                
+                <div class="snippet-card">
+                    <div class="snippet-icon">👻</div>
+                    <h3>心理恐怖</h3>
+                    <p>没有廉价的jump scare，而是通过氛围、声音和未知营造深入骨髓的恐惧。</p>
+                </div>
+                
+                <div class="snippet-card">
+                    <div class="snippet-icon">🔄</div>
+                    <h3>多重结局</h3>
+                    <p>你的选择将决定最终命运，是成功逃脱还是永远被困在13号病房？</p>
+                </div>
+                
+                <div class="snippet-card">
+                    <div class="snippet-icon">🏥</div>
+                    <h3>动态环境</h3>
+                    <p>医院似乎有自己的意识，房间布局会随时间变化，增加探索难度。</p>
+                </div>
+                
+                <div class="snippet-card">
+                    <div class="snippet-icon">🕵️</div>
+                    <h3>隐藏真相</h3>
+                    <p>收集散落在各处的文件和录音，拼凑出医院和13号病房的完整秘密。</p>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <div class="footer-logo">13号病房</div>
+            <div class="footer-links">
+                <a href="index.html">主页</a>
+                <a href="login.html">登录</a>
+                <a href="register.html">注册</a>
+                <a href="team.html">开发团队</a>
+            </div>
+            <p class="copyright">&copy; 2023 13号病房 - 医院逃生恐怖解密游戏 | 大学生团队制作</p>
+        </footer>
+    </div>
+
+    <script>
+        // 页面加载时的过渡动画
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('page-transition');
+            
+            // 为所有链接添加页面切换效果
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                // 只处理站内链接
+                if (link.href.startsWith(window.location.origin) && !link.target) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const targetUrl = this.href;
+                        
+                        // 添加淡出动画
+                        document.body.style.opacity = '0';
+                        document.body.style.transition = 'opacity 0.5s ease-out';
+                        
+                        // 延迟后跳转
+                        setTimeout(() => {
+                            window.location.href = targetUrl;
+                        }, 500);
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

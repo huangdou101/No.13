@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13号病房 - 登录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        :root {
+            --primary-color: #e63946;
+            --dark-red: #5d001e;
+            --bg-dark: #0d0d0d;
+            --bg-overlay: rgba(0, 0, 0, 0.88);
+            --text-light: #f8f9fa;
+            --text-gray: #d6d6d6;
+            --accent: #ffb703;
+            --shadow: 0 0 25px rgba(230, 57, 70, 0.25);
+        }
+        
+        /* 页面切换动画 */
+        .page-transition {
+            animation: pageFadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 全局动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.03); }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            background-image: url('images/hospital-login-bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 装饰性形状元素 */
+        .decor-shape {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.05;
+            filter: blur(2px);
+        }
+        
+        .shape-1 {
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            top: 20%;
+            right: -150px;
+            animation: float 28s ease-in-out infinite;
+        }
+        
+        .shape-2 {
+            width: 200px;
+            height: 200px;
+            clip-path: polygon(100% 0%, 0% 100%, 100% 100%);
+            background-color: var(--accent);
+            bottom: 10%;
+            left: 5%;
+            animation: float 22s ease-in-out infinite 5s;
+        }
+        
+        .overlay {
+            background-color: var(--bg-overlay);
+            min-height: 100vh;
+            padding: 40px 20px;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            padding: 20px 0;
+            margin-bottom: 60px;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 2.8em;
+            color: var(--primary-color);
+            text-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
+            font-family: 'Georgia', serif;
+            position: relative;
+        }
+        
+        .logo::after {
+            content: '病房';
+            font-size: 0.4em;
+            position: absolute;
+            bottom: 5px;
+            right: -30px;
+            color: var(--accent);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 35px;
+        }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        nav a:hover {
+            color: var(--primary-color);
+            background-color: rgba(93, 0, 30, 0.2);
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        nav a.active {
+            background-color: var(--dark-red);
+            color: var(--text-light);
+        }
+        
+        nav a.active::after {
+            width: 100%;
+            background-color: var(--text-light);
+        }
+        
+        /* 统一二级标题样式 */
+        .section-title {
+            color: var(--primary-color);
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent);
+            border-radius: 3px;
+        }
+        
+        .login-container {
+            max-width: 500px;
+            margin: 0 auto;
+            width: 100%;
+            background-color: rgba(13, 13, 13, 0.9);
+            border-radius: 10px;
+            padding: 50px;
+            border: 1px solid var(--dark-red);
+            box-shadow: var(--shadow);
+            animation: fadeIn 1s ease-out;
+            position: relative;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* 装饰性元素 */
+        .login-container::before {
+            content: '13';
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            font-size: 80px;
+            font-weight: bold;
+            color: rgba(230, 57, 70, 0.1);
+            z-index: -1;
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .login-header h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+        
+        .login-header p {
+            color: var(--text-gray);
+        }
+        
+        .login-form {
+            margin-bottom: 30px;
+            flex-grow: 1;
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-gray);
+            font-size: 1em;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 14px 15px;
+            background-color: rgba(30, 30, 30, 0.8);
+            border: 1px solid #440000;
+            border-radius: 6px;
+            color: var(--text-light);
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(230, 57, 70, 0.2);
+        }
+        
+        .form-icon {
+            position: absolute;
+            right: 15px;
+            top: 45px;
+            color: #777;
+        }
+        
+        .error-message {
+            color: var(--primary-color);
+            font-size: 0.9em;
+            margin-top: 5px;
+            min-height: 20px;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 16px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 3s infinite;
+        }
+        
+        .btn:hover {
+            background-color: #d62828;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(230, 57, 70, 0.3);
+            animation: none;
+        }
+        
+        .register-link {
+            text-align: center;
+        }
+        
+        .register-link p {
+            color: var(--text-gray);
+        }
+        
+        .register-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s ease;
+        }
+        
+        .register-link a:hover {
+            color: #ff6b6b;
+            text-decoration: underline;
+        }
+        
+        footer {
+            background-color: rgba(10, 10, 10, 0.95);
+            padding: 30px 20px;
+            border-top: 2px solid var(--dark-red);
+            text-align: center;
+            margin-top: 60px;
+        }
+        
+        .footer-logo {
+            font-size: 1.5em;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+            text-shadow: 0 0 10px rgba(230, 57, 70, 0.5);
+        }
+        
+        .footer-links {
+            margin-bottom: 15px;
+        }
+        
+        .footer-links a {
+            color: var(--text-gray);
+            margin: 0 10px;
+            text-decoration: none;
+            font-size: 0.9em;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .copyright {
+            color: #777;
+            font-size: 0.8em;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            nav ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .login-container {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 装饰性形状元素 -->
+    <div class="decor-shape shape-1"></div>
+    <div class="decor-shape shape-2"></div>
+    
+    <div class="overlay">
+        <header>
+            <div class="header-container">
+                <div class="logo">13号</div>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">主页</a></li>
+                        <li><a href="login.html" class="active">登录</a></li>
+                        <li><a href="register.html">注册</a></li>
+                        <li><a href="team.html">开发团队</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        
+        <div class="login-container">
+            <div class="login-header">
+                <h1>进入13号病房</h1>
+                <p>输入你的账号信息，开始这场恐怖之旅</p>
+            </div>
+            
+            <form id="loginForm" class="login-form">
+                <div class="form-group">
+                    <label for="username">账号名</label>
+                    <input type="text" id="username" required>
+                    <span class="form-icon">👤</span>
+                    <div class="error-message" id="usernameError"></div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">密码</label>
+                    <input type="password" id="password" required>
+                    <span class="form-icon">🔒</span>
+                    <div class="error-message" id="passwordError"></div>
+                </div>
+                
+                <button type="submit" class="btn">开始游戏</button>
+            </form>
+            
+            <div class="register-link">
+                <p>还没有账号？<a href="register.html">注册进入13号病房</a></p>
+            </div>
+        </div>
+        
+        <footer>
+            <div class="footer-logo">13号病房</div>
+            <div class="footer-links">
+                <a href="index.html">主页</a>
+                <a href="login.html">登录</a>
+                <a href="register.html">注册</a>
+                <a href="team.html">开发团队</a>
+            </div>
+            <p class="copyright">&copy; 2023 13号病房 - 医院逃生恐怖解密游戏 | 大学生团队制作</p>
+        </footer>
+    </div>
+
+    <script>
+        // 页面加载时的过渡动画
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('page-transition');
+            
+            // 为所有链接添加页面切换效果
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                // 只处理站内链接
+                if (link.href.startsWith(window.location.origin) && !link.target) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const targetUrl = this.href;
+                        
+                        // 添加淡出动画
+                        document.body.style.opacity = '0';
+                        document.body.style.transition = 'opacity 0.5s ease-out';
+                        
+                        // 延迟后跳转
+                        setTimeout(() => {
+                            window.location.href = targetUrl;
+                        }, 500);
+                    });
+                }
+            });
+            
+            // 登录表单处理
+            const loginForm = document.getElementById('loginForm');
+            const usernameInput = document.getElementById('username');
+            const passwordInput = document.getElementById('password');
+            const usernameError = document.getElementById('usernameError');
+            const passwordError = document.getElementById('passwordError');
+            
+            loginForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                let isValid = true;
+                
+                // 验证用户名
+                if (usernameInput.value.trim() === '') {
+                    usernameError.textContent = '请输入账号名';
+                    isValid = false;
+                } else {
+                    usernameError.textContent = '';
+                }
+                
+                // 验证密码
+                if (passwordInput.value.trim() === '') {
+                    passwordError.textContent = '请输入密码';
+                    isValid = false;
+                } else {
+                    passwordError.textContent = '';
+                }
+                
+                // 如果验证通过，检查本地存储
+                if (isValid) {
+                    const users = JSON.parse(localStorage.getItem('users') || '[]');
+                    const user = users.find(u => u.username === usernameInput.value && u.password === passwordInput.value);
+                    
+                    if (user) {
+                        // 登录成功，保存当前用户
+                        localStorage.setItem('currentUser', usernameInput.value);
+                        
+                        // 添加登录成功动画
+                        loginForm.innerHTML = `
+                            <div style="text-align: center; padding: 20px 0;">
+                                <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
+                                <p style="font-size: 1.2em; color: var(--primary-color);">登录成功</p>
+                                <p style="color: var(--text-gray); margin-top: 10px;">正在进入13号病房...</p>
+                            </div>
+                        `;
+                        
+                        // 延迟后跳转到游戏页面（这里暂时跳回主页）
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 2000);
+                    } else {
+                        passwordError.textContent = '账号名或密码不正确';
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
