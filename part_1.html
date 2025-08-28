@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <title>Part_1_ward</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #222;
+            color: #fff;
+            font-family: 'Courier New', monospace;
+            box-sizing: border-box;
+        }
+
+        #gameCanvas {
+            border: 4px solid #555;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            background-color: #ccc; /* 背景图加载前的临时颜色 */
+        }
+
+        .controls {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        .key {
+            display: inline-block;
+            padding: 5px 10px;
+            background-color: #444;
+            border: 2px solid #666;
+            border-radius: 4px;
+            margin: 0 5px;
+        }
+
+        #preload {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- 游戏场景大小改为1450×818 -->
+    <canvas id="gameCanvas" width="1450" height="818"></canvas>
+    <div class="controls">
+        <p>使用 <span class="key">A</span> / <span class="key">←</span> 向左移动</p>
+        <p>使用 <span class="key">D</span> / <span class="key">→</span> 向右移动</p>
+    </div>
+
+    <!-- 预加载所有图片，路径已修改为pictures文件夹 -->
+    <div id="preload">
+        <!-- 背景图 -->
+        <img src="pictures/病房.jpg" id="background" alt="病房背景">
+        <!-- 行走动画 -->
+        <img src="pictures/walk1.png" id="walk1" alt="行走状态1">
+        <img src="pictures/walk2.png" id="walk2" alt="行走状态2">
+        <img src="pictures/walk3.png" id="walk3" alt="行走状态3">
+        <!-- 待机动画 -->
+        <img src="pictures/stand1.png" id="stand1" alt="待机动画1">
+        <img src="pictures/stand2.png" id="stand2" alt="待机动画2">
+    </div>
+
+    <script>
+        /*************************
+         *  配置与初始化
+         *************************/
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        
+        const TARGET_HEIGHT = 336; 
+        const WALK_SPEED = 13; // 行走速度
+        const FRAME_DURATION = 80; // 行走每帧持续时间
+        const FRAMES_PER_IMAGE = 3; // 行走每张图片显示的帧数
+        
+        // 待机动画配置
+        const STAND_FRAME_DURATION = 100; // 待机每帧持续时间
+        const STAND_FRAMES_PER_IMAGE = 5; // 待机每张图片显示的帧数
+        
+        // 动画序列
+        const WALK_ANIMATION_SEQUENCE = ['walk1', 'walk2', 'walk1', 'walk3'];
+        const STAND_ANIMATION_SEQUENCE = ['stand1', 'stand2'];
+        
+        // 图片资源 - 引用的是preload中定义的图片元素
+        const images = {
+            background: document.getElementById('background'),
+            walk1: document.getElementById('walk1'),
+            walk2: document.getElementById('walk2'),
+            walk3: document.getElementById('walk3'),
+            stand1: document.getElementById('stand1'),
+            stand2: document.getElementById('stand2')
+        };
+        
+        // 人物状态
+        const player = {
+            x: canvas.width / 2,
+            y: 0, // 图片加载后计算
+            width: 0,
+            height: 0,
+            originalWidth: 0,
+            originalHeight: 0,
+            direction: 'right',
+            isMoving: false,
+            
+            // 行走动画状态
+            walkCurrentFrame: 0,
+            walkFrameCounter: 0,
+            
+            // 待机动画状态
+            standCurrentFrame: 0,
+            standFrameCounter: 0
+        };
+        
+        // 键盘状态
+        const keys = {
+            left: false,
+            right: false
+        };
+
+        /*************************
+         *  加载与初始化
+         *************************/
+        function init() {
+            Promise.all([
+                new Promise(resolve => images.background.onload = resolve),
+                new Promise(resolve => images.walk1.onload = resolve),
+                new Promise(resolve => images.walk2.onload = resolve),
+                new Promise(resolve => images.walk3.onload = resolve),
+                new Promise(resolve => images.stand1.onload = resolve),
+                new Promise(resolve => images.stand2.onload = resolve)
+            ]).then(() => {
+                // 获取原始尺寸并计算缩放比例
+                player.originalWidth = images.walk1.naturalWidth;
+                player.originalHeight = images.walk1.naturalHeight;
+                const scaleRatio = TARGET_HEIGHT / player.originalHeight;
+                
+                // 设置缩放后的尺寸（缩小一半）
+                player.width = player.originalWidth * scaleRatio;
+                player.height = TARGET_HEIGHT;
+                
+                // 计算Y坐标（适应新场景大小）
+                player.y = canvas.height - player.height;
+                
+                // 开始游戏循环
+                requestAnimationFrame(gameLoop);
+            }).catch(err => {
+                console.error("图片加载失败:", err);
+                alert("请确保所有图片文件在picture文件夹中，且与HTML文件同级");
+            });
+        }
+
+        /*************************
+         *  绘制场景（与1450×818场景匹配）
+         *************************/
+        function drawScene() {
+            // 清空画布
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // 绘制背景图，与场景大小完全匹配
+            ctx.drawImage(images.background, 0, 0, canvas.width, canvas.height);
+        }
+
+        /*************************
+         *  绘制人物
+         *************************/
+        function drawPlayer() {
+            // 确定当前显示的图片
+            let currentImageName;
+            if (player.isMoving) {
+                currentImageName = WALK_ANIMATION_SEQUENCE[player.walkCurrentFrame];
+            } else {
+                currentImageName = STAND_ANIMATION_SEQUENCE[player.standCurrentFrame];
+            }
+            const currentImage = images[currentImageName];
+            
+            ctx.save();
+            
+            // 计算绘制位置
+            let drawX = player.x - player.width / 2;
+            const drawY = player.y;
+            
+            // 向左走时翻转图片
+            if (player.direction === 'left') {
+                ctx.translate(player.x + player.width / 2, 0);
+                ctx.scale(-1, 1); // 水平翻转
+                drawX = 0;
+            }
+            
+            // 绘制图片
+            ctx.drawImage(currentImage, drawX, drawY, player.width, player.height);
+            
+            ctx.restore();
+        }
+
+        /*************************
+         *  更新人物状态与动画
+         *************************/
+        function updatePlayer() {
+            // 处理移动
+            if (keys.left) {
+                player.direction = 'left';
+                player.isMoving = true;
+                if (player.x > player.width / 2) {
+                    player.x -= WALK_SPEED;
+                }
+                
+                // 更新行走动画帧
+                player.walkFrameCounter++;
+                if (player.walkFrameCounter >= FRAMES_PER_IMAGE) {
+                    player.walkFrameCounter = 0;
+                    player.walkCurrentFrame = (player.walkCurrentFrame + 1) % WALK_ANIMATION_SEQUENCE.length;
+                }
+            } else if (keys.right) {
+                player.direction = 'right';
+                player.isMoving = true;
+                if (player.x < canvas.width - player.width / 2) {
+                    player.x += WALK_SPEED;
+                }
+                
+                // 更新行走动画帧
+                player.walkFrameCounter++;
+                if (player.walkFrameCounter >= FRAMES_PER_IMAGE) {
+                    player.walkFrameCounter = 0;
+                    player.walkCurrentFrame = (player.walkCurrentFrame + 1) % WALK_ANIMATION_SEQUENCE.length;
+                }
+            } else {
+                // 停止移动时处理待机动画
+                player.isMoving = false;
+                
+                // 更新待机动画帧
+                player.standFrameCounter++;
+                if (player.standFrameCounter >= STAND_FRAMES_PER_IMAGE) {
+                    player.standFrameCounter = 0;
+                    player.standCurrentFrame = (player.standCurrentFrame + 1) % STAND_ANIMATION_SEQUENCE.length;
+                }
+                return;
+            }
+        }
+
+        /*************************
+         *  游戏主循环
+         *************************/
+        let lastTime = 0;
+        function gameLoop(timestamp) {
+            // 根据状态使用不同的帧持续时间
+            const frameDuration = player.isMoving ? FRAME_DURATION : STAND_FRAME_DURATION;
+            
+            if (!lastTime || timestamp - lastTime >= frameDuration) {
+                lastTime = timestamp;
+                
+                // 绘制场景和人物
+                drawScene();
+                updatePlayer();
+                drawPlayer();
+            }
+            
+            requestAnimationFrame(gameLoop);
+        }
+
+        /*************************
+         *  键盘事件
+         *************************/
+        document.addEventListener('keydown', (e) => {
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    keys.left = true;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    keys.right = true;
+                    break;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            switch(e.key) {
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    keys.left = false;
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    keys.right = false;
+                    break;
+            }
+        });
+
+        /*************************
+         *  启动游戏
+         *************************/
+        init();
+    </script>
+</body>
+</html>
