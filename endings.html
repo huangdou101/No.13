@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>13号病房 - 开发团队</title>
+    <title>13号病房 - 解锁结局</title>
     <style>
         * {
             margin: 0;
@@ -60,14 +60,25 @@
             50% { transform: translateY(-12px); }
         }
         
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(230, 57, 70, 0.3); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(230, 57, 70, 0.5); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+        
         body {
             background-color: var(--bg-dark);
             color: var(--text-light);
-            background-image: url('images/hospital-team-bg.jpg');
+            background-image: url('images/hospital-endings-bg.jpg');
             background-size: cover;
             background-attachment: fixed;
             background-position: center;
-            line-height: 1.6;
+            min-height: 100vh;
             position: relative;
             overflow-x: hidden;
         }
@@ -83,27 +94,37 @@
         .shape-1 {
             width: 250px;
             height: 250px;
-            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            border-radius: 50%;
             background-color: var(--primary-color);
-            top: 20%;
+            top: 15%;
             left: 5%;
-            animation: float 28s ease-in-out infinite;
+            animation: float 25s ease-in-out infinite;
         }
         
         .shape-2 {
-            width: 350px;
-            height: 350px;
-            border-radius: 50%;
+            width: 300px;
+            height: 300px;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
             background-color: var(--accent);
-            bottom: -150px;
-            right: 5%;
-            animation: float 32s ease-in-out infinite 8s;
+            bottom: 10%;
+            right: 8%;
+            animation: float 30s ease-in-out infinite 7s;
+        }
+        
+        .shape-3 {
+            width: 150px;
+            height: 150px;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            background-color: var(--dark-red);
+            top: 50%;
+            right: 3%;
+            animation: float 20s ease-in-out infinite 3s;
         }
         
         .overlay {
             background-color: var(--bg-overlay);
             min-height: 100vh;
-            padding-bottom: 80px;
+            padding-bottom: 50px;
             position: relative;
             z-index: 1;
         }
@@ -221,15 +242,15 @@
         main {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 80px 20px 40px;
+            padding: 80px 20px;
         }
         
-        .team-header {
+        .endings-header {
             text-align: center;
             margin-bottom: 80px;
         }
         
-        .team-header h1 {
+        .endings-header h1 {
             color: var(--primary-color);
             font-size: 3em;
             margin-bottom: 20px;
@@ -237,7 +258,7 @@
             display: inline-block;
         }
         
-        .team-header h1::after {
+        .endings-header h1::after {
             content: '';
             position: absolute;
             bottom: -10px;
@@ -248,7 +269,7 @@
             border-radius: 3px;
         }
         
-        .team-header p {
+        .endings-header p {
             color: var(--text-gray);
             font-size: 1.2em;
             max-width: 800px;
@@ -256,121 +277,206 @@
             line-height: 1.8;
         }
         
-        .team-description {
-            background-color: rgba(13, 13, 13, 0.8);
-            padding: 40px;
+        .login-notice {
+            background-color: rgba(93, 0, 30, 0.3);
+            border: 2px solid var(--primary-color);
             border-radius: 10px;
-            border: 1px solid var(--dark-red);
-            margin-bottom: 80px;
-            box-shadow: var(--shadow);
-        }
-        
-        .team-description h2 {
-            color: var(--primary-color);
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-        
-        .team-description p {
-            margin-bottom: 20px;
-            line-height: 1.8;
-            color: var(--text-gray);
-        }
-        
-        .team-members {
-            margin-bottom: 80px;
-        }
-        
-        .team-members h2 {
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 60px;
-            font-size: 2.2em;
-        }
-        
-        .members-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 40px;
-        }
-        
-        .member-card {
-            background-color: rgba(13, 13, 13, 0.85);
-            border-radius: 10px;
-            overflow: hidden;
-            transition: all 0.4s ease;
-            border: 1px solid #330000;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            position: relative;
-        }
-        
-        .member-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(230, 57, 70, 0.3);
-        }
-        
-        .member-photo {
-            height: 280px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .member-photo img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.8s ease;
-            filter: brightness(0.8);
-        }
-        
-        .member-card:hover .member-photo img {
-            transform: scale(1.1);
-            filter: brightness(1);
-        }
-        
-        .member-badge {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            background-color: var(--dark-red);
-            color: white;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.8em;
-            font-weight: bold;
-            z-index: 10;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-        }
-        
-        .member-info {
             padding: 30px;
+            margin: 0 auto 60px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            animation: pulse 3s infinite;
         }
         
-        .member-info h3 {
+        .login-notice h3 {
             color: var(--primary-color);
-            margin-bottom: 5px;
             font-size: 1.5em;
-        }
-        
-        .member-role {
-            color: #bbb;
             margin-bottom: 15px;
-            font-style: italic;
-            font-size: 0.95em;
         }
         
-        .member-bio {
+        .login-notice p {
             color: var(--text-gray);
-            font-size: 0.95em;
+            margin-bottom: 20px;
             line-height: 1.6;
         }
         
-        .member-major {
-            font-size: 0.9em;
+        .login-notice .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.4s ease;
+        }
+        
+        .login-notice .btn:hover {
+            background-color: #d62828;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(230, 57, 70, 0.3);
+        }
+        
+        .endings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+        
+        .ending-card {
+            background-color: rgba(13, 13, 13, 0.9);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #333;
+            transition: all 0.4s ease;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ending-card.locked {
+            opacity: 0.7;
+            filter: grayscale(0.8);
+        }
+        
+        .ending-card.locked:hover {
+            animation: shake 0.5s ease-in-out;
+            border-color: var(--primary-color);
+            box-shadow: 0 15px 35px rgba(230, 57, 70, 0.2);
+        }
+        
+        .ending-image {
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ending-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .ending-card:hover .ending-image img {
+            transform: scale(1.05);
+        }
+        
+        .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            color: var(--primary-color);
+            backdrop-filter: blur(3px);
+        }
+        
+        .ending-card.locked .lock-overlay {
+            display: flex;
+        }
+        
+        .ending-info {
+            padding: 30px;
+        }
+        
+        .ending-number {
             color: var(--accent);
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed rgba(255, 183, 3, 0.2);
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .ending-title {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .ending-description {
+            color: var(--text-gray);
+            line-height: 1.6;
+            font-size: 1em;
+        }
+        
+        .ending-card.locked .ending-description {
+            color: #888;
+            font-style: italic;
+        }
+        
+        .ending-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(93, 0, 30, 0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+        
+        .ending-card.locked .ending-status {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #aaa;
+        }
+        
+        .unlock-hint {
+            background-color: rgba(13, 13, 13, 0.8);
+            border-radius: 10px;
+            padding: 40px;
+            border: 1px solid var(--dark-red);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .unlock-hint h3 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        .unlock-hint p {
+            color: var(--text-gray);
+            line-height: 1.7;
+            margin-bottom: 30px;
+        }
+        
+        .hint-list {
+            list-style: none;
+            color: var(--text-gray);
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .hint-list li {
+            margin-bottom: 12px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .hint-list li::before {
+            content: '•';
+            color: var(--accent);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.2em;
         }
         
         footer {
@@ -378,6 +484,7 @@
             padding: 40px 20px;
             border-top: 2px solid var(--dark-red);
             text-align: center;
+            margin-top: 80px;
         }
         
         .footer-logo {
@@ -494,13 +601,97 @@
             }
         }
         
-        /* 响应式设计 */
-        @media (max-width: 1024px) {
-            .members-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
         }
         
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: rgba(13, 13, 13, 0.95);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 60px rgba(230, 57, 70, 0.3);
+        }
+        
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+        
+        .modal h3 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        .modal p {
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .modal-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .modal-btn.primary:hover {
+            background-color: #d62828;
+            transform: translateY(-2px);
+        }
+        
+        .modal-btn.secondary {
+            background-color: transparent;
+            color: var(--text-gray);
+            border: 1px solid #666;
+        }
+        
+        .modal-btn.secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--text-light);
+            color: var(--text-light);
+        }
+        
+        /* 响应式设计 */
         @media (max-width: 768px) {
             .header-container {
                 flex-direction: column;
@@ -513,14 +704,17 @@
                 justify-content: center;
             }
             
-            .team-header h1 {
+            .endings-header h1 {
                 font-size: 2.5em;
             }
             
-            .members-grid {
+            .endings-grid {
                 grid-template-columns: 1fr;
-                max-width: 400px;
-                margin: 0 auto;
+                gap: 30px;
+            }
+            
+            main {
+                padding: 60px 15px;
             }
         }
     </style>
@@ -541,9 +735,11 @@
             🔊
         </button>
     </div>
+    
     <!-- 装饰性形状元素 -->
     <div class="decor-shape shape-1"></div>
     <div class="decor-shape shape-2"></div>
+    <div class="decor-shape shape-3"></div>
     
     <div class="overlay">
         <header id="mainHeader">
@@ -554,113 +750,93 @@
                         <li><a href="index.html">主页</a></li>
                         <li><a href="login.html">登录</a></li>
                         <li><a href="register.html">注册</a></li>
-                        <li><a href="team.html" class="active">开发团队</a></li>
-                        <li><a href="endings.html">解锁结局</a></li>
+                        <li><a href="team.html">开发团队</a></li>
+                        <li><a href="endings.html" class="active">解锁结局</a></li>
                     </ul>
                 </nav>
             </div>
         </header>
         
         <main>
-            <section class="team-header scroll-animate">
-                <h1>开发团队</h1>
-                <p>一群热爱恐怖游戏的大学生开发者，携手打造沉浸式的13号病房逃生体验</p>
+            <section class="endings-header scroll-animate">
+                <h1>解锁结局</h1>
+                <p>每一个结局都隐藏着13号病房的不同真相，你的选择将决定最终的命运</p>
             </section>
             
-            <section class="team-description scroll-animate">
-                <h2 class="section-title">关于我们</h2>
-                <p>我们是来自计算机与设计专业的大学生开发团队，对恐怖游戏和互动叙事有着浓厚兴趣。《13号病房》是我们的课程设计与毕业设计结合项目，灵感来源于校园怪谈和都市传说。</p>
-                <p>作为学生开发者，我们利用课余时间完成了这款游戏的设计与开发，希望通过独特的叙事方式和沉浸式体验，让玩家感受心理恐怖的魅力。我们相信真正的恐怖不仅来自视觉冲击，更源于对未知的恐惧和对人性的思考。</p>
-                <p>团队成员各有所长，从创意构思到技术实现，每个人都为项目贡献了自己的专业知识和热情。通过这个项目，我们不仅提升了专业技能，更学会了团队协作和项目管理。</p>
+            <!-- 未登录提示 -->
+            <section id="loginNotice" class="login-notice scroll-animate" style="display: none;">
+                <h3>🔒 需要登录账号</h3>
+                <p>您需要登录账号才能查看和解锁游戏结局。登录后您可以保存游戏进度，解锁不同的结局路径。</p>
+                <a href="login.html" class="btn">立即登录</a>
             </section>
             
-            <section class="team-members scroll-animate">
-                <h2 class="section-title">团队成员</h2>
-                <div class="members-grid">
-                    <!-- 组长 -->
-                    <div class="member-card scroll-animate">
-                        <div class="member-photo">
-                            <img src="images/leader-liuhanlin.jpg" alt="刘翰霖照片，团队组长">
-                            <div class="member-badge">组长</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>刘翰霖</h3>
-                            <div class="member-role">项目负责人 / 创意总监</div>
-                            <p class="member-bio">人工智能专业大二学生，负责项目整体规划与创意指导，主导《13号病房》的故事设定和核心玩法设计。</p>
-                            <div class="member-major">主修：人工智能</div>
-                        </div>
+            <section class="endings-grid scroll-animate">
+                <!-- 结局1：逃脱 -->
+                <div class="ending-card locked" data-ending="1">
+                    <div class="ending-image">
+                        <img src="images/ending-escape.jpg" alt="逃脱结局">
+                        <div class="lock-overlay">🔒</div>
+                        <div class="ending-status">未解锁</div>
                     </div>
-                    
-                    <!-- 组员1 -->
-                    <div class="member-card scroll-animate">
-                        <div class="member-photo">
-                            <img src="images/member-wuchangrong.jpg" alt="吴昌融照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>吴昌融</h3>
-                            <div class="member-role">程序开发</div>
-                            <p class="member-bio">人工智能专业大二学生，负责游戏的程序开发与技术实现，实现了游戏中的核心机制、谜题逻辑和AI行为。</p>
-                            <div class="member-major">主修：人工智能</div>
-                        </div>
-                    </div>
-                    
-                    <!-- 组员2 -->
-                    <div class="member-card scroll-animate">
-                        <div class="member-photo">
-                            <img src="images/member-wujingpeng.jpg" alt="吴京澎照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>吴京澎</h3>
-                            <div class="member-role">人工智能</div>
-                            <p class="member-bio">人工智能专业大二学生，负责游戏的视觉设计与美术资源制作，擅长恐怖氛围的视觉表达与场景设计。</p>
-                            <div class="member-major">主修：人工智能</div>
-                        </div>
-                    </div>
-                    
-                    <!-- 组员3 -->
-                    <div class="member-card scroll-animate">
-                        <div class="member-photo">
-                            <img src="images/member-zhangxinnan.jpg" alt="张星南照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>张星南</h3>
-                            <div class="member-role">人工智能</div>
-                            <p class="member-bio">人工智能专业大二学生，负责游戏的音效设计与音乐创作，深谙声音对恐怖氛围的影响与塑造。</p>
-                            <div class="member-major">主修：人工智能</div>
-                        </div>
-                    </div>
-                    
-                    <!-- 组员4 -->
-                    <div class="member-card scroll-animate">
-                        <div class="member-photo">
-                            <img src="images/member-wangshiying.jpg" alt="王诗颖照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>王诗颖</h3>
-                            <div class="member-role">剧本写作</div>
-                            <p class="member-bio">计算机科学与技术专业大二学生，负责游戏的剧情创作与文本撰写，擅长悬疑故事的构建与规则怪谈设计。</p>
-                            <div class="member-major">主修：计算机科学与技术</div>
-                        </div>
-                    </div>
-                    
-                    <!-- 组员5 -->
-                    <div class="member-card scroll-animate">
-                        <div class="member-photo">
-                            <img src="images/member-wangzexian.jpg" alt="王泽贤照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>王泽贤</h3>
-                            <div class="member-role">测试与优化</div>
-                            <p class="member-bio">计算机科学与技术专业大二学生，负责游戏的测试与体验优化，注重玩家的游戏感受与流程顺畅度。</p>
-                            <div class="member-major">主修：计算机科学与技术</div>
-                        </div>
+                    <div class="ending-info">
+                        <div class="ending-number">结局 01</div>
+                        <h3 class="ending-title">完美逃脱</h3>
+                        <p class="ending-description">你成功逃出了13号病房，但外面的世界真的安全吗？阳光刺眼，你却感觉一切都像是另一个更大的梦境...</p>
                     </div>
                 </div>
+                
+                <!-- 结局2：真相 -->
+                <div class="ending-card locked" data-ending="2">
+                    <div class="ending-image">
+                        <img src="images/ending-truth.jpg" alt="真相结局">
+                        <div class="lock-overlay">🔒</div>
+                        <div class="ending-status">未解锁</div>
+                    </div>
+                    <div class="ending-info">
+                        <div class="ending-number">结局 02</div>
+                        <h3 class="ending-title">残酷真相</h3>
+                        <p class="ending-description">你发现了医院记忆提取实验的全部真相，但知道太多的人往往没有好下场。真相的代价比无知更沉重...</p>
+                    </div>
+                </div>
+                
+                <!-- 结局3：循环 -->
+                <div class="ending-card locked" data-ending="3">
+                    <div class="ending-image">
+                        <img src="images/ending-loop.jpg" alt="循环结局">
+                        <div class="lock-overlay">🔒</div>
+                        <div class="ending-status">未解锁</div>
+                    </div>
+                    <div class="ending-info">
+                        <div class="ending-number">结局 03</div>
+                        <h3 class="ending-title">永恒轮回</h3>
+                        <p class="ending-description">一切回到了原点。你再次在13号病房醒来，枕头下还是那张熟悉的纸条。这一次，你能改变什么吗？</p>
+                    </div>
+                </div>
+                
+                <!-- 结局4：献祭 -->
+                <div class="ending-card locked" data-ending="4">
+                    <div class="ending-image">
+                        <img src="images/ending-sacrifice.jpg" alt="献祭结局">
+                        <div class="lock-overlay">🔒</div>
+                        <div class="ending-status">未解锁</div>
+                    </div>
+                    <div class="ending-info">
+                        <div class="ending-number">结局 04</div>
+                        <h3 class="ending-title">自我献祭</h3>
+                        <p class="ending-description">为了拯救其他病人，你选择了成为最后的实验体。你的记忆将成为他人获得自由的钥匙...</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="unlock-hint scroll-animate">
+                <h3>解锁提示</h3>
+                <p>每个结局都需要特定的选择路径才能解锁。在游戏过程中仔细观察环境，收集线索，做出不同的决定：</p>
+                <ul class="hint-list">
+                    <li>完美逃脱：严格遵守所有病房规则，避免与医护人员接触</li>
+                    <li>残酷真相：深入调查医院档案，收集所有关于记忆实验的证据</li>
+                    <li>永恒轮回：多次违反规则被发现，但始终拒绝配合实验</li>
+                    <li>自我献祭：在了解真相后，主动选择保护其他病人</li>
+                </ul>
             </section>
         </main>
         
@@ -677,10 +853,25 @@
         </footer>
     </div>
 
+    <!-- 登录提醒弹窗 -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal">
+            <h3>🚪 需要登录</h3>
+            <p>您需要先登录账号才能解锁游戏结局。登录后您可以保存游戏进度并查看已解锁的结局内容。</p>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="goToLogin()">前往登录</button>
+                <button class="modal-btn secondary" onclick="closeModal()">稍后再说</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // 页面加载时的过渡动画
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.add('page-transition');
+            
+            // 检查登录状态
+            checkLoginStatus();
             
             // 为所有链接添加页面切换效果
             const links = document.querySelectorAll('a');
@@ -766,6 +957,83 @@
             
             // 监听滚动事件（使用节流优化）
             window.addEventListener('scroll', throttle(handleScrollAnimation));
+            
+            // 结局卡片点击事件
+            const endingCards = document.querySelectorAll('.ending-card');
+            endingCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const currentUser = localStorage.getItem('currentUser');
+                    
+                    if (!currentUser) {
+                        // 未登录，显示登录弹窗
+                        showLoginModal();
+                    } else {
+                        // 已登录，检查结局解锁状态
+                        if (this.classList.contains('locked')) {
+                            // 结局未解锁，显示提示
+                            alert('该结局尚未解锁，需要在游戏中完成特定条件才能查看。');
+                        } else {
+                            // 结局已解锁，跳转到结局详情（这里可以扩展）
+                            alert('结局详情页面开发中...');
+                        }
+                    }
+                });
+            });
+        });
+        
+        // 检查登录状态
+        function checkLoginStatus() {
+            const currentUser = localStorage.getItem('currentUser');
+            const loginNotice = document.getElementById('loginNotice');
+            
+            if (!currentUser) {
+                // 未登录，显示登录提示
+                loginNotice.style.display = 'block';
+            } else {
+                // 已登录，隐藏登录提示
+                loginNotice.style.display = 'none';
+                
+                // 这里可以加载用户的结局解锁状态
+                // loadUserEndingProgress();
+            }
+        }
+        
+        // 显示登录弹窗
+        function showLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.classList.add('show');
+        }
+        
+        // 关闭弹窗
+        function closeModal() {
+            const modal = document.getElementById('loginModal');
+            modal.classList.remove('show');
+        }
+        
+        // 前往登录页面
+        function goToLogin() {
+            // 添加淡出动画
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease-out';
+            
+            // 延迟后跳转
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 500);
+        }
+        
+        // 点击弹窗外部关闭
+        document.getElementById('loginModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // ESC键关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
         });
     </script>
 </body>
