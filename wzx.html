@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13号病房 - 王泽贤</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        :root {
+            --primary-color: #e63946;
+            --dark-red: #5d001e;
+            --bg-dark: #0d0d0d;
+            --bg-overlay: rgba(0, 0, 0, 0.88);
+            --text-light: #f8f9fa;
+            --text-gray: #d6d6d6;
+            --accent: #ffb703;
+            --shadow: 0 0 25px rgba(230, 57, 70, 0.25);
+        }
+        
+        /* 页面切换动画 */
+        .page-transition {
+            animation: pageFadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 滚动时页面整体淡入淡出动画 */
+        body.fade-scroll {
+            transition: opacity 0.5s;
+        }
+        body.fade-scroll.fade-out {
+            opacity: 0.4;
+        }
+        body.fade-scroll.fade-in {
+            opacity: 1;
+        }
+        
+        /* 滚动动画核心样式 */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, transform;
+        }
+        
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .scroll-animate.fade-out {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            background-image: url('images/hospital-team-bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        .decor-shape {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.05;
+            filter: blur(2px);
+        }
+        
+        .shape-1 {
+            width: 250px;
+            height: 250px;
+            clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+            background-color: var(--primary-color);
+            top: 20%;
+            left: 5%;
+            animation: float 28s ease-in-out infinite;
+        }
+        
+        .shape-2 {
+            width: 350px;
+            height: 350px;
+            border-radius: 50%;
+            background-color: var(--accent);
+            bottom: -150px;
+            right: 5%;
+            animation: float 32s ease-in-out infinite 8s;
+        }
+        
+        .overlay {
+            background-color: var(--bg-overlay);
+            min-height: 100vh;
+            padding-bottom: 80px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            padding: 25px 0;
+            background-color: rgba(13, 13, 13, 0.95);
+            border-bottom: 2px solid var(--dark-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s ease, padding 0.3s ease;
+        }
+        
+        header.scrolled {
+            background-color: rgba(13, 13, 13, 0.98);
+            padding: 15px 0;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 2.8em;
+            color: var(--primary-color);
+            text-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
+            font-family: 'Georgia', serif;
+            animation: float 6s ease-in-out infinite;
+            position: relative;
+        }
+        
+        .logo::after {
+            content: '病房';
+            font-size: 0.4em;
+            position: absolute;
+            bottom: 5px;
+            right: -30px;
+            color: var(--accent);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 35px;
+        }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        nav a:hover {
+            color: var(--primary-color);
+            background-color: rgba(93, 0, 30, 0.2);
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        nav a.active {
+            background-color: var(--dark-red);
+            color: var(--text-light);
+        }
+        
+        nav a.active::after {
+            width: 100%;
+            background-color: var(--text-light);
+        }
+        
+        .section-title {
+            color: var(--primary-color);
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent);
+            border-radius: 3px;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px 40px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            color: var(--text-gray);
+            text-decoration: none;
+            margin-bottom: 40px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+        
+        .back-link:hover {
+            color: var(--primary-color);
+            transform: translateX(-5px);
+        }
+        
+        .back-link::before {
+            content: '← ';
+        }
+        
+        .member-detail {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 60px;
+            align-items: start;
+            margin-bottom: 80px;
+        }
+        
+        .member-photo-large {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--dark-red);
+            position: relative;
+        }
+        
+        .member-photo-large img {
+            width: 100%;
+            display: block;
+            transition: transform 0.8s ease;
+        }
+        
+        .member-photo-large:hover img {
+            transform: scale(1.05);
+        }
+        
+        .member-badge-large {
+            position: absolute;
+            top: 20px;
+            right: -15px;
+            background-color: var(--dark-red);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            font-weight: bold;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .member-info-detail h1 {
+            color: var(--primary-color);
+            font-size: 2.8em;
+            margin-bottom: 10px;
+        }
+        
+        .member-role-detail {
+            color: var(--accent);
+            font-size: 1.3em;
+            margin-bottom: 30px;
+            font-style: italic;
+        }
+        
+        .member-content {
+            background-color: rgba(13, 13, 13, 0.6);
+            border-radius: 10px;
+            padding: 30px;
+            border: 1px solid rgba(93, 0, 30, 0.5);
+            margin-bottom: 40px;
+        }
+        
+        .member-bio-detail {
+            color: var(--text-gray);
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+        
+        .member-bio-detail p {
+            margin-bottom: 15px;
+        }
+        
+        .member-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .detail-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+        
+        .detail-item h3::before {
+            content: '•';
+            color: var(--accent);
+            margin-right: 10px;
+        }
+        
+        .detail-item p {
+            color: var(--text-gray);
+            font-size: 0.95em;
+        }
+        
+        .member-contributions h2 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--dark-red);
+        }
+        
+        .contribution-list {
+            list-style: none;
+        }
+        
+        .contribution-list li {
+            color: var(--text-gray);
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.7;
+        }
+        
+        .contribution-list li::before {
+            content: '✓';
+            color: var(--accent);
+            position: absolute;
+            left: 0;
+        }
+        
+        footer {
+            background-color: rgba(10, 10, 10, 0.95);
+            padding: 40px 20px;
+            border-top: 2px solid var(--dark-red);
+            text-align: center;
+        }
+        
+        .footer-logo {
+            font-size: 1.8em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(230, 57, 70, 0.5);
+        }
+        
+        .footer-links {
+            margin-bottom: 25px;
+        }
+        
+        .footer-links a {
+            color: var(--text-gray);
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .copyright {
+            color: #777;
+            font-size: 0.9em;
+        }
+        
+        /* BGM控制按钮样式 */
+        .bgm-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .bgm-toggle {
+            background: linear-gradient(135deg, rgba(13, 13, 13, 0.95), rgba(93, 0, 30, 0.8));
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.4em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .bgm-toggle:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
+        }
+        
+        .bgm-toggle.paused {
+            background: linear-gradient(135deg, rgba(13, 13, 13, 0.8), rgba(119, 119, 119, 0.6));
+            color: #999;
+            border-color: #666;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.05);
+        }
+        
+        .bgm-toggle.paused:hover {
+            background: linear-gradient(135deg, rgba(119, 119, 119, 0.8), rgba(93, 0, 30, 0.6));
+            color: var(--text-light);
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+            box-shadow: 0 6px 18px rgba(230, 57, 70, 0.3);
+        }
+        
+        .bgm-toggle.playing {
+            animation: bgmPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes bgmPulse {
+            0%, 100% {
+                box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3), 0 0 0 0 rgba(230, 57, 70, 0.4);
+            }
+            50% {
+                box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3), 0 0 0 10px rgba(230, 57, 70, 0);
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .member-detail {
+                grid-template-columns: 1fr;
+            }
+            
+            .member-photo-large {
+                max-width: 500px;
+                margin: 0 auto;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            nav ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .member-info-detail h1 {
+                font-size: 2.2em;
+            }
+        }
+    </style>
+    <script src="bgm-manager.js"></script>
+</head>
+<body>
+    <audio id="bgmAudio" loop preload="auto">
+        <source src="audio/Home bgm.mp3" type="audio/mpeg">
+        <source src="audio/Home bgm.ogg" type="audio/ogg">
+        您的浏览器不支持音频播放。
+    </audio>
+    
+    <div id="bgmControl" class="bgm-control">
+        <button id="bgmToggle" class="bgm-toggle" title="点击播放/暂停背景音乐">
+            🔊
+        </button>
+    </div>
+    
+    <div class="decor-shape shape-1"></div>
+    <div class="decor-shape shape-2"></div>
+    
+    <div class="overlay">
+        <header id="mainHeader">
+            <div class="header-container">
+                <div class="logo">13号</div>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">主页</a></li>
+                        <li><a href="login.html">登录</a></li>
+                        <li><a href="register.html">注册</a></li>
+                        <li><a href="team.html" class="active">开发团队</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        
+        <main>
+    <a href="team.html" class="back-link scroll-animate">返回团队页面</a>
+    
+    <section class="member-detail scroll-animate">
+        <div class="member-photo-large">
+            <img src="pictures/wzx.jpg" alt="王泽贤照片">
+            <div class="member-badge-large">测试与体验优化</div>
+        </div>
+        <div class="member-info-detail">
+            <h1>王泽贤</h1>
+            <div class="member-role-detail">测试与体验优化</div>
+            
+            <div class="member-content">
+                <div class="member-bio-detail">
+                    <p>我叫王泽贤，是北京理工大学人工智能专业的大二学生。在小组中我主要负责负责游戏的测试与体验优化，希望可以和小组同学一起协作，完成一个有意思的小游戏</p>
+                    <p>我个人兴趣比较广泛，喜欢听音乐和踢足球，欢迎大家和我来约球。在生活中，我既享受和朋友一起搞怪玩乐的时间，也享受独处时的悠闲时光。</p>
+                    <p>在编程学习方面，个人经历尚不够丰富，深知编程能力的提升还有很长的路要走。希望通过参与C语言学习网站的设计制作，进一步夯实编程基础，也期待能和在这个网站一起学习的朋友们互相鼓励、共同进步。</p>
+                </div>
+                
+                <div class="member-details-grid">
+                    <div class="detail-item">
+                        <h3>教育背景</h3>
+                        <p>北京理工大学 人工智能专业 大二在读</p>
+                    </div>
+                    <div class="detail-item">
+                        <h3>技能特长</h3>
+                        <p>游戏测试流程设计、用户体验分析、问题反馈整理、基础编程应用</p>
+                    </div>
+                    <div class="detail-item">
+                        <h3>兴趣爱好</h3>
+                        <p>听音乐、踢足球、团队协作项目、独处阅读、编程学习</p>
+                    </div>
+                    <div class="detail-item">
+                        <h3>参与项目</h3>
+                        <p>趣味小游戏开发（测试与体验优化）、C语言学习网站制作</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="member-contributions">
+                <h2>项目贡献</h2>
+                <ul class="contribution-list">
+                    <li>负责游戏功能模块的测试用例设计与执行，确保核心玩法稳定运行</li>
+                    <li>从玩家视角体验游戏流程，收集并反馈影响体验的细节问题</li>
+                    <li>参与团队协作讨论，提出优化游戏趣味性的建议</li>
+                    <li>协助整理用户反馈，为游戏迭代提供参考依据</li>
+                    <li>参与C语言学习网站的需求分析与功能测试</li>
+                    <li>通过实践积累编程经验，逐步提升代码实现与问题解决能力</li>
+                    <li>积极沟通协调，促进团队成员间的信息同步与合作效率</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</main>
+        
+        <footer class="scroll-animate">
+            <div class="footer-logo">13号病房</div>
+            <div class="footer-links">
+                <a href="index.html">主页</a>
+                <a href="login.html">登录</a>
+                <a href="register.html">注册</a>
+                <a href="team.html">开发团队</a>
+            </div>
+            <p class="copyright">&copy; 2025 13号病房 - 医院逃生恐怖解密游戏 | 大学生团队制作</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('page-transition');
+            document.body.classList.add('fade-scroll', 'fade-in');
+
+            // 点击logo返回主页
+            document.querySelector('.logo').addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+
+            // 点击footer logo返回主页
+            document.querySelector('.footer-logo').addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+
+            // 点击footer链接跳转
+            document.querySelectorAll('.footer-links a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = this.getAttribute('href');
+                });
+            });
+
+            // 点击返回团队页面
+            document.querySelector('.back-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'team.html';
+            });
+
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                if (link.href.startsWith(window.location.origin) && !link.target) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const targetUrl = this.href;
+                        
+                        document.body.style.opacity = '0';
+                        document.body.style.transition = 'opacity 0.5s ease-out';
+                        
+                        setTimeout(() => {
+                            window.location.href = targetUrl;
+                        }, 500);
+                    });
+                }
+            });
+
+            // 监听滚动事件，改变header样式
+            window.addEventListener('scroll', function() {
+                const header = document.getElementById('mainHeader');
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // 检查元素是否在视口中
+            function isInViewport(element) {
+                const rect = element.getBoundingClientRect();
+                return (
+                    rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.85 &&
+                    rect.bottom >= 0
+                );
+            }
+
+            // 检查元素是否在视口上方（已滚动过去）
+            function isAboveViewport(element) {
+                const rect = element.getBoundingClientRect();
+                return rect.bottom < 0;
+            }
+
+            // 处理滚动动画
+            function handleScrollAnimation() {
+                const animatedElements = document.querySelectorAll('.scroll-animate');
+                
+                animatedElements.forEach(element => {
+                    if (isInViewport(element)) {
+                        element.classList.add('visible');
+                        element.classList.remove('fade-out');
+                    } else if (isAboveViewport(element)) {
+                        element.classList.add('fade-out');
+                        element.classList.remove('visible');
+                    } else {
+                        element.classList.remove('visible', 'fade-out');
+                    }
+                });
+            }
+
+            // 初始检查可见元素
+            handleScrollAnimation();
+            
+            // 监听滚动事件
+            window.addEventListener('scroll', handleScrollAnimation);
+        });
+    </script>
+</body>
+</html>
