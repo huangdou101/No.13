@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>13号病房 - 开发团队</title>
+    <title>13号病房 - 刘翰霖</title>
     <style>
         * {
             margin: 0;
@@ -28,10 +28,20 @@
             animation: pageFadeIn 0.8s ease-out forwards;
             opacity: 0;
         }
-        
         @keyframes pageFadeIn {
             from { opacity: 0; transform: translateY(20px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 新增：滚动时页面整体淡入淡出动画 */
+        body.fade-scroll {
+            transition: opacity 0.5s;
+        }
+        body.fade-scroll.fade-out {
+            opacity: 0.4;
+        }
+        body.fade-scroll.fade-in {
+            opacity: 1;
         }
         
         /* 滚动动画核心样式 */
@@ -42,19 +52,16 @@
             will-change: opacity, transform;
         }
         
-        /* 元素进入视口时的状态 */
         .scroll-animate.visible {
             opacity: 1;
             transform: translateY(0);
         }
         
-        /* 元素离开视口上方时的淡出效果 */
         .scroll-animate.fade-out {
             opacity: 0;
             transform: translateY(-30px);
         }
         
-        /* 全局动画 */
         @keyframes float {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-12px); }
@@ -72,7 +79,6 @@
             overflow-x: hidden;
         }
         
-        /* 装饰性形状元素 */
         .decor-shape {
             position: absolute;
             z-index: 0;
@@ -197,7 +203,6 @@
             background-color: var(--text-light);
         }
         
-        /* 统一二级标题样式 */
         .section-title {
             color: var(--primary-color);
             font-size: 2.2em;
@@ -224,154 +229,145 @@
             padding: 80px 20px 40px;
         }
         
-        .team-header {
-            text-align: center;
-            margin-bottom: 80px;
-        }
-        
-        .team-header h1 {
-            color: var(--primary-color);
-            font-size: 3em;
-            margin-bottom: 20px;
-            position: relative;
+        .back-link {
             display: inline-block;
-        }
-        
-        .team-header h1::after {
-            content: '';
-            position: absolute;
-            bottom: -10px;
-            left: 10%;
-            width: 80%;
-            height: 3px;
-            background-color: var(--dark-red);
-            border-radius: 3px;
-        }
-        
-        .team-header p {
             color: var(--text-gray);
-            font-size: 1.2em;
-            max-width: 800px;
-            margin: 0 auto;
-            line-height: 1.8;
+            text-decoration: none;
+            margin-bottom: 40px;
+            font-size: 1em;
+            transition: all 0.3s ease;
         }
         
-        .team-description {
-            background-color: rgba(13, 13, 13, 0.8);
-            padding: 40px;
-            border-radius: 10px;
-            border: 1px solid var(--dark-red);
-            margin-bottom: 80px;
-            box-shadow: var(--shadow);
-        }
-        
-        .team-description h2 {
+        .back-link:hover {
             color: var(--primary-color);
-            margin-bottom: 20px;
-            font-size: 1.8em;
+            transform: translateX(-5px);
         }
         
-        .team-description p {
-            margin-bottom: 20px;
-            line-height: 1.8;
-            color: var(--text-gray);
+        .back-link::before {
+            content: '← ';
         }
         
-        .team-members {
-            margin-bottom: 80px;
-        }
-        
-        .team-members h2 {
-            color: var(--primary-color);
-            text-align: center;
-            margin-bottom: 60px;
-            font-size: 2.2em;
-        }
-        
-        .members-grid {
+        .member-detail {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 40px;
+            grid-template-columns: 1fr 2fr;
+            gap: 60px;
+            align-items: start;
+            margin-bottom: 80px;
         }
         
-        .member-card {
-            background-color: rgba(13, 13, 13, 0.85);
+        .member-photo-large {
             border-radius: 10px;
             overflow: hidden;
-            transition: all 0.4s ease;
-            border: 1px solid #330000;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            position: relative;
-            cursor: pointer; /* 添加鼠标指针样式 */
-        }
-        
-        .member-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(230, 57, 70, 0.3);
-        }
-        
-        .member-photo {
-            height: 280px;
-            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--dark-red);
             position: relative;
         }
         
-        .member-photo img {
+        .member-photo-large img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            display: block;
             transition: transform 0.8s ease;
-            filter: brightness(0.8);
         }
         
-        .member-card:hover .member-photo img {
-            transform: scale(1.1);
-            filter: brightness(1);
+        .member-photo-large:hover img {
+            transform: scale(1.05);
         }
         
-        .member-badge {
+        .member-badge-large {
             position: absolute;
-            top: 15px;
-            right: 15px;
+            top: 20px;
+            right: -15px;
             background-color: var(--dark-red);
             color: white;
-            padding: 5px 12px;
+            padding: 8px 20px;
             border-radius: 20px;
-            font-size: 0.8em;
+            font-size: 1em;
             font-weight: bold;
-            z-index: 10;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
         }
         
-        .member-info {
-            padding: 30px;
-        }
-        
-        .member-info h3 {
+        .member-info-detail h1 {
             color: var(--primary-color);
-            margin-bottom: 5px;
-            font-size: 1.5em;
+            font-size: 2.8em;
+            margin-bottom: 10px;
         }
         
-        .member-role {
-            color: #bbb;
-            margin-bottom: 15px;
+        .member-role-detail {
+            color: var(--accent);
+            font-size: 1.3em;
+            margin-bottom: 30px;
             font-style: italic;
-            font-size: 0.95em;
         }
         
-        .member-bio {
+        .member-content {
+            background-color: rgba(13, 13, 13, 0.6);
+            border-radius: 10px;
+            padding: 30px;
+            border: 1px solid rgba(93, 0, 30, 0.5);
+            margin-bottom: 40px;
+        }
+        
+        .member-bio-detail {
+            color: var(--text-gray);
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+        
+        .member-bio-detail p {
+            margin-bottom: 15px;
+        }
+        
+        .member-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .detail-item h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+        }
+        
+        .detail-item h3::before {
+            content: '•';
+            color: var(--accent);
+            margin-right: 10px;
+        }
+        
+        .detail-item p {
             color: var(--text-gray);
             font-size: 0.95em;
-            line-height: 1.6;
         }
         
-        .member-major {
-            font-size: 0.9em;
+        .member-contributions h2 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 25px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--dark-red);
+        }
+        
+        .contribution-list {
+            list-style: none;
+        }
+        
+        .contribution-list li {
+            color: var(--text-gray);
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+            line-height: 1.7;
+        }
+        
+        .contribution-list li::before {
+            content: '✓';
             color: var(--accent);
-            margin-top: 10px;
-            padding-top: 10px;
-            border-top: 1px dashed rgba(255, 183, 3, 0.2);
+            position: absolute;
+            left: 0;
         }
         
         footer {
@@ -481,7 +477,6 @@
             box-shadow: 0 6px 18px rgba(230, 57, 70, 0.3);
         }
         
-        /* 播放时的脉冲动画 */
         .bgm-toggle.playing {
             animation: bgmPulse 2s ease-in-out infinite;
         }
@@ -495,10 +490,14 @@
             }
         }
         
-        /* 响应式设计 */
         @media (max-width: 1024px) {
-            .members-grid {
-                grid-template-columns: repeat(2, 1fr);
+            .member-detail {
+                grid-template-columns: 1fr;
+            }
+            
+            .member-photo-large {
+                max-width: 500px;
+                margin: 0 auto;
             }
         }
         
@@ -514,35 +513,26 @@
                 justify-content: center;
             }
             
-            .team-header h1 {
-                font-size: 2.5em;
-            }
-            
-            .members-grid {
-                grid-template-columns: 1fr;
-                max-width: 400px;
-                margin: 0 auto;
+            .member-info-detail h1 {
+                font-size: 2.2em;
             }
         }
     </style>
-    <!-- BGM管理器 -->
     <script src="bgm-manager.js"></script>
 </head>
 <body>
-    <!-- 背景音乐 -->
     <audio id="bgmAudio" loop preload="auto">
         <source src="audio/Home bgm.mp3" type="audio/mpeg">
         <source src="audio/Home bgm.ogg" type="audio/ogg">
         您的浏览器不支持音频播放。
     </audio>
     
-    <!-- BGM控制按钮 -->
     <div id="bgmControl" class="bgm-control">
         <button id="bgmToggle" class="bgm-toggle" title="点击播放/暂停背景音乐">
             🔊
         </button>
     </div>
-    <!-- 装饰性形状元素 -->
+    
     <div class="decor-shape shape-1"></div>
     <div class="decor-shape shape-2"></div>
     
@@ -562,107 +552,60 @@
         </header>
         
         <main>
-            <section class="team-header scroll-animate">
-                <h1>开发团队</h1>
-                <p>一群热爱恐怖游戏的大学生开发者，携手打造沉浸式的13号病房逃生体验</p>
-            </section>
+    <a href="team.html" class="back-link scroll-animate">返回团队页面</a>
+    
+    <section class="member-detail scroll-animate">
+        <div class="member-photo-large">
+            <img src="pictures/lhl.jpg" alt="刘翰霖照片">
+            <div class="member-badge-large">组长</div>
+        </div>
+        <div class="member-info-detail">
+            <h1>刘翰霖</h1>
+            <div class="member-role-detail">项目负责人 / 创意总监 / 主程序开发</div>
             
-            <section class="team-description scroll-animate">
-                <h2 class="section-title">关于我们</h2>
-                <p>我们是来自计算机与设计专业的大学生开发团队，对恐怖游戏和互动叙事有着浓厚兴趣。《13号病房》是我们的课程设计与毕业设计结合项目，灵感来源于校园怪谈和都市传说。</p>
-                <p>作为学生开发者，我们利用课余时间完成了这款游戏的设计与开发，希望通过独特的叙事方式和沉浸式体验，让玩家感受心理恐怖的魅力。我们相信真正的恐怖不仅来自视觉冲击，更源于对未知的恐惧和对人性的思考。</p>
-                <p>团队成员各有所长，从创意构思到技术实现，每个人都为项目贡献了自己的专业知识和热情。通过这个项目，我们不仅提升了专业技能，更学会了团队协作和项目管理。</p>
-            </section>
-            
-            <section class="team-members scroll-animate">
-                <h2 class="section-title">团队成员</h2>
-                <div class="members-grid">
-                    <!-- 组长 -->
-                    <div class="member-card scroll-animate" data-name="刘翰霖">
-                        <div class="member-photo">
-                            <img src="pictures/lhl.jpg" alt="刘翰霖照片，团队组长">
-                            <div class="member-badge">组长</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>刘翰霖</h3>
-                            <div class="member-role">项目负责人 / 程序设计</div>
-                            <p class="member-bio">负责项目整体规划与创意指导，程序开发，主导《13号病房》的故事设定和核心玩法设计。</p>
-                            <div class="member-major">主修：人工智能</div>
-                        </div>
+            <div class="member-content">
+                <div class="member-bio-detail">
+                    <p>我是北京理工大学人工智能专业的大二学生刘翰霖，同时也是《13号病房》项目的核心发起者和负责人。作为团队组长，我不仅需要统筹项目整体规划、把握创意方向，还深度参与了核心程序的编写工作。</p>
+                    <p>我性格比较积极向上，待人真诚友善，一直觉得良好的沟通和团队协作是做好项目的关键——正是这些特质帮助我们团队凝聚力量，高效推进开发。平时我很注重锻炼自己的组织协调能力，加上较强的责任心和集体荣誉感，总能在项目遇到瓶颈时做好协调，推动大家一起往前走。</p>
+                    <p>课余时间里，我喜欢看各种番剧、打打篮球，也常和舍友一起组队打游戏——不过我有个原则，绝不熬夜打游戏，得保持规律作息嘛。这次能亲身参与游戏制作，对我来说真的是一次超宝贵又新奇的实践经历。特别期待能把课堂上学到的知识用到实际中，在这个过程里不断提升自己的综合能力。</p>
+                </div>
+                
+                <div class="member-details-grid">
+                    <div class="detail-item">
+                        <h3>教育背景</h3>
+                        <p>北京理工大学 人工智能专业 大二在读</p>
                     </div>
-                    
-                    <!-- 组员1 -->
-                    <div class="member-card scroll-animate" data-name="吴昌融">
-                        <div class="member-photo">
-                            <img src="pictures/wcr.jpg" alt="吴昌融照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>吴昌融</h3>
-                            <div class="member-role">游戏美术 / 程序开发</div>
-                            <p class="member-bio">负责游戏的程序开发与技术实现，负责游戏美术资源制作，擅长恐怖氛围的视觉表达与场景设计。</p>
-                            <div class="member-major">主修：人工智能</div>
-                        </div>
+                    <div class="detail-item">
+                        <h3>技能特长</h3>
+                        <p>项目管理、创意设计、游戏策划、程序开发、团队协调</p>
                     </div>
-                    
-                    <!-- 组员2 -->
-                    <div class="member-card scroll-animate" data-name="吴京澎">
-                        <div class="member-photo">
-                            <img src="pictures/wjp.jpg" alt="吴京澎照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>吴京澎</h3>
-                            <div class="member-role">视觉设计 / 程序开发</div>
-                            <p class="member-bio">负责游戏的视觉设计与宣传视频剪辑，同时参与程序编写与实现。</p>
-                            <div class="member-major">主修：人工智能</div>
-                        </div>
+                    <div class="detail-item">
+                        <h3>兴趣爱好</h3>
+                        <p>看番剧、打篮球</p>
                     </div>
-                    
-                    <!-- 组员3 -->
-                    <div class="member-card scroll-animate" data-name="张星南">
-                        <div class="member-photo">
-                            <img src="pictures/zxn.jpg" alt="张星南照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>张星南</h3>
-                            <div class="member-role">CIO / 剧情策划</div>
-                            <p class="member-bio">负责游戏的玩法设计与剧情创作，担任项目的核心策划与CIO工作。</p>
-                            <div class="member-major">主修：人工智能</div>
-                        </div>
-                    </div>
-                    
-                    <!-- 组员4 -->
-                    <div class="member-card scroll-animate" data-name="王诗颖">
-                        <div class="member-photo">
-                            <img src="pictures/wsy.jpg" alt="王诗颖照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>王诗颖</h3>
-                            <div class="member-role">剧本写作 / 关卡策划</div>
-                            <p class="member-bio">负责游戏的剧情创作与文本撰写，擅长悬疑故事的构建与规则怪谈设计。</p>
-                            <div class="member-major">主修：计算机科学与技术</div>
-                        </div>
-                    </div>
-                    
-                    <!-- 组员5 -->
-                    <div class="member-card scroll-animate" data-name="王泽贤">
-                        <div class="member-photo">
-                            <img src="pictures/wzx.jpg" alt="王泽贤照片，团队组员">
-                            <div class="member-badge">组员</div>
-                        </div>
-                        <div class="member-info">
-                            <h3>王泽贤</h3>
-                            <div class="member-role">测试与体验优化</div>
-                            <p class="member-bio">负责游戏的测试与体验优化，注重玩家的游戏感受与流程顺畅度。</p>
-                            <div class="member-major">主修：计算机科学与技术</div>
-                        </div>
+                    <div class="detail-item">
+                        <h3>代表作品</h3>
+                        <p>《13号病房》（项目负责人及主程序开发）</p>
                     </div>
                 </div>
-            </section>
-        </main>
+            </div>
+            
+            <div class="member-contributions">
+                <h2>项目贡献</h2>
+                <ul class="contribution-list">
+                    <li>担任项目组长，负责整体规划、团队协调与进度管理</li>
+                    <li>主导《13号病房》的故事设定与世界观构建</li>
+                    <li>设计游戏核心玩法机制与交互逻辑</li>
+                    <li>负责主要程序编写与技术实现</li>
+                    <li>统筹游戏开发各环节，协调美术、策划与技术团队协作</li>
+                    <li>制定开发规范与代码标准，保障项目质量</li>
+                    <li>收集并分析用户反馈，推动游戏迭代优化</li>
+                    <li>平衡游戏难度与叙事节奏，提升玩家体验</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+</main>
         
         <footer class="scroll-animate">
             <div class="footer-logo">13号病房</div>
@@ -677,24 +620,45 @@
     </div>
 
     <script>
-        // 页面加载时的过渡动画
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.add('page-transition');
-            
-            // 为所有链接添加页面切换效果
+            // 新增：为body添加fade-scroll类
+            document.body.classList.add('fade-scroll', 'fade-in');
+
+            // 新增：点击logo返回主页
+            document.querySelector('.logo').addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+
+            // 新增：点击footer logo返回主页
+            document.querySelector('.footer-logo').addEventListener('click', function() {
+                window.location.href = 'index.html';
+            });
+
+            // 新增：点击footer链接跳转
+            document.querySelectorAll('.footer-links a').forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    window.location.href = this.getAttribute('href');
+                });
+            });
+
+            // 新增：点击返回团队页面
+            document.querySelector('.back-link').addEventListener('click', function(e) {
+                e.preventDefault();
+                window.location.href = 'team.html';
+            });
+
             const links = document.querySelectorAll('a');
             links.forEach(link => {
-                // 只处理站内链接
                 if (link.href.startsWith(window.location.origin) && !link.target) {
                     link.addEventListener('click', function(e) {
                         e.preventDefault();
                         const targetUrl = this.href;
                         
-                        // 添加淡出动画
                         document.body.style.opacity = '0';
                         document.body.style.transition = 'opacity 0.5s ease-out';
                         
-                        // 延迟后跳转
                         setTimeout(() => {
                             window.location.href = targetUrl;
                         }, 500);
@@ -702,7 +666,6 @@
                 }
             });
             
-            // 滚动时导航栏变化
             const header = document.getElementById('mainHeader');
             window.addEventListener('scroll', function() {
                 if (window.scrollY > 50) {
@@ -712,8 +675,6 @@
                 }
             });
 
-            // 滚动动画实现
-            // 节流函数，优化滚动性能
             function throttle(func, delay = 100) {
                 let lastTime = 0;
                 return function(...args) {
@@ -725,25 +686,21 @@
                 };
             }
 
-            // 检查元素是否在视口中
             function isInViewport(element) {
                 const rect = element.getBoundingClientRect();
                 const windowHeight = window.innerHeight || document.documentElement.clientHeight;
                 
-                // 元素顶部进入视口底部80%以内，或元素底部进入视口顶部
                 return (
-                    rect.top <= windowHeight * 0.8 && // 顶部在视口下方80%位置以内
-                    rect.bottom >= 0 // 底部在视口顶部以上
+                    rect.top <= windowHeight * 0.8 &&
+                    rect.bottom >= 0
                 );
             }
 
-            // 检查元素是否在视口上方（已滚动过去）
             function isAboveViewport(element) {
                 const rect = element.getBoundingClientRect();
                 return rect.bottom < 0;
             }
 
-            // 处理滚动动画
             function handleScrollAnimation() {
                 const animatedElements = document.querySelectorAll('.scroll-animate');
                 
@@ -760,43 +717,19 @@
                 });
             }
 
-            // 初始检查可见元素
             handleScrollAnimation();
-            
-            // 监听滚动事件（使用节流优化）
             window.addEventListener('scroll', throttle(handleScrollAnimation));
-            
-            // 成员卡片点击跳转功能
-            const memberCards = document.querySelectorAll('.member-card');
-            memberCards.forEach(card => {
-                card.addEventListener('click', function() {
-                    // 获取姓名并转换为拼音首字母小写
-                    const name = this.getAttribute('data-name');
-                    let initials = '';
-                    
-                    // 根据已知成员姓名手动映射首字母（更可靠）
-                    const nameMap = {
-                        '刘翰霖': 'lhl',
-                        '吴昌融': 'wcr',
-                        '吴京澎': 'wjp',
-                        '张星南': 'zxn',
-                        '王诗颖': 'wsy',
-                        '王泽贤': 'wzx'
-                    };
-                    
-                    initials = nameMap[name] || '';
-                    
-                    if (initials) {
-                        // 添加淡出动画
-                        document.body.style.opacity = '0';
-                        document.body.style.transition = 'opacity 0.5s ease-out';
-                        
-                        // 延迟后跳转
-                        setTimeout(() => {
-                            window.location.href = `${initials}.html`;
-                        }, 500);
-                    }
-                });
+
+            // 新增：滚动时页面整体淡入淡出效果
+            let fadeTimeout = null;
+            window.addEventListener('scroll', function() {
+                document.body.classList.add('fade-out');
+                document.body.classList.remove('fade-in');
+                if (fadeTimeout) clearTimeout(fadeTimeout);
+                fadeTimeout = setTimeout(() => {
+                    document.body.classList.remove('fade-out');
+                    document.body.classList.add('fade-in');
+                }, 250); // 停止滚动后0.25秒恢复
             });
         });
     </script>
