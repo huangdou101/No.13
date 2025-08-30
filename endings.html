@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13号病房 - 解锁结局</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        :root {
+            --primary-color: #e63946;
+            --dark-red: #5d001e;
+            --bg-dark: #0d0d0d;
+            --bg-overlay: rgba(0, 0, 0, 0.88);
+            --text-light: #f8f9fa;
+            --text-gray: #d6d6d6;
+            --accent: #ffb703;
+            --shadow: 0 0 25px rgba(230, 57, 70, 0.25);
+        }
+        
+        /* 页面切换动画 */
+        .page-transition {
+            animation: pageFadeIn 0.8s ease-out forwards;
+            opacity: 0;
+        }
+        
+        @keyframes pageFadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 滚动动画核心样式 */
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 0.8s ease-out, transform 0.8s ease-out;
+            will-change: opacity, transform;
+        }
+        
+        /* 元素进入视口时的状态 */
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* 元素离开视口上方时的淡出效果 */
+        .scroll-animate.fade-out {
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+        
+        /* 全局动画 */
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 20px rgba(230, 57, 70, 0.3); }
+            50% { transform: scale(1.02); box-shadow: 0 0 30px rgba(230, 57, 70, 0.5); }
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            background-image: url('images/hospital-endings-bg.jpg');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        /* 装饰性形状元素 */
+        .decor-shape {
+            position: absolute;
+            z-index: 0;
+            opacity: 0.05;
+            filter: blur(2px);
+        }
+        
+        .shape-1 {
+            width: 250px;
+            height: 250px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            top: 15%;
+            left: 5%;
+            animation: float 25s ease-in-out infinite;
+        }
+        
+        .shape-2 {
+            width: 300px;
+            height: 300px;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            background-color: var(--accent);
+            bottom: 10%;
+            right: 8%;
+            animation: float 30s ease-in-out infinite 7s;
+        }
+        
+        .shape-3 {
+            width: 150px;
+            height: 150px;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+            background-color: var(--dark-red);
+            top: 50%;
+            right: 3%;
+            animation: float 20s ease-in-out infinite 3s;
+        }
+        
+        .overlay {
+            background-color: var(--bg-overlay);
+            min-height: 100vh;
+            padding-bottom: 50px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        header {
+            padding: 25px 0;
+            background-color: rgba(13, 13, 13, 0.95);
+            border-bottom: 2px solid var(--dark-red);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+            transition: background-color 0.3s ease, padding 0.3s ease;
+        }
+        
+        header.scrolled {
+            background-color: rgba(13, 13, 13, 0.98);
+            padding: 15px 0;
+        }
+        
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 2.8em;
+            color: var(--primary-color);
+            text-shadow: 0 0 15px rgba(230, 57, 70, 0.6);
+            font-family: 'Georgia', serif;
+            animation: float 6s ease-in-out infinite;
+            position: relative;
+        }
+        
+        .logo::after {
+            content: '病房';
+            font-size: 0.4em;
+            position: absolute;
+            bottom: 5px;
+            right: -30px;
+            color: var(--accent);
+        }
+        
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 35px;
+        }
+        
+        nav a {
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 1.1em;
+            padding: 8px 15px;
+            border-radius: 4px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+        
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+        
+        nav a:hover {
+            color: var(--primary-color);
+            background-color: rgba(93, 0, 30, 0.2);
+        }
+        
+        nav a:hover::after {
+            width: 100%;
+        }
+        
+        nav a.active {
+            background-color: var(--dark-red);
+            color: var(--text-light);
+        }
+        
+        nav a.active::after {
+            width: 100%;
+            background-color: var(--text-light);
+        }
+        
+        /* 统一二级标题样式 */
+        .section-title {
+            color: var(--primary-color);
+            font-size: 2.2em;
+            margin-bottom: 40px;
+            position: relative;
+            display: inline-block;
+            padding-bottom: 10px;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background-color: var(--accent);
+            border-radius: 3px;
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+        
+        .endings-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        
+        .endings-header h1 {
+            color: var(--primary-color);
+            font-size: 3em;
+            margin-bottom: 20px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .endings-header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background-color: var(--dark-red);
+            border-radius: 3px;
+        }
+        
+        .endings-header p {
+            color: var(--text-gray);
+            font-size: 1.2em;
+            max-width: 800px;
+            margin: 0 auto;
+            line-height: 1.8;
+        }
+        
+        .login-notice {
+            background-color: rgba(93, 0, 30, 0.3);
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 30px;
+            margin: 0 auto 60px;
+            max-width: 600px;
+            text-align: center;
+            box-shadow: var(--shadow);
+            animation: pulse 3s infinite;
+        }
+        
+        .login-notice h3 {
+            color: var(--primary-color);
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        
+        .login-notice p {
+            color: var(--text-gray);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        
+        .login-notice .btn {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.4s ease;
+        }
+        
+        .login-notice .btn:hover {
+            background-color: #d62828;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(230, 57, 70, 0.3);
+        }
+        
+        .endings-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 40px;
+            margin-bottom: 80px;
+        }
+        
+        .ending-card {
+            background-color: rgba(13, 13, 13, 0.9);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 2px solid #333;
+            transition: all 0.4s ease;
+            position: relative;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .ending-card.locked {
+            opacity: 0.7;
+            filter: grayscale(0.8);
+        }
+        
+        .ending-card.locked:hover {
+            animation: shake 0.5s ease-in-out;
+            border-color: var(--primary-color);
+            box-shadow: 0 15px 35px rgba(230, 57, 70, 0.2);
+        }
+        
+        .ending-image {
+            height: 250px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .ending-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .ending-card:hover .ending-image img {
+            transform: scale(1.05);
+        }
+        
+        .lock-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3em;
+            color: var(--primary-color);
+            backdrop-filter: blur(3px);
+        }
+        
+        .ending-card.locked .lock-overlay {
+            display: flex;
+        }
+        
+        .ending-info {
+            padding: 30px;
+        }
+        
+        .ending-number {
+            color: var(--accent);
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .ending-title {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        
+        .ending-description {
+            color: var(--text-gray);
+            line-height: 1.6;
+            font-size: 1em;
+        }
+        
+        .ending-card.locked .ending-description {
+            color: #888;
+            font-style: italic;
+        }
+        
+        .ending-status {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(93, 0, 30, 0.9);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            backdrop-filter: blur(10px);
+        }
+        
+        .ending-card.locked .ending-status {
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #aaa;
+        }
+        
+        .unlock-hint {
+            background-color: rgba(13, 13, 13, 0.8);
+            border-radius: 10px;
+            padding: 40px;
+            border: 1px solid var(--dark-red);
+            box-shadow: var(--shadow);
+            text-align: center;
+        }
+        
+        .unlock-hint h3 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        .unlock-hint p {
+            color: var(--text-gray);
+            line-height: 1.7;
+            margin-bottom: 30px;
+        }
+        
+        .hint-list {
+            list-style: none;
+            color: var(--text-gray);
+            text-align: left;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .hint-list li {
+            margin-bottom: 12px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .hint-list li::before {
+            content: '•';
+            color: var(--accent);
+            position: absolute;
+            left: 0;
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+        
+        footer {
+            background-color: rgba(10, 10, 10, 0.95);
+            padding: 40px 20px;
+            border-top: 2px solid var(--dark-red);
+            text-align: center;
+            margin-top: 80px;
+        }
+        
+        .footer-logo {
+            font-size: 1.8em;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(230, 57, 70, 0.5);
+        }
+        
+        .footer-links {
+            margin-bottom: 25px;
+        }
+        
+        .footer-links a {
+            color: var(--text-gray);
+            margin: 0 15px;
+            text-decoration: none;
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--primary-color);
+        }
+        
+        .copyright {
+            color: #777;
+            font-size: 0.9em;
+        }
+        
+        /* BGM控制按钮样式 */
+        .bgm-control {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        
+        .bgm-toggle {
+            background: linear-gradient(135deg, rgba(13, 13, 13, 0.95), rgba(93, 0, 30, 0.8));
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.4em;
+            transition: all 0.4s ease;
+            box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bgm-toggle::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary-color), var(--dark-red), var(--accent));
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .bgm-toggle:hover {
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-red));
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 8px 25px rgba(230, 57, 70, 0.5), inset 0 2px 6px rgba(255, 255, 255, 0.2);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        
+        .bgm-toggle:hover::before {
+            opacity: 1;
+        }
+        
+        .bgm-toggle:active {
+            transform: scale(1.05);
+        }
+        
+        .bgm-toggle.paused {
+            background: linear-gradient(135deg, rgba(13, 13, 13, 0.8), rgba(119, 119, 119, 0.6));
+            color: #999;
+            border-color: #666;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.05);
+        }
+        
+        .bgm-toggle.paused:hover {
+            background: linear-gradient(135deg, rgba(119, 119, 119, 0.8), rgba(93, 0, 30, 0.6));
+            color: var(--text-light);
+            border-color: var(--primary-color);
+            transform: scale(1.1);
+            box-shadow: 0 6px 18px rgba(230, 57, 70, 0.3);
+        }
+        
+        /* 播放时的脉冲动画 */
+        .bgm-toggle.playing {
+            animation: bgmPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes bgmPulse {
+            0%, 100% {
+                box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3), 0 0 0 0 rgba(230, 57, 70, 0.4);
+            }
+            50% {
+                box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3), 0 0 0 10px rgba(230, 57, 70, 0);
+            }
+        }
+        
+        /* 弹窗样式 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .modal {
+            background-color: rgba(13, 13, 13, 0.95);
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+            box-shadow: 0 20px 60px rgba(230, 57, 70, 0.3);
+        }
+        
+        .modal-overlay.show .modal {
+            transform: scale(1);
+        }
+        
+        .modal h3 {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            margin-bottom: 20px;
+        }
+        
+        .modal p {
+            color: var(--text-gray);
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .modal-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-btn.primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .modal-btn.primary:hover {
+            background-color: #d62828;
+            transform: translateY(-2px);
+        }
+        
+        .modal-btn.secondary {
+            background-color: transparent;
+            color: var(--text-gray);
+            border: 1px solid #666;
+        }
+        
+        .modal-btn.secondary:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-color: var(--text-light);
+            color: var(--text-light);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 20px;
+            }
+            
+            nav ul {
+                gap: 15px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .endings-header h1 {
+                font-size: 2.5em;
+            }
+            
+            .endings-grid {
+                grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            main {
+                padding: 60px 15px;
+            }
+        }
+    </style>
+    <!-- BGM管理器 -->
+    <script src="bgm-manager.js"></script>
+</head>
+<body>
+    <!-- 背景音乐 -->
+    <audio id="bgmAudio" loop preload="auto">
+        <source src="audio/Home bgm.mp3" type="audio/mpeg">
+        <source src="audio/Home bgm.ogg" type="audio/ogg">
+        您的浏览器不支持音频播放。
+    </audio>
+    
+    <!-- BGM控制按钮 -->
+    <div id="bgmControl" class="bgm-control">
+        <button id="bgmToggle" class="bgm-toggle" title="点击播放/暂停背景音乐">
+            🔊
+        </button>
+    </div>
+    
+    <!-- 装饰性形状元素 -->
+    <div class="decor-shape shape-1"></div>
+    <div class="decor-shape shape-2"></div>
+    <div class="decor-shape shape-3"></div>
+    
+    <div class="overlay">
+        <header id="mainHeader">
+            <div class="header-container">
+                <div class="logo">13号</div>
+                <nav>
+                    <ul>
+                        <li><a href="index.html">主页</a></li>
+                        <li><a href="login.html">登录</a></li>
+                        <li><a href="register.html">注册</a></li>
+                        <li><a href="team.html">开发团队</a></li>
+                        <li><a href="endings.html" class="active">解锁结局</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </header>
+        
+        <main>
+            <section class="endings-header scroll-animate">
+                <h1>解锁结局</h1>
+                <p>每一个结局都隐藏着13号病房的不同真相，你的选择将决定最终的命运</p>
+            </section>
+            
+            <!-- 未登录提示 -->
+            <section id="loginNotice" class="login-notice scroll-animate" style="display: none;">
+                <h3>🔒 需要登录账号</h3>
+                <p>您需要登录账号才能查看和解锁游戏结局。登录后您可以保存游戏进度，解锁不同的结局路径。</p>
+                <a href="login.html" class="btn">立即登录</a>
+            </section>
+            
+            <section class="endings-grid scroll-animate">
+                <!-- 结局1：逃脱 -->
+                <div class="ending-card locked" data-ending="1">
+                    <div class="ending-image">
+                        <img src="images/ending-escape.jpg" alt="逃脱结局">
+                        <div class="lock-overlay">🔒</div>
+                        <div class="ending-status">未解锁</div>
+                    </div>
+                    <div class="ending-info">
+                        <div class="ending-number">结局 01</div>
+                        <h3 class="ending-title">完美逃脱</h3>
+                        <p class="ending-description">你成功逃出了13号病房，但外面的世界真的安全吗？阳光刺眼，你却感觉一切都像是另一个更大的梦境...</p>
+                    </div>
+                </div>
+                
+                <!-- 结局2：真相 -->
+                <div class="ending-card locked" data-ending="2">
+                    <div class="ending-image">
+                        <img src="images/ending-truth.jpg" alt="真相结局">
+                        <div class="lock-overlay">🔒</div>
+                        <div class="ending-status">未解锁</div>
+                    </div>
+                    <div class="ending-info">
+                        <div class="ending-number">结局 02</div>
+                        <h3 class="ending-title">残酷真相</h3>
+                        <p class="ending-description">你发现了医院记忆提取实验的全部真相，但知道太多的人往往没有好下场。真相的代价比无知更沉重...</p>
+                    </div>
+                </div>
+                
+                <!-- 结局3：循环 -->
+                <div class="ending-card locked" data-ending="3">
+                    <div class="ending-image">
+                        <img src="images/ending-loop.jpg" alt="循环结局">
+                        <div class="lock-overlay">🔒</div>
+                        <div class="ending-status">未解锁</div>
+                    </div>
+                    <div class="ending-info">
+                        <div class="ending-number">结局 03</div>
+                        <h3 class="ending-title">永恒轮回</h3>
+                        <p class="ending-description">一切回到了原点。你再次在13号病房醒来，枕头下还是那张熟悉的纸条。这一次，你能改变什么吗？</p>
+                    </div>
+                </div>
+                
+                <!-- 结局4：献祭 -->
+                <div class="ending-card locked" data-ending="4">
+                    <div class="ending-image">
+                        <img src="images/ending-sacrifice.jpg" alt="献祭结局">
+                        <div class="lock-overlay">🔒</div>
+                        <div class="ending-status">未解锁</div>
+                    </div>
+                    <div class="ending-info">
+                        <div class="ending-number">结局 04</div>
+                        <h3 class="ending-title">自我献祭</h3>
+                        <p class="ending-description">为了拯救其他病人，你选择了成为最后的实验体。你的记忆将成为他人获得自由的钥匙...</p>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="unlock-hint scroll-animate">
+                <h3>解锁提示</h3>
+                <p>每个结局都需要特定的选择路径才能解锁。在游戏过程中仔细观察环境，收集线索，做出不同的决定：</p>
+                <ul class="hint-list">
+                    <li>完美逃脱：严格遵守所有病房规则，避免与医护人员接触</li>
+                    <li>残酷真相：深入调查医院档案，收集所有关于记忆实验的证据</li>
+                    <li>永恒轮回：多次违反规则被发现，但始终拒绝配合实验</li>
+                    <li>自我献祭：在了解真相后，主动选择保护其他病人</li>
+                </ul>
+            </section>
+        </main>
+        
+        <footer class="scroll-animate">
+            <div class="footer-logo">13号病房</div>
+            <div class="footer-links">
+                <a href="index.html">主页</a>
+                <a href="login.html">登录</a>
+                <a href="register.html">注册</a>
+                <a href="team.html">开发团队</a>
+                <a href="endings.html">解锁结局</a>
+            </div>
+            <p class="copyright">&copy; 2025 13号病房 - 医院逃生恐怖解密游戏 | 大学生团队制作</p>
+        </footer>
+    </div>
+
+    <!-- 登录提醒弹窗 -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal">
+            <h3>🚪 需要登录</h3>
+            <p>您需要先登录账号才能解锁游戏结局。登录后您可以保存游戏进度并查看已解锁的结局内容。</p>
+            <div class="modal-buttons">
+                <button class="modal-btn primary" onclick="goToLogin()">前往登录</button>
+                <button class="modal-btn secondary" onclick="closeModal()">稍后再说</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 页面加载时的过渡动画
+        document.addEventListener('DOMContentLoaded', function() {
+            document.body.classList.add('page-transition');
+            
+            // 检查登录状态
+            checkLoginStatus();
+            
+            // 为所有链接添加页面切换效果
+            const links = document.querySelectorAll('a');
+            links.forEach(link => {
+                // 只处理站内链接
+                if (link.href.startsWith(window.location.origin) && !link.target) {
+                    link.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        const targetUrl = this.href;
+                        
+                        // 添加淡出动画
+                        document.body.style.opacity = '0';
+                        document.body.style.transition = 'opacity 0.5s ease-out';
+                        
+                        // 延迟后跳转
+                        setTimeout(() => {
+                            window.location.href = targetUrl;
+                        }, 500);
+                    });
+                }
+            });
+            
+            // 滚动时导航栏变化
+            const header = document.getElementById('mainHeader');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    header.classList.add('scrolled');
+                } else {
+                    header.classList.remove('scrolled');
+                }
+            });
+
+            // 滚动动画实现
+            // 节流函数，优化滚动性能
+            function throttle(func, delay = 100) {
+                let lastTime = 0;
+                return function(...args) {
+                    const now = Date.now();
+                    if (now - lastTime >= delay) {
+                        func.apply(this, args);
+                        lastTime = now;
+                    }
+                };
+            }
+
+            // 检查元素是否在视口中
+            function isInViewport(element) {
+                const rect = element.getBoundingClientRect();
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                
+                // 元素顶部进入视口底部80%以内，或元素底部进入视口顶部
+                return (
+                    rect.top <= windowHeight * 0.8 && // 顶部在视口下方80%位置以内
+                    rect.bottom >= 0 // 底部在视口顶部以上
+                );
+            }
+
+            // 检查元素是否在视口上方（已滚动过去）
+            function isAboveViewport(element) {
+                const rect = element.getBoundingClientRect();
+                return rect.bottom < 0;
+            }
+
+            // 处理滚动动画
+            function handleScrollAnimation() {
+                const animatedElements = document.querySelectorAll('.scroll-animate');
+                
+                animatedElements.forEach(element => {
+                    if (isInViewport(element)) {
+                        element.classList.add('visible');
+                        element.classList.remove('fade-out');
+                    } else if (isAboveViewport(element)) {
+                        element.classList.add('fade-out');
+                        element.classList.remove('visible');
+                    } else {
+                        element.classList.remove('visible', 'fade-out');
+                    }
+                });
+            }
+
+            // 初始检查可见元素
+            handleScrollAnimation();
+            
+            // 监听滚动事件（使用节流优化）
+            window.addEventListener('scroll', throttle(handleScrollAnimation));
+            
+            // 结局卡片点击事件
+            const endingCards = document.querySelectorAll('.ending-card');
+            endingCards.forEach(card => {
+                card.addEventListener('click', function() {
+                    const currentUser = localStorage.getItem('currentUser');
+                    
+                    if (!currentUser) {
+                        // 未登录，显示登录弹窗
+                        showLoginModal();
+                    } else {
+                        // 已登录，检查结局解锁状态
+                        if (this.classList.contains('locked')) {
+                            // 结局未解锁，显示提示
+                            alert('该结局尚未解锁，需要在游戏中完成特定条件才能查看。');
+                        } else {
+                            // 结局已解锁，跳转到结局详情（这里可以扩展）
+                            alert('结局详情页面开发中...');
+                        }
+                    }
+                });
+            });
+        });
+        
+        // 检查登录状态
+        function checkLoginStatus() {
+            const currentUser = localStorage.getItem('currentUser');
+            const loginNotice = document.getElementById('loginNotice');
+            
+            if (!currentUser) {
+                // 未登录，显示登录提示
+                loginNotice.style.display = 'block';
+            } else {
+                // 已登录，隐藏登录提示
+                loginNotice.style.display = 'none';
+                
+                // 这里可以加载用户的结局解锁状态
+                // loadUserEndingProgress();
+            }
+        }
+        
+        // 显示登录弹窗
+        function showLoginModal() {
+            const modal = document.getElementById('loginModal');
+            modal.classList.add('show');
+        }
+        
+        // 关闭弹窗
+        function closeModal() {
+            const modal = document.getElementById('loginModal');
+            modal.classList.remove('show');
+        }
+        
+        // 前往登录页面
+        function goToLogin() {
+            // 添加淡出动画
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.5s ease-out';
+            
+            // 延迟后跳转
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 500);
+        }
+        
+        // 点击弹窗外部关闭
+        document.getElementById('loginModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+        
+        // ESC键关闭弹窗
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
