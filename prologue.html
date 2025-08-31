@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13号病房 - 序章</title>
+    <style>
+        :root {
+            --primary-color: #8B0000;
+            --dark-red: #5A0000;
+            --text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            background: #000; /* 初始背景为纯黑色 */
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #backgroundImage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 1s ease-in-out;
+            z-index: 1;
+            opacity: 0; /* 初始不显示图片 */
+        }
+
+        #storyOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(0,0,0,0.3) 0%,
+                rgba(0,0,0,0.5) 50%,
+                rgba(0,0,0,0.7) 100%
+            );
+            z-index: 2;
+        }
+
+        #storyContainer {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.5);
+            z-index: 3;
+        }
+
+        #storyText {
+            font-size: 1.4em;
+            line-height: 1.8;
+            text-align: justify;
+            text-shadow: var(--text-shadow);
+            min-height: 120px;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .story-text-visible {
+            opacity: 1 !important;
+        }
+
+        #continueButton {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(45deg, var(--primary-color), var(--dark-red));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+            opacity: 0;
+            animation: fadeInButton 0.5s ease-in-out 2s forwards;
+        }
+
+        #continueButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 0, 0, 0.5);
+            background: linear-gradient(45deg, #A00000, var(--primary-color));
+        }
+
+        #continueButton:active {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeInButton {
+            to {
+                opacity: 1;
+            }
+        }
+
+        #skipButton {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        #skipButton:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        #bgmToggle {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #bgmToggle:hover {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .story-title {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: var(--text-shadow);
+            font-weight: bold;
+        }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            #storyContainer {
+                width: 95%;
+                padding: 20px;
+                bottom: 15%;
+            }
+
+            #storyText {
+                font-size: 1.2em;
+                line-height: 1.6;
+            }
+
+            .story-title {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+
+            #continueButton {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            #bgmToggle, #skipButton {
+                top: 20px;
+            }
+
+            #bgmToggle {
+                left: 20px;
+                width: 45px;
+                height: 45px;
+            }
+
+            #skipButton {
+                right: 20px;
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- 背景图片 -->
+        <img id="backgroundImage" src="" alt="背景">
+        
+        <!-- 故事遮罩层 -->
+        <div id="storyOverlay"></div>
+        
+        <!-- BGM控制按钮 -->
+        <button id="bgmToggle">🔇</button>
+        
+        <!-- 跳过按钮 -->
+        <button id="skipButton">跳过序章</button>
+        
+        <!-- 故事文本容器 -->
+        <div id="storyContainer">
+            <div class="story-title">回忆之始</div>
+            <div id="storyText"></div>
+            <button id="continueButton">继续</button>
+        </div>
+        
+        <!-- BGM音频 -->
+        <audio id="bgmAudio" loop preload="auto">
+            <source src="audio/Home bgm.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <script src="bgm-manager.js"></script>
+    <script>
+        // 故事内容配置
+        const storySteps = [
+            {
+                text: "我永远都不会忘记那一次。",
+                background: "pictures/black.jpg",
+                delay: 1000
+            },
+            {
+                text: "说真的，如果时间可以倒流，我绝对不会再喝那一瓶过期牛奶。也就不用去那个诡异的地方。",
+                background: "pictures/早餐（牛奶）.jpg",
+                delay: 1500
+            },
+            {
+                text: "都是它害的。我早上吃完饭，随口喝了一瓶牛奶，计划着待会儿和朋友一起玩。",
+                background: "pictures/早餐（牛奶）.jpg",
+                delay: 1500
+            },
+            {
+                text: "突然，我感到了一阵眩晕。什么情况！？",
+                background: "pictures/早餐（牛奶）.jpg",
+                delay: 1200
+            },
+            {
+                text: "一个没站稳，我晕倒在地上。迷迷糊糊中，我看到似乎有一个人影靠近了我，嘴里还呢喃着什么\"13号，是你...\"",
+                background: "pictures/晕倒.png",
+                delay: 2000
+            }
+        ];
+
+        let currentStep = 0;
+        let isTyping = false;
+        let bgmManager;
+        let currentBackground = '';
+
+        // 页面元素
+        const backgroundImage = document.getElementById('backgroundImage');
+        const storyText = document.getElementById('storyText');
+        const continueButton = document.getElementById('continueButton');
+        const skipButton = document.getElementById('skipButton');
+
+        // 初始化
+        function init() {
+            // 初始化BGM管理器
+            bgmManager = new BGMManager('bgmAudio', 'bgmToggle');
+            
+            // 开始第一步
+            showStep(0);
+            
+            // 绑定事件
+            continueButton.addEventListener('click', nextStep);
+            skipButton.addEventListener('click', skipPrologue);
+            
+            // 键盘事件
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        // 显示指定步骤
+        function showStep(stepIndex) {
+            if (stepIndex >= storySteps.length) {
+                endPrologue();
+                return;
+            }
+
+            const step = storySteps[stepIndex];
+            currentStep = stepIndex;
+            
+            // 切换背景图片（只有不同图片才渐变）
+            if (currentBackground !== step.background) {
+                // 不同图片，使用渐变效果
+                backgroundImage.style.opacity = '0';
+                setTimeout(() => {
+                    backgroundImage.src = step.background;
+                    currentBackground = step.background;
+                    // 第一张图片需要从黑色背景淡入
+                    setTimeout(() => {
+                        backgroundImage.style.opacity = '1';
+                    }, 100);
+                }, currentBackground ? 500 : 0); // 第一张图不需要等待淡出
+            }
+            
+            // 隐藏继续按钮
+            continueButton.style.opacity = '0';
+            
+            // 显示文本（打字机效果）
+            typewriterEffect(step.text, step.delay);
+        }
+
+        // 打字机效果
+        function typewriterEffect(text, delay) {
+            isTyping = true;
+            storyText.style.opacity = '0';
+            storyText.textContent = '';
+            
+            setTimeout(() => {
+                storyText.style.opacity = '1';
+                let index = 0;
+                
+                function typeChar() {
+                    if (index < text.length) {
+                        storyText.textContent += text.charAt(index);
+                        index++;
+                        setTimeout(typeChar, 50); // 每个字符间隔50ms
+                    } else {
+                        isTyping = false;
+                        // 文本显示完成后，显示继续按钮
+                        setTimeout(() => {
+                            continueButton.style.opacity = '1';
+                        }, 300);
+                    }
+                }
+                
+                typeChar();
+            }, 300);
+        }
+
+        // 下一步
+        function nextStep() {
+            if (isTyping) {
+                // 如果正在打字，跳过打字效果
+                isTyping = false;
+                const step = storySteps[currentStep];
+                storyText.textContent = step.text;
+                continueButton.style.opacity = '1';
+                return;
+            }
+            
+            if (currentStep < storySteps.length - 1) {
+                showStep(currentStep + 1);
+            } else {
+                endPrologue();
+            }
+        }
+
+        // 键盘事件处理
+        function handleKeyPress(e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                nextStep();
+            } else if (e.key === 'Escape') {
+                skipPrologue();
+            }
+        }
+
+        // 跳过序章
+        function skipPrologue() {
+            if (confirm('确定要跳过序章吗？')) {
+                endPrologue();
+            }
+        }
+
+        // 结束序章
+        function endPrologue() {
+            // 渐变到黑屏
+            document.body.style.transition = 'opacity 1s ease-in-out';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                // 跳转到主游戏页面或下一个页面
+                window.location.href = 'part_1_1.html';
+            }, 1000);
+        }
+
+        // 预加载图片
+        function preloadImages() {
+            storySteps.forEach(step => {
+                const img = new Image();
+                img.src = step.background;
+            });
+        }
+
+        // 页面加载完成后初始化
+        window.addEventListener('load', () => {
+            preloadImages();
+            init();
+        });
+    </script>
+</body>
+</html>
