@@ -240,37 +240,37 @@
         
         <!-- BGM音频 -->
         <audio id="bgmAudio" loop preload="auto">
-            <source src="audio/Home bgm.mp3" type="audio/mpeg">
+            <source src="../audio/Home bgm.mp3" type="audio/mpeg">
         </audio>
     </div>
 
-    <script src="bgm-manager.js"></script>
+    <script src="../bgm-manager.js"></script>
     <script>
         // 故事内容配置
         const storySteps = [
             {
                 text: "我永远都不会忘记那一次。",
-                background: "pictures/black.jpg",
+                background: "../pictures/black.jpg",
                 delay: 1000
             },
             {
                 text: "说真的，如果时间可以倒流，我绝对不会再喝那一瓶过期牛奶。也就不用去那个诡异的地方。",
-                background: "pictures/早餐（牛奶）.jpg",
+                background: "../pictures/早餐（牛奶）.jpg",
                 delay: 1500
             },
             {
                 text: "都是它害的。我早上吃完饭，随口喝了一瓶牛奶，计划着待会儿和朋友一起玩。",
-                background: "pictures/早餐（牛奶）.jpg",
+                background: "../pictures/早餐（牛奶）.jpg",
                 delay: 1500
             },
             {
                 text: "突然，我感到了一阵眩晕。什么情况！？",
-                background: "pictures/早餐（牛奶）.jpg",
+                background: "../pictures/早餐（牛奶）.jpg",
                 delay: 1200
             },
             {
                 text: "一个没站稳，我晕倒在地上。迷迷糊糊中，我看到似乎有一个人影靠近了我，嘴里还呢喃着什么\"13号，是你...\"",
-                background: "pictures/晕倒.png",
+                background: "../pictures/晕倒.png",
                 delay: 2000
             }
         ];
@@ -404,7 +404,7 @@
             
             setTimeout(() => {
                 // 跳转到主游戏页面或下一个页面
-                window.location.href = 'codes/part_1_1.html';
+                window.location.href = 'part_1_1.html';
             }, 1000);
         }
 

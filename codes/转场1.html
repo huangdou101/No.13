@@ -245,7 +245,7 @@
         <img id="backgroundImage" src="" alt="背景">
         
         <!-- 人物立绘 -->
-        <img id="characterSprite" src="pictures/1.png" alt="人物立绘">
+        <img id="characterSprite" src="../pictures/1.png" alt="人物立绘">
         
         <!-- 故事遮罩层 -->
         <div id="storyOverlay"></div>
@@ -265,59 +265,59 @@
         
         <!-- BGM音频 -->
         <audio id="bgmAudio" loop preload="auto">
-            <source src="audio/Home bgm.mp3" type="audio/mpeg">
+            <source src="../audio/Home bgm.mp3" type="audio/mpeg">
         </audio>
     </div>
 
-    <script src="bgm-manager.js"></script>
+    <script src="../bgm-manager.js"></script>
     <script>
         // 故事内容配置
         const storySteps = [
             {
                 text: "安康医院？这是什么医院啊？怎么从来没听说过",
-                background: "pictures/病房_night.jpg",
+                background: "../pictures/病房_night.jpg",
                 delay: 1000,
                 isCharacterSpeaking: true
             },
             {
                 text: "作息表又是什么？对了！现在几点了，我还和小刘说好要出去玩的，这下又要咕咕咕了。",
-                background: "pictures/病房_night.jpg",
+                background: "../pictures/病房_night.jpg",
                 delay: 1500,
                 isCharacterSpeaking: true
             },
             {
                 text: "欸，我的手表呢？床边也没有啊，一切都好古怪啊，怎么和我看过的规则怪谈小说这么像。可是，可是这是现实啊。可能又是熊孩子的恶作剧吧。",
-                background: "pictures/手腕.jpg",
+                background: "../pictures/手腕.jpg",
                 delay: 2000,
                 isCharacterSpeaking: true
             },
             {
                 text: "尽管我不以为然，但凭直觉，我还是将纸团揣进口袋里了。",
-                background: "pictures/手腕.jpg",
+                background: "../pictures/手腕.jpg",
                 delay: 1500,
                 isCharacterSpeaking: false
             },
             {
                 text: "（眼前一阵眩晕）嘶，头又痛起来了，这个过期牛奶的后劲儿也太大了吧",
-                background: "pictures/第三幕_1.jpg",
+                background: "../pictures/第三幕_1.jpg",
                 delay: 1500,
                 isCharacterSpeaking: true
             },
             {
                 text: "努力把身体撑起来，试图按床边的护士铃，却发现，床边并没有护士铃",
-                background: "pictures/第三幕_1.jpg",
+                background: "../pictures/第三幕_1.jpg",
                 delay: 1500,
                 isCharacterSpeaking: true
             },
             {
                 text: "我凭借仅剩的意志力站起身，挪到病房门口，病房门一侧有一个很小的钟表，上面写着时间21：50",
-                background: "pictures/时间.jpg",
+                background: "../pictures/时间.jpg",
                 delay: 2000,
                 isCharacterSpeaking: true
             },
             {
                 text: "居然都21：50了，我难道昏迷这么长时间了吗？不可能吧",
-                background: "pictures/时间.jpg",
+                background: "../pictures/时间.jpg",
                 delay: 1500,
                 isCharacterSpeaking: true
             }
@@ -474,7 +474,7 @@
             
             // 预加载人物立绘
             const charImg = new Image();
-            charImg.src = 'pictures/1.png';
+            charImg.src = '../pictures/1.png';
         }
 
         // 页面加载完成后初始化

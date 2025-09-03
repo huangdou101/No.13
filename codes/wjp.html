@@ -490,12 +490,12 @@
             }
         }
     </style>
-    <script src="bgm-manager.js"></script>
+    <script src="../bgm-manager.js"></script>
 </head>
 <body>
     <audio id="bgmAudio" loop preload="auto">
-        <source src="audio/Home bgm.mp3" type="audio/mpeg">
-        <source src="audio/Home bgm.ogg" type="audio/ogg">
+        <source src="../audio/Home bgm.mp3" type="audio/mpeg">
+        <source src="../audio/Home bgm.ogg" type="audio/ogg">
         您的浏览器不支持音频播放。
     </audio>
     
@@ -514,21 +514,21 @@
                 <div class="logo">13号</div>
                 <nav>
                     <ul>
-                        <li><a href="index.html">主页</a></li>
-                        <li><a href="codes/login.html">登录</a></li>
-                        <li><a href="codes/register.html">注册</a></li>
-                        <li><a href="codes/team.html" class="active">开发团队</a></li>
+                        <li><a href="../index.html">主页</a></li>
+                        <li><a href="login.html">登录</a></li>
+                        <li><a href="register.html">注册</a></li>
+                        <li><a href="team.html" class="active">开发团队</a></li>
                     </ul>
                 </nav>
             </div>
         </header>
         
         <main>
-    <a href="codes/team.html" class="back-link scroll-animate">返回团队页面</a>
+    <a href="team.html" class="back-link scroll-animate">返回团队页面</a>
 
     <section class="member-detail scroll-animate">
         <div class="member-photo-large">
-            <img src="pictures/wjp.jpg" alt="吴京澎照片">
+            <img src="../pictures/wjp.jpg" alt="吴京澎照片">
             <div class="member-badge-large">程序 | 视频</div> <!-- 修正角色标签 -->
         </div>
         <div class="member-info-detail">
@@ -580,7 +580,7 @@
         <footer class="scroll-animate">
             <div class="footer-logo">13号病房</div>
             <div class="footer-links">
-                <a href="index.html">主页</a>
+                <a href="../index.html">主页</a>
                 <a href="login.html">登录</a>
                 <a href="register.html">注册</a>
                 <a href="team.html">开发团队</a>
@@ -596,12 +596,12 @@
 
             // 点击logo返回主页
             document.querySelector('.logo').addEventListener('click', function() {
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             });
 
             // 点击footer logo返回主页
             document.querySelector('.footer-logo').addEventListener('click', function() {
-                window.location.href = 'index.html';
+                window.location.href = '../index.html';
             });
 
             // 点击footer链接跳转

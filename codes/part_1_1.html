@@ -266,7 +266,7 @@
             <p>使用 <span class="key">空格</span> 与物品交互</p>
         </div>
         <div id="backpackButton">
-            <img src="pictures/bag.png" id="bagIcon" alt="背包">
+            <img src="../pictures/bag.png" id="bagIcon" alt="背包">
             <span class="item-count" id="bagCount">0</span>
             <span class="new-item-indicator" id="newItemIndicator"></span>
         </div>
@@ -274,7 +274,7 @@
 
     <div id="paperOverlay">
         <div class="paper-content">
-            <img src="pictures/folded_paper_1.png" id="unfoldedPaper" alt="展开的纸">
+            <img src="../pictures/folded_paper_1.png" id="unfoldedPaper" alt="展开的纸">
             <button id="closePaper">关闭</button>
         </div>
     </div>
@@ -290,15 +290,15 @@
     </div>
 
     <div id="preload">
-        <img src="pictures/病房_night.jpg" id="background" alt="病房背景">
-        <img src="pictures/walk1.png" id="walk1" alt="行走状态1">
-        <img src="pictures/walk2.png" id="walk2" alt="行走状态2">
-        <img src="pictures/walk3.png" id="walk3" alt="行走状态3">
-        <img src="pictures/stand1.png" id="stand1" alt="待机动画1">
-        <img src="pictures/stand2.png" id="stand2" alt="待机动画2">
-        <img src="pictures/纸团.png" id="paperBall" alt="纸团">
-        <img src="pictures/folded_paper_1.png" id="unfoldedPaperPre" alt="展开的纸">
-        <img src="pictures/bag.png" id="bagIconPreload" alt="背包图标">
+        <img src="../pictures/病房_night.jpg" id="background" alt="病房背景">
+        <img src="../pictures/walk1.png" id="walk1" alt="行走状态1">
+        <img src="../pictures/walk2.png" id="walk2" alt="行走状态2">
+        <img src="../pictures/walk3.png" id="walk3" alt="行走状态3">
+        <img src="../pictures/stand1.png" id="stand1" alt="待机动画1">
+        <img src="../pictures/stand2.png" id="stand2" alt="待机动画2">
+        <img src="../pictures/纸团.png" id="paperBall" alt="纸团">
+        <img src="../pictures/folded_paper_1.png" id="unfoldedPaperPre" alt="展开的纸">
+        <img src="../pictures/bag.png" id="bagIconPreload" alt="背包图标">
     </div>
 
     <script>
@@ -467,7 +467,7 @@
             document.getElementById('paperOverlay').style.display = 'none';
             document.getElementById('gameCanvas').style.filter = 'none';
             // 关闭纸条后立即跳转到转场1.html
-            window.location.href = 'codes/转场1.html';
+            window.location.href = '转场1.html';
         }
 
         function drawScene() {

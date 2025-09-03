@@ -784,9 +784,9 @@
             if (startBtn) {
                 startBtn.addEventListener('click', function(e) {
                     // 判断登录
-                    const isLogin = localStorage.getItem('isLogin');
+                    const currentUser = localStorage.getItem('currentUser');
                     let targetUrl = '';
-                    if (isLogin === 'true') {
+                    if (currentUser) {
                         targetUrl = 'codes/prologue.html';
                     } else {
                         targetUrl = 'codes/login.html';

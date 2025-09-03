@@ -27,9 +27,25 @@ No package manager, build tools, or test runners are used.
 
 ### Code Organization
 ```
-├── *.html           # 4 main pages (index, login, register, team)
-├── bgm-manager.js   # Audio management module  
-└── audio/           # Audio assets
+├── index.html            # Main homepage
+├── bgm-manager.js        # Audio management module
+├── codes/                # Game pages and core functionality
+│   ├── login.html        # User login page
+│   ├── register.html     # User registration page
+│   ├── team.html         # Development team showcase
+│   ├── prologue.html     # Game opening sequence
+│   ├── part_1_1.html     # First game chapter (canvas-based)
+│   ├── part_1_2.html     # Second game chapter
+│   ├── part_2.html       # Third game chapter
+│   ├── endings.html      # Multiple game endings
+│   ├── 转场1.html         # Transition scene
+│   └── [member].html     # Individual team member pages (lhl, wcr, wjp, etc.)
+├── audio/                # Audio assets (MP3 format)
+├── pictures/             # Game assets and team photos
+│   ├── [character].jpg   # Team member photos
+│   ├── [game_assets].png # In-game sprites and backgrounds
+│   └── [story_items].jpg # Story-related images
+└── README.md            # Basic project description
 ```
 
 ### Key Architectural Patterns
@@ -44,6 +60,12 @@ No package manager, build tools, or test runners are used.
 - Class-based architecture (`BGMManager`)
 - Handles play/pause controls, UI state sync, error handling
 - Integrated across all pages with consistent behavior
+
+**Canvas-based Game System**: Game chapters use HTML5 Canvas for 2D gameplay
+- Character animation with sprite sequences (walk1, walk2, walk3, stand1, stand2)
+- Real-time collision detection and player-object interactions
+- Inventory system with backpack UI for collecting story items
+- State management for game progression and item collection
 
 **User Authentication System**: LocalStorage-based user management
 - Registration with validation (username uniqueness, password strength)
@@ -70,11 +92,19 @@ No package manager, build tools, or test runners are used.
 ### Important Patterns to Follow
 
 **Adding New Pages**:
-1. Copy existing HTML structure template
-2. Include `bgm-manager.js` script
+1. Copy existing HTML structure template from `index.html` or `codes/` examples
+2. Include `bgm-manager.js` script via `<script src="bgm-manager.js"></script>`
 3. Add scroll-triggered animations with `.scroll-animate` classes
-4. Use CSS custom properties for consistent theming
-5. Test responsive behavior on mobile
+4. Use CSS custom properties for consistent theming (`--primary-color`, `--dark-red`, etc.)
+5. Include navigation structure with proper `active` class
+6. Test responsive behavior on mobile devices
+
+**Adding New Game Chapters**:
+1. Use HTML5 Canvas for interactive gameplay (see `part_1_1.html` as reference)
+2. Implement character sprite animation system with predefined sequences
+3. Include inventory/backpack system for story progression
+4. Handle keyboard input (WASD/Arrow keys, Space for interaction)
+5. Manage game state transitions between chapters
 
 **BGM Integration**:
 All pages must include BGM controls:
@@ -86,22 +116,36 @@ All pages must include BGM controls:
 <script src="bgm-manager.js"></script>
 ```
 
-**Scroll Animation Pattern**:
+**Game Development Patterns**:
 ```javascript
-// Viewport detection + throttled optimization
-function handleScrollAnimation() {
-    const elements = document.querySelectorAll('.scroll-animate');
-    elements.forEach(element => {
-        if (isInViewport(element)) {
-            element.classList.add('visible');
-        }
-    });
+// Character animation system (from part_1_1.html)
+const WALK_ANIMATION_SEQUENCE = ['walk1', 'walk2', 'walk1', 'walk3'];
+const STAND_ANIMATION_SEQUENCE = ['stand1', 'stand2'];
+
+// Inventory management pattern
+const backpack = {
+    items: [],
+    maxItems: 16,
+    hasNewItem: false
+};
+
+// Canvas game loop structure
+function gameLoop(timestamp) {
+    drawScene();
+    drawPaperBall();
+    updatePlayer();
+    drawPlayer();
+    requestAnimationFrame(gameLoop);
 }
 ```
 
 ## Current State & Limitations
 
-**Present State**: Showcase website only - core game mechanics not implemented
+**Present State**: Interactive game prototype with multiple chapters implemented
+- Working authentication system with LocalStorage persistence
+- Canvas-based gameplay with character animation and inventory system
+- Multiple game chapters (prologue, part_1_1, part_1_2, part_2, endings)
+- Team member showcase with individual profile pages
 **Missing Assets**: Several background images and team member photos referenced but not present
 **Audio Compatibility**: Only MP3 format provided (consider adding OGG for broader support)
 
