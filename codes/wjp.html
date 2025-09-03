@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>13号病房 - 刘翰霖</title>
+    <title>13号病房 - 吴京澎</title>
     <style>
         * {
             margin: 0;
@@ -33,7 +33,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 新增：滚动时页面整体淡入淡出动画 */
+        /* 滚动时页面整体淡入淡出动画 */
         body.fade-scroll {
             transition: opacity 0.5s;
         }
@@ -422,44 +422,16 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 1.4em;
-            transition: all 0.4s ease;
-            box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            backdrop-filter: blur(10px);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .bgm-toggle::before {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: linear-gradient(45deg, var(--primary-color), var(--dark-red), var(--accent));
-            border-radius: 50%;
-            z-index: -1;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         
         .bgm-toggle:hover {
-            background: linear-gradient(135deg, var(--primary-color), var(--dark-red));
-            color: white;
-            transform: scale(1.15);
-            box-shadow: 0 8px 25px rgba(230, 57, 70, 0.5), inset 0 2px 6px rgba(255, 255, 255, 0.2);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
-        }
-        
-        .bgm-toggle:hover::before {
-            opacity: 1;
-        }
-        
-        .bgm-toggle:active {
-            transform: scale(1.05);
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
         }
         
         .bgm-toggle.paused {
@@ -543,31 +515,32 @@
                 <nav>
                     <ul>
                         <li><a href="index.html">主页</a></li>
-                        <li><a href="login.html">登录</a></li>
-                        <li><a href="register.html">注册</a></li>
-                        <li><a href="team.html" class="active">开发团队</a></li>
+                        <li><a href="codes/login.html">登录</a></li>
+                        <li><a href="codes/register.html">注册</a></li>
+                        <li><a href="codes/team.html" class="active">开发团队</a></li>
                     </ul>
                 </nav>
             </div>
         </header>
         
         <main>
-    <a href="team.html" class="back-link scroll-animate">返回团队页面</a>
-    
+    <a href="codes/team.html" class="back-link scroll-animate">返回团队页面</a>
+
     <section class="member-detail scroll-animate">
         <div class="member-photo-large">
-            <img src="pictures/lhl.jpg" alt="刘翰霖照片">
-            <div class="member-badge-large">组长</div>
+            <img src="pictures/wjp.jpg" alt="吴京澎照片">
+            <div class="member-badge-large">程序 | 视频</div> <!-- 修正角色标签 -->
         </div>
         <div class="member-info-detail">
-            <h1>刘翰霖</h1>
-            <div class="member-role-detail">项目负责人 / 创意总监 / 主程序开发</div>
-            
+            <h1>吴京澎</h1>
+            <div class="member-role-detail">程序 | 视频剪辑</div> <!-- 修正角色描述 -->
+
+            <!-- 保持原有卡片设计，仅更新自我介绍内容 -->
             <div class="member-content">
                 <div class="member-bio-detail">
-                    <p>我是北京理工大学人工智能专业的大二学生刘翰霖，同时也是《13号病房》项目的核心发起者和负责人。作为团队组长，我不仅需要统筹项目整体规划、把握创意方向，还深度参与了核心程序的编写工作。</p>
-                    <p>我性格比较积极向上，待人真诚友善，一直觉得良好的沟通和团队协作是做好项目的关键——正是这些特质帮助我们团队凝聚力量，高效推进开发。平时我很注重锻炼自己的组织协调能力，加上较强的责任心和集体荣誉感，总能在项目遇到瓶颈时做好协调，推动大家一起往前走。</p>
-                    <p>课余时间里，我喜欢看各种番剧、打打篮球，也常和舍友一起组队打游戏——不过我有个原则，绝不熬夜打游戏，得保持规律作息嘛。这次能亲身参与游戏制作，对我来说真的是一次超宝贵又新奇的实践经历。特别期待能把课堂上学到的知识用到实际中，在这个过程里不断提升自己的综合能力。</p>
+                    <p>本人在此次项目中，担任主程序员与视频剪辑。平常生活里喜欢看NBA，也喜欢自己打篮球。这也给予了我小组介绍视频的剪辑灵感。</p>
+                    <p>我还喜欢编程，当一行行代码在指尖飞跃，流淌过的不只是时间，更是对编程的又一份热爱。目前在努力学习HTML、JS、CSS等前端编程语言。</p>
+                    <p>这次小学期也是一次难得的团队合作机会，组内氛围融洽，大家齐心协力。希望能和大家一起，把《13号病房》做的越来越好，给《13号病房》和我们自己，一个完美结局。</p>
                 </div>
                 
                 <div class="member-details-grid">
@@ -577,15 +550,15 @@
                     </div>
                     <div class="detail-item">
                         <h3>技能特长</h3>
-                        <p>项目管理、创意设计、游戏策划、程序开发、团队协调</p>
+                        <p>前端开发（HTML、JS、CSS）、视频剪辑、编程实现</p> <!-- 修正技能内容 -->
                     </div>
                     <div class="detail-item">
                         <h3>兴趣爱好</h3>
-                        <p>看番剧、打篮球</p>
+                        <p>看NBA、打篮球、编程、视频剪辑</p> <!-- 修正兴趣内容 -->
                     </div>
                     <div class="detail-item">
                         <h3>代表作品</h3>
-                        <p>《13号病房》（项目负责人及主程序开发）</p>
+                        <p>《13号病房》（程序开发与视频剪辑）</p> <!-- 修正作品描述 -->
                     </div>
                 </div>
             </div>
@@ -593,14 +566,11 @@
             <div class="member-contributions">
                 <h2>项目贡献</h2>
                 <ul class="contribution-list">
-                    <li>担任项目组长，负责整体规划、团队协调与进度管理</li>
-                    <li>主导《13号病房》的故事设定与世界观构建</li>
-                    <li>设计游戏核心玩法机制与交互逻辑</li>
-                    <li>负责主要程序编写与技术实现</li>
-                    <li>统筹游戏开发各环节，协调美术、策划与技术团队协作</li>
-                    <li>制定开发规范与代码标准，保障项目质量</li>
-                    <li>收集并分析用户反馈，推动游戏迭代优化</li>
-                    <li>平衡游戏难度与叙事节奏，提升玩家体验</li>
+                    <li>担任项目主程序员，负责核心功能代码开发</li>
+                    <li>负责小组介绍视频剪辑，融入篮球元素灵感</li>
+                    <li>进行HTML、JS、CSS等前端技术实现与优化</li>
+                    <li>参与团队协作，解决开发过程中的技术问题</li>
+                    <li>配合团队完成项目迭代与功能完善</li>
                 </ul>
             </div>
         </div>
@@ -622,20 +592,19 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.add('page-transition');
-            // 新增：为body添加fade-scroll类
             document.body.classList.add('fade-scroll', 'fade-in');
 
-            // 新增：点击logo返回主页
+            // 点击logo返回主页
             document.querySelector('.logo').addEventListener('click', function() {
                 window.location.href = 'index.html';
             });
 
-            // 新增：点击footer logo返回主页
+            // 点击footer logo返回主页
             document.querySelector('.footer-logo').addEventListener('click', function() {
                 window.location.href = 'index.html';
             });
 
-            // 新增：点击footer链接跳转
+            // 点击footer链接跳转
             document.querySelectorAll('.footer-links a').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -643,7 +612,7 @@
                 });
             });
 
-            // 新增：点击返回团队页面
+            // 点击返回团队页面
             document.querySelector('.back-link').addEventListener('click', function(e) {
                 e.preventDefault();
                 window.location.href = 'team.html';
@@ -665,9 +634,10 @@
                     });
                 }
             });
-            
-            const header = document.getElementById('mainHeader');
+
+            // 监听滚动事件，改变header样式
             window.addEventListener('scroll', function() {
+                const header = document.getElementById('mainHeader');
                 if (window.scrollY > 50) {
                     header.classList.add('scrolled');
                 } else {
@@ -675,32 +645,22 @@
                 }
             });
 
-            function throttle(func, delay = 100) {
-                let lastTime = 0;
-                return function(...args) {
-                    const now = Date.now();
-                    if (now - lastTime >= delay) {
-                        func.apply(this, args);
-                        lastTime = now;
-                    }
-                };
-            }
-
+            // 检查元素是否在视口中
             function isInViewport(element) {
                 const rect = element.getBoundingClientRect();
-                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
-                
                 return (
-                    rect.top <= windowHeight * 0.8 &&
+                    rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.85 &&
                     rect.bottom >= 0
                 );
             }
 
+            // 检查元素是否在视口上方（已滚动过去）
             function isAboveViewport(element) {
                 const rect = element.getBoundingClientRect();
                 return rect.bottom < 0;
             }
 
+            // 处理滚动动画
             function handleScrollAnimation() {
                 const animatedElements = document.querySelectorAll('.scroll-animate');
                 
@@ -717,20 +677,11 @@
                 });
             }
 
+            // 初始检查可见元素
             handleScrollAnimation();
-            window.addEventListener('scroll', throttle(handleScrollAnimation));
-
-            // 新增：滚动时页面整体淡入淡出效果
-            let fadeTimeout = null;
-            window.addEventListener('scroll', function() {
-                document.body.classList.add('fade-out');
-                document.body.classList.remove('fade-in');
-                if (fadeTimeout) clearTimeout(fadeTimeout);
-                fadeTimeout = setTimeout(() => {
-                    document.body.classList.remove('fade-out');
-                    document.body.classList.add('fade-in');
-                }, 250); // 停止滚动后0.25秒恢复
-            });
+            
+            // 监听滚动事件
+            window.addEventListener('scroll', handleScrollAnimation);
         });
     </script>
 </body>

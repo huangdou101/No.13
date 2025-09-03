@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>13号病房 - 吴昌融</title>
+    <title>13号病房 - 刘翰霖</title>
     <style>
         * {
             margin: 0;
@@ -33,7 +33,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* 滚动时页面整体淡入淡出动画 */
+        /* 新增：滚动时页面整体淡入淡出动画 */
         body.fade-scroll {
             transition: opacity 0.5s;
         }
@@ -422,16 +422,44 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 1.4em;
+            transition: all 0.4s ease;
+            box-shadow: 0 6px 20px rgba(230, 57, 70, 0.3), inset 0 2px 4px rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .bgm-toggle::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary-color), var(--dark-red), var(--accent));
+            border-radius: 50%;
+            z-index: -1;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
         .bgm-toggle:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(230, 57, 70, 0.4);
+            background: linear-gradient(135deg, var(--primary-color), var(--dark-red));
+            color: white;
+            transform: scale(1.15);
+            box-shadow: 0 8px 25px rgba(230, 57, 70, 0.5), inset 0 2px 6px rgba(255, 255, 255, 0.2);
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+        }
+        
+        .bgm-toggle:hover::before {
+            opacity: 1;
+        }
+        
+        .bgm-toggle:active {
+            transform: scale(1.05);
         }
         
         .bgm-toggle.paused {
@@ -515,31 +543,31 @@
                 <nav>
                     <ul>
                         <li><a href="index.html">主页</a></li>
-                        <li><a href="login.html">登录</a></li>
-                        <li><a href="register.html">注册</a></li>
-                        <li><a href="team.html" class="active">开发团队</a></li>
+                        <li><a href="codes/login.html">登录</a></li>
+                        <li><a href="codes/register.html">注册</a></li>
+                        <li><a href="codes/team.html" class="active">开发团队</a></li>
                     </ul>
                 </nav>
             </div>
         </header>
         
         <main>
-    <a href="team.html" class="back-link scroll-animate">返回团队页面</a>
-    
+    <a href="codes/team.html" class="back-link scroll-animate">返回团队页面</a>
+
     <section class="member-detail scroll-animate">
         <div class="member-photo-large">
-            <img src="pictures/wcr.jpg" alt="吴昌融照片">
-            <div class="member-badge-large">主美工 | 程序</div>
+            <img src="pictures/lhl.jpg" alt="刘翰霖照片">
+            <div class="member-badge-large">组长</div>
         </div>
         <div class="member-info-detail">
-            <h1>吴昌融</h1>
-            <div class="member-role-detail">主美工与程序开发 | 全能型创作者</div>
+            <h1>刘翰霖</h1>
+            <div class="member-role-detail">项目负责人 / 创意总监 / 主程序开发</div>
             
             <div class="member-content">
                 <div class="member-bio-detail">
-                    <p>吴昌融，北京理工大学人工智能专业大二学生，《13号病房》项目的主美工与核心程序开发者。自小对游戏怀有深厚热情，游戏经验丰富，从爆火的《骗子酒吧》、经典合作游戏《双人成行》到近期热门的《三角洲行动》均有涉猎，这为游戏开发提供了丰富的用户视角。</p>
-                    <p>拥有长期班干部经历，在PPT制作、视频剪辑、美术设计等领域积累了扎实技能。性格乐于挑战，在项目中勇于踏出舒适圈，不断尝试新领域。擅长将艺术审美与技术实现相结合，既能打造视觉独特的游戏界面，又能编写高效的游戏逻辑。</p>
-                    <p>致力于通过技术与艺术的融合提升游戏体验，追求"功能与美感并存"的开发理念。未来希望在游戏交互设计与视觉表现领域深入探索，创造更具沉浸感的游戏作品。</p>
+                    <p>我是北京理工大学人工智能专业的大二学生刘翰霖，同时也是《13号病房》项目的核心发起者和负责人。作为团队组长，我不仅需要统筹项目整体规划、把握创意方向，还深度参与了核心程序的编写工作。</p>
+                    <p>我性格比较积极向上，待人真诚友善，一直觉得良好的沟通和团队协作是做好项目的关键——正是这些特质帮助我们团队凝聚力量，高效推进开发。平时我很注重锻炼自己的组织协调能力，加上较强的责任心和集体荣誉感，总能在项目遇到瓶颈时做好协调，推动大家一起往前走。</p>
+                    <p>课余时间里，我喜欢看各种番剧、打打篮球，也常和舍友一起组队打游戏——不过我有个原则，绝不熬夜打游戏，得保持规律作息嘛。这次能亲身参与游戏制作，对我来说真的是一次超宝贵又新奇的实践经历。特别期待能把课堂上学到的知识用到实际中，在这个过程里不断提升自己的综合能力。</p>
                 </div>
                 
                 <div class="member-details-grid">
@@ -548,17 +576,16 @@
                         <p>北京理工大学 人工智能专业 大二在读</p>
                     </div>
                     <div class="detail-item">
-                        <h3>核心技能</h3>
-                        <p>程序开发：C#、Python、Unity开发<br>
-                        设计创作：UI/UX设计、视频剪辑、PPT制作、美工设计</p>
+                        <h3>技能特长</h3>
+                        <p>项目管理、创意设计、游戏策划、程序开发、团队协调</p>
                     </div>
                     <div class="detail-item">
-                        <h3>游戏经历</h3>
-                        <p>《骗子酒吧》《双人成行》《三角洲行动》等多类型游戏深度玩家</p>
+                        <h3>兴趣爱好</h3>
+                        <p>看番剧、打篮球</p>
                     </div>
                     <div class="detail-item">
-                        <h3>个人特质</h3>
-                        <p>跨领域能力强、乐于挑战新事物、团队协作经验丰富</p>
+                        <h3>代表作品</h3>
+                        <p>《13号病房》（项目负责人及主程序开发）</p>
                     </div>
                 </div>
             </div>
@@ -566,18 +593,15 @@
             <div class="member-contributions">
                 <h2>项目贡献</h2>
                 <ul class="contribution-list">
-                    <li>担任主美工：负责游戏UI设计、场景美术风格定义及美术资源制作</li>
-                    <li>核心程序开发：搭建游戏基础框架与核心交互逻辑</li>
-                    <li>负责游戏视觉与功能的平衡，确保艺术表现与技术实现的高效结合</li>
-                    <li>制作项目演示PPT与宣传素材，参与游戏推广内容剪辑</li>
-                    <li>设计玩家引导系统，优化新手体验与操作流程</li>
-                    <li>实现游戏内动态视觉效果与交互反馈机制</li>
+                    <li>担任项目组长，负责整体规划、团队协调与进度管理</li>
+                    <li>主导《13号病房》的故事设定与世界观构建</li>
+                    <li>设计游戏核心玩法机制与交互逻辑</li>
+                    <li>负责主要程序编写与技术实现</li>
+                    <li>统筹游戏开发各环节，协调美术、策划与技术团队协作</li>
+                    <li>制定开发规范与代码标准，保障项目质量</li>
+                    <li>收集并分析用户反馈，推动游戏迭代优化</li>
+                    <li>平衡游戏难度与叙事节奏，提升玩家体验</li>
                 </ul>
-            </div>
-
-            <div class="member-invitation" style="margin-top: 40px; padding: 20px; background-color: rgba(255, 183, 3, 0.1); border-left: 4px solid var(--accent); border-radius: 4px;">
-                <p style="color: var(--accent); font-size: 1.2em; font-weight: bold;">诚邀交流：</p>
-                <p style="color: var(--text-gray); margin-top: 10px;">欢迎来一起网e云吧！无论是游戏开发技术、美术设计还是游戏体验交流，都期待与你探讨~</p>
             </div>
         </div>
     </section>
@@ -587,9 +611,9 @@
             <div class="footer-logo">13号病房</div>
             <div class="footer-links">
                 <a href="index.html">主页</a>
-                <a href="login.html">登录</a>
-                <a href="register.html">注册</a>
-                <a href="team.html">开发团队</a>
+                <a href="codes/login.html">登录</a>
+                <a href="codes/register.html">注册</a>
+                <a href="codes/team.html">开发团队</a>
             </div>
             <p class="copyright">&copy; 2025 13号病房 - 医院逃生恐怖解密游戏 | 大学生团队制作</p>
         </footer>
@@ -598,19 +622,20 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.add('page-transition');
+            // 新增：为body添加fade-scroll类
             document.body.classList.add('fade-scroll', 'fade-in');
 
-            // 点击logo返回主页
+            // 新增：点击logo返回主页
             document.querySelector('.logo').addEventListener('click', function() {
                 window.location.href = 'index.html';
             });
 
-            // 点击footer logo返回主页
+            // 新增：点击footer logo返回主页
             document.querySelector('.footer-logo').addEventListener('click', function() {
                 window.location.href = 'index.html';
             });
 
-            // 点击footer链接跳转
+            // 新增：点击footer链接跳转
             document.querySelectorAll('.footer-links a').forEach(link => {
                 link.addEventListener('click', function(e) {
                     e.preventDefault();
@@ -618,7 +643,7 @@
                 });
             });
 
-            // 点击返回团队页面
+            // 新增：点击返回团队页面
             document.querySelector('.back-link').addEventListener('click', function(e) {
                 e.preventDefault();
                 window.location.href = 'team.html';
@@ -640,10 +665,9 @@
                     });
                 }
             });
-
-            // 监听滚动事件，改变header样式
+            
+            const header = document.getElementById('mainHeader');
             window.addEventListener('scroll', function() {
-                const header = document.getElementById('mainHeader');
                 if (window.scrollY > 50) {
                     header.classList.add('scrolled');
                 } else {
@@ -651,22 +675,32 @@
                 }
             });
 
-            // 检查元素是否在视口中
+            function throttle(func, delay = 100) {
+                let lastTime = 0;
+                return function(...args) {
+                    const now = Date.now();
+                    if (now - lastTime >= delay) {
+                        func.apply(this, args);
+                        lastTime = now;
+                    }
+                };
+            }
+
             function isInViewport(element) {
                 const rect = element.getBoundingClientRect();
+                const windowHeight = window.innerHeight || document.documentElement.clientHeight;
+                
                 return (
-                    rect.top <= (window.innerHeight || document.documentElement.clientHeight) * 0.85 &&
+                    rect.top <= windowHeight * 0.8 &&
                     rect.bottom >= 0
                 );
             }
 
-            // 检查元素是否在视口上方（已滚动过去）
             function isAboveViewport(element) {
                 const rect = element.getBoundingClientRect();
                 return rect.bottom < 0;
             }
 
-            // 处理滚动动画
             function handleScrollAnimation() {
                 const animatedElements = document.querySelectorAll('.scroll-animate');
                 
@@ -683,11 +717,20 @@
                 });
             }
 
-            // 初始检查可见元素
             handleScrollAnimation();
-            
-            // 监听滚动事件
-            window.addEventListener('scroll', handleScrollAnimation);
+            window.addEventListener('scroll', throttle(handleScrollAnimation));
+
+            // 新增：滚动时页面整体淡入淡出效果
+            let fadeTimeout = null;
+            window.addEventListener('scroll', function() {
+                document.body.classList.add('fade-out');
+                document.body.classList.remove('fade-in');
+                if (fadeTimeout) clearTimeout(fadeTimeout);
+                fadeTimeout = setTimeout(() => {
+                    document.body.classList.remove('fade-out');
+                    document.body.classList.add('fade-in');
+                }, 250); // 停止滚动后0.25秒恢复
+            });
         });
     </script>
 </body>

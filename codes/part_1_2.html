@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <title>病房</title>
+    <title>病房 - 转场</title>
     <style>
         body {
             margin: 0;
@@ -106,7 +106,74 @@
             background-color: #5a5a5a;
             transform: scale(1.05);
         }
-
+        
+        .arrow-indicator {
+            position: absolute;
+            top: 50%;
+            right: 30px;
+            transform: translateY(-50%);
+            z-index: 5;
+            animation: floatPulse 1.5s infinite ease-in-out;
+        }
+        
+        .arrow-indicator img {
+            width: 80px;
+            height: auto;
+            filter: drop-shadow(0 0 10px rgba(0, 255, 0, 0.8));
+        }
+        
+        @keyframes floatPulse {
+            0%, 100% { 
+                opacity: 0.7; 
+                transform: translateY(-50%) scale(1) translateX(0);
+            }
+            50% { 
+                opacity: 1; 
+                transform: translateY(-50%) scale(1.2) translateX(-10px);
+            }
+        }
+        
+        #optionOverlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+        }
+        .option-content {
+            background-color: #333;
+            padding: 35px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 0 25px rgba(255, 255, 255, 0.2);
+        }
+        #optionOverlay h3 {
+            font-size: 1.5em;
+            margin-top: 0;
+            color: #eee;
+        }
+        .option-btn {
+            padding: 12px 30px;
+            margin: 0 15px;
+            background-color: #444;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1.1em;
+            margin-top: 25px;
+            transition: all 0.2s;
+        }
+        .option-btn:hover {
+            background-color: #5a5a5a;
+            transform: scale(1.08);
+        }
+        
         #backpackButton {
             position: absolute;
             top: 20px;
@@ -270,12 +337,24 @@
             <span class="item-count" id="bagCount">0</span>
             <span class="new-item-indicator" id="newItemIndicator"></span>
         </div>
+        <!-- 右侧箭头使用图片 -->
+        <div id="arrowIndicator" class="arrow-indicator">
+            <img src="pictures/箭头.png" alt="向右移动指示">
+        </div>
     </div>
 
     <div id="paperOverlay">
         <div class="paper-content">
             <img src="pictures/folded_paper_1.png" id="unfoldedPaper" alt="展开的纸">
             <button id="closePaper">关闭</button>
+        </div>
+    </div>
+    
+    <div id="optionOverlay">
+        <div class="option-content">
+            <h3>接下来要做什么？</h3>
+            <button id="goNurseBtn" class="option-btn">去找护士</button>
+            <button id="goBedBtn" class="option-btn">回到床上</button>
         </div>
     </div>
     
@@ -299,6 +378,8 @@
         <img src="pictures/纸团.png" id="paperBall" alt="纸团">
         <img src="pictures/folded_paper_1.png" id="unfoldedPaperPre" alt="展开的纸">
         <img src="pictures/bag.png" id="bagIconPreload" alt="背包图标">
+        <!-- 预加载箭头图片 -->
+        <img src="pictures/箭头.png" id="arrowImagePreload" alt="箭头图片预加载">
     </div>
 
     <script>
@@ -327,7 +408,8 @@
             stand2: document.getElementById('stand2'),
             paperBall: document.getElementById('paperBall'),
             unfoldedPaper: document.getElementById('unfoldedPaperPre'),
-            bagIcon: document.getElementById('bagIconPreload')
+            bagIcon: document.getElementById('bagIconPreload'),
+            arrow: document.getElementById('arrowImagePreload')
         };
         
         const player = {
@@ -345,17 +427,26 @@
             standFrameCounter: 0
         };
         
+        // 纸团默认已收集，所以地上无纸团
         const paperBall = {
             x: 500, 
             y: 0, 
             width: 60, 
             height: 60, 
             isHighlighted: false,
-            collected: false 
+            collected: true 
         };
         
+        // 背包默认已有纸条
         const backpack = {
-            items: [], 
+            items: [
+                {
+                    id: 'paper1',
+                    name: '神秘纸条',
+                    image: 'pictures/纸团.png',
+                    count: 1
+                }
+            ], 
             maxItems: 16, 
             hasNewItem: false 
         };
@@ -365,6 +456,9 @@
             right: false,
             space: false
         };
+
+        // 已播放完剧情，直接显示箭头
+        let hasPlayedSequence = true;
 
         function init() {
             Promise.all([
@@ -376,7 +470,8 @@
                 new Promise(resolve => images.stand2.onload = resolve),
                 new Promise(resolve => images.paperBall.onload = resolve),
                 new Promise(resolve => images.unfoldedPaper.onload = resolve),
-                new Promise(resolve => images.bagIcon.onload = resolve)
+                new Promise(resolve => images.bagIcon.onload = resolve),
+                new Promise(resolve => images.arrow.onload = resolve)
             ]).then(() => {
                 player.originalWidth = images.walk1.naturalWidth;
                 player.originalHeight = images.walk1.naturalHeight;
@@ -389,7 +484,18 @@
                 document.getElementById('closePaper').addEventListener('click', closePaper);
                 document.getElementById('closeBackpack').addEventListener('click', closeBackpack);
                 document.getElementById('backpackButton').addEventListener('click', openBackpack);
-                document.getElementById('bagCount').textContent = '0';
+                updateBackpackButton(); // 更新背包计数
+                
+                // 绑定选项按钮事件
+                document.getElementById('goNurseBtn').addEventListener('click', () => {
+                    window.location.href = 'codes/part_2.html';
+                    document.getElementById('optionOverlay').style.display = 'none';
+                    document.getElementById('gameCanvas').style.filter = 'none';
+                });
+                document.getElementById('goBedBtn').addEventListener('click', () => {
+                    document.getElementById('optionOverlay').style.display = 'none';
+                    document.getElementById('gameCanvas').style.filter = 'none';
+                });
                 
                 requestAnimationFrame(gameLoop);
             }).catch(err => {
@@ -462,12 +568,24 @@
             document.getElementById('backpackOverlay').style.display = 'none';
         }
 
-        // 修改关闭纸条函数，直接跳转到转场
         function closePaper() {
             document.getElementById('paperOverlay').style.display = 'none';
             document.getElementById('gameCanvas').style.filter = 'none';
-            // 关闭纸条后立即跳转到转场1.html
-            window.location.href = '转场1.html';
+        }
+
+        // 检查右侧边界交互
+        function checkRightBoundary() {
+            if (!hasPlayedSequence) return;
+            
+            // 检查人物是否到达最右侧
+            const isAtRightEdge = player.x >= canvas.width - player.width / 2 - 10;
+            
+            // 按空格触发选项弹窗
+            if (isAtRightEdge && keys.space) {
+                document.getElementById('optionOverlay').style.display = 'flex';
+                document.getElementById('gameCanvas').style.filter = 'blur(5px)';
+                keys.space = false;
+            }
         }
 
         function drawScene() {
@@ -475,6 +593,7 @@
             ctx.drawImage(images.background, 0, 0, canvas.width, canvas.height);
         }
         
+        // 纸团已收集，所以不绘制
         function drawPaperBall() {
             if (paperBall.collected) return;
             let drawWidth = paperBall.width;
@@ -567,6 +686,7 @@
             }
             
             checkPaperBallInteraction();
+            checkRightBoundary();
         }
 
         let lastTime = 0;

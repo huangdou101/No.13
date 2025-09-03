@@ -690,10 +690,10 @@
                 <nav>
                     <ul>
                         <li><a href="index.html" class="active">主页</a></li>
-                        <li><a href="login.html">登录</a></li>
-                        <li><a href="register.html">注册</a></li>
-                        <li><a href="team.html">开发团队</a></li>
-                        <li><a href="endings.html">解锁结局</a></li>
+                        <li><a href="./codes/login.html">登录</a></li>
+                        <li><a href="codes/register.html">注册</a></li>
+                        <li><a href="codes/team.html">开发团队</a></li>
+                        <li><a href="codes/endings.html">解锁结局</a></li>
                     </ul>
                 </nav>
             </div>
@@ -705,8 +705,8 @@
                 <h1>病房</h1>
                 <p>在冰冷的病床上惊醒，刺鼻的消毒水气味弥漫。你什么都不记得了，唯一的线索是枕头下那张泛黄的纸条，上面用诡异的字迹写着"病房规则"。门外传来拖沓的脚步声，越来越近...</p>
                 <div class="cta-buttons">
-                    <a href="login.html" class="btn btn-primary">开始游戏</a>
-                    <a href="team.html" class="btn btn-secondary">关于团队</a>
+                    <a href="#" id="startGameBtn" class="btn btn-primary">开始游戏</a>
+                    <a href="codes/team.html" class="btn btn-secondary">关于团队</a>
                 </div>
             </div>
         </section>
@@ -765,10 +765,10 @@
             <div class="footer-logo">13号病房</div>
             <div class="footer-links">
                 <a href="index.html">主页</a>
-                <a href="login.html">登录</a>
-                <a href="register.html">注册</a>
-                <a href="team.html">开发团队</a>
-                <a href="endings.html">解锁结局</a>
+                <a href="codes/login.html">登录</a>
+                <a href="codes/register.html">注册</a>
+                <a href="codes/team.html">开发团队</a>
+                <a href="codes/endings.html">解锁结局</a>
             </div>
             <p class="copyright">&copy; 2025 13号病房 - 医院逃生恐怖解密游戏 | 大学生团队制作</p>
         </footer>
@@ -778,28 +778,30 @@
         // 页面加载时的过渡动画
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.add('page-transition');
-            
-            // 为所有链接添加页面切换效果
-            const links = document.querySelectorAll('a');
-            links.forEach(link => {
-                // 只处理站内链接
-                if (link.href.startsWith(window.location.origin) && !link.target) {
-                    link.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        const targetUrl = this.href;
-                        
-                        // 添加淡出动画
-                        document.body.style.opacity = '0';
-                        document.body.style.transition = 'opacity 0.5s ease-out';
-                        
-                        // 延迟后跳转
-                        setTimeout(() => {
-                            window.location.href = targetUrl;
-                        }, 500);
-                    });
-                }
-            });
-            
+
+            // "开始游戏"按钮登录判断
+            const startBtn = document.getElementById('startGameBtn');
+            if (startBtn) {
+                startBtn.addEventListener('click', function(e) {
+                    // 判断登录
+                    const isLogin = localStorage.getItem('isLogin');
+                    let targetUrl = '';
+                    if (isLogin === 'true') {
+                        targetUrl = 'codes/prologue.html';
+                    } else {
+                        targetUrl = 'codes/login.html';
+                    }
+                    // 动画后跳转
+                    document.body.style.opacity = '0';
+                    document.body.style.transition = 'opacity 0.5s ease-out';
+                    setTimeout(() => {
+                        window.location.href = targetUrl;
+                    }, 500);
+                });
+            }
+
+            // 其它链接直接跳转（不阻止默认行为）
+
             // 滚动时导航栏变化
             const header = document.getElementById('mainHeader');
             window.addEventListener('scroll', function() {
