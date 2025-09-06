@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+<meta charset="utf-8" />
+<title>接物得分小游戏（代码内设置提示文本）</title>
+<style>
+  :root{
+    --panel-shadow: 0 12px 40px rgba(0,0,0,.25);
+    --card: rgba(255,255,255,.95);
+    --scale: 1.5; /* 缩放倍数 */
+  }
+
+  html,body{
+    height:100%;
+    margin:0;
+    padding:0;
+    overflow-x:hidden;
+    overflow-y:hidden;
+    font-family:"Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg,#74ebd5 0%,#9face6 100%);
+    color:#222;
+    -webkit-user-select:none;
+    user-select:none;
+  }
+  body { text-align: center; }
+
+  /* ---------- 大区块：把左+右合并为一个 block 并水平居中 ---------- */
+  #gameBlock {
+    display: flex;
+    align-items: flex-start; /* 让右侧 canvas 紧贴顶部 */
+    gap: 12px;
+    width: fit-content;      /* 根据内部内容自动宽度 */
+    margin: 16px auto;       /* 水平居中，距离顶部 16px */
+    box-sizing: border-box;
+  }
+
+  /* 左侧控制栏（尽量窄），并让内容上下分散以便底部提示栏固定在底部 */
+  #leftPanel {
+    width: 180px;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* 顶部放标题/按钮，中间信息，下部留空提示栏 */
+    gap: 10px;
+    align-items: flex-start;
+    box-sizing: border-box;
+    /* 保证左栏下边缘和右栏下边缘对齐：最小高度 = 画布高度 * 缩放倍数 */
+    min-height: calc(500px * var(--scale));
+    padding-bottom: 4px; /* 保证视觉不紧贴 */
+  }
+  #leftPanel h1 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 800;
+    text-shadow: 0 2px 8px rgba(0,0,0,.12);
+  }
+  .controlCard {
+    width: 100%;
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: var(--panel-shadow);
+    padding: 10px;
+    box-sizing: border-box;
+  }
+  #startBtn {
+    display:block;
+    width:100%;
+    padding:8px 10px;
+    border-radius:8px;
+    border:0;
+    background:linear-gradient(45deg,#ff6f61,#ff9a8b);
+    color:#fff;
+    font-weight:800;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(0,0,0,.14);
+  }
+  #hud { display:flex; flex-direction:column; gap:8px; margin-top:10px; }
+  .pill { padding:6px 10px; border-radius:999px; background: rgba(255,255,255,0.95); box-shadow:0 6px 18px rgba(0,0,0,.06); font-weight:700; font-size:13px; text-align:left; }
+  #tip { margin-top:8px; font-size:13px; opacity:.95; }
+
+  /* 底部空白提示栏：高度 480px，顶部保留用于显示文本（通过代码设置 DEFAULT_HINT） */
+  #bottomHint {
+    width: 100%;
+    height: 480px;
+    background: var(--card);
+    border-radius: 12px;
+    box-shadow: var(--panel-shadow);
+    box-sizing: border-box;
+    padding: 12px;
+    opacity: 0.95;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow: hidden;
+  }
+
+  /* 提示显示区（在 bottomHint 顶部较美观位置） */
+  .hint-display {
+    flex: 1 1 auto;
+    overflow: auto;
+    padding: 10px;
+    border-radius: 8px;
+    background: rgba(255,255,255,0.98);
+    border: 1px dashed rgba(0,0,0,0.04);
+    font-size: 13px;
+    color: #111;
+    line-height: 1.4;
+    white-space: pre-wrap; /* 保留换行 */
+  }
+
+  /* 右侧：游戏区域（被 scale） */
+  #rightPanel {
+    width: calc(400px * var(--scale));
+    box-sizing: border-box;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+  }
+  #gameArea {
+    width: 400px;
+    transform-origin: 0 0;
+    transform: scale(var(--scale)); /* 放大 */
+    margin: 0; /* 顶部直接紧贴 */
+  }
+  #stageWrap { position: relative; width:400px; margin: 0 auto; }
+  #gameCanvas { display:block; width:400px; height:500px; border-radius:12px; background: rgba(255,255,255,.6); box-shadow:var(--panel-shadow); }
+
+  #frenzyBanner {
+    position:absolute; left:50%; transform:translateX(-50%);
+    top:76px; padding:6px 12px; border-radius:999px; font-weight:800;
+    background:#ffd54f; color:#8d6e00; box-shadow:0 10px 20px rgba(0,0,0,.18); display:none; pointer-events:none;
+  }
+
+  /* 结算面板：等比放大 & 居中覆盖视口 */
+  #resultPanel {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.55);
+    z-index: 9999;
+  }
+  #panelContent {
+    width: 320px;
+    background: var(--card);
+    border-radius: 16px;
+    padding: 18px;
+    box-shadow: var(--panel-shadow);
+    transform-origin: center;
+    transform: scale(var(--scale)); /* 与游戏区等比放大 */
+  }
+  .stars { margin-top:8px; }
+  .star { font-size:28px; color:#ddd; margin:0 6px; display:inline-block; transition: transform .25s, color .25s; }
+  .star.active { color: gold; transform: scale(1.08) rotate(-3deg); }
+
+  /* 响应：窄屏时改为垂直堆叠，缩放恢复 1 */
+  @media (max-width: 900px) {
+    :root { --scale: 1; }
+    #gameBlock { flex-direction: column; align-items: center; gap: 12px; width: auto; }
+    #leftPanel { width: 90%; min-height: auto; justify-content: flex-start; }
+    #rightPanel { width: 100%; }
+    #panelContent { transform: scale(1); }
+    #bottomHint { height: 240px; } /* 减小底部占位 */
+  }
+</style>
+</head>
+<body>
+
+  <!-- 合并的大区块（水平居中） -->
+  <div id="gameBlock">
+    <!-- 左侧（窄）控制栏 -->
+    <div id="leftPanel">
+      <div> <!-- 顶部区域（标题 + 控制） -->
+        <h1>爷爷扔的烟</h1>
+
+        <div class="controlCard" style="margin-top:10px;">
+          <button id="startBtn">开始游戏</button>
+
+          <div id="hud">
+            <div class="pill">得分：<span id="score">0</span></div>
+            <div class="pill">剩余时间：<span id="timer">60</span> 秒</div>
+          </div>
+
+          <div id="tip" style="margin-top:8px;">按住 ← → 键连续移动双手，接住香烟，避开水滴！</div>
+        </div>
+      </div>
+
+      <!-- 底部空白提示栏（宽度与上方 controlCard 一致） -->
+      <div id="bottomHint" aria-hidden="false">
+        <!-- 顶部为提示显示区域（由代码中 DEFAULT_HINT 设置） -->
+        <div id="hintDisplay" class="hint-display" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <!-- 右侧：放大后画面，canvas 顶部对齐 -->
+    <div id="rightPanel">
+      <div id="gameArea">
+        <div id="stageWrap">
+          <canvas id="gameCanvas" width="400" height="500"></canvas>
+          <div id="frenzyBanner">⚡ 狂欢时间！+20 物品</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 结算面板 -->
+  <div id="resultPanel">
+    <div id="panelContent">
+      <h2 style="margin:0 0 6px 0;">结算</h2>
+      <div id="finalScore" style="font-weight:800;margin-bottom:6px;">得分：0</div>
+      <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span></div>
+      <div id="rankText" style="font-weight:700;margin-top:8px;">未通过</div>
+      <div style="text-align:center;">
+        <button id="restartBtn" style="margin-top:10px;padding:8px 14px;border-radius:10px;border:0;background:linear-gradient(45deg,#42a5f5,#478ed1);color:#fff;font-weight:700;cursor:pointer;">再玩一次</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ---------- 游戏逻辑保持不变（提示文本改为在代码中设置） ---------- */
+
+/* === 在这里修改默认显示给玩家的文本（可以包含多行） === */
+const DEFAULT_HINT = `老爷爷给你扔来了烟，看你能否接住了！
+香烟有三种：
+哈德门（1分）
+玉溪（2分）
+软中华（5分）
+在左侧区域你可以看到得分与剩余时间。
+只有达到350分才能获得老爷爷的烟。
+当然，这需要一定的操作和运气。
+提示：连续接住5个高分物品可获得额外奖励
+接到水滴会减5分哦。
+祝你好运！`;
+
+/* ---------- 常量 ---------- */
+const TOTAL_TIME = 60;
+const CUT_OFF_MARGIN = 4;
+const SPAWN_WINDOW = TOTAL_TIME - CUT_OFF_MARGIN;
+const BASE_ITEMS = 100;
+const EXTRA_ITEMS = 20;
+const MAX_BOMBS = 10;
+const X_SPAN = 80;
+const BASE_FALL_SPEED = 150; // px/s
+const BASKET_SPEED = 700;    // px/s
+const CANVAS_W = 400, CANVAS_H = 500;
+
+/* ---------- DOM ---------- */
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+const scoreEl = document.getElementById('score');
+const timerEl = document.getElementById('timer');
+const frenzyBanner = document.getElementById('frenzyBanner');
+const hintDisplay = document.getElementById('hintDisplay');
+
+/* 把 DEFAULT_HINT 放入显示区域（使用 textContent 保留纯文本并保留换行） */
+hintDisplay.textContent = DEFAULT_HINT;
+
+/* ---------- 资源（占位） ---------- */
+function loadImage(src){ const img=new Image(); img.src=src; img.onerror=()=>img._broken=true; return img; }
+function imgReady(img){ return img && !img._broken && img.complete && img.naturalWidth>0; }
+function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+
+const basketImg = loadImage('basket.png');
+const bgImg = loadImage('bg.png');
+const itemImgMap = {
+  apple:  loadImage('yuxi.png'),
+  banana: loadImage('hademen.png'),
+  diamond:loadImage('zhonghua.png'),
+  bomb:   loadImage('shuidi.png'),
+};
+const TYPES = {
+  apple:{ color:'#ff6f61', score:2 },
+  banana:{ color:'#f5d142', score:1 },
+  diamond:{ color:'#40e0d0', score:5 },
+  bomb:{ color:'#000000', score:-5 }
+};
+
+/* ---------- 状态 ---------- */
+let gameRunning=false, elapsed=0, lastFrameT=0;
+let items=[], particles=[];
+let score=0, combo=0;
+let frenzyScheduled=false, frenzyFlashUntil=0;
+let plan=[], nextPlanIndex=0;
+let leftPressed=false, rightPressed=false;
+
+const basket={ w:80,h:22,x:CANVAS_W/2-40,y:CANVAS_H-22-10, vx:0 };
+let lastSpawnX = CANVAS_W/2;
+
+/* ---------- 逻辑函数 ---------- */
+function speedMultiplierByTimeLeft(tLeft){
+  if (tLeft <= 20) return 5/3;
+  if (tLeft <= 40) return 4/3;
+  return 1;
+}
+function buildBasePlan(){
+  plan=[]; nextPlanIndex=0;
+  const bombPositions=new Set();
+  for(let b=0;b<MAX_BOMBS;b++){
+    const idx=Math.floor((b+0.5)*BASE_ITEMS/MAX_BOMBS);
+    bombPositions.add(idx);
+  }
+  const positives=['apple','banana','diamond']; let posIdx=0;
+  for(let i=0;i<BASE_ITEMS;i++){
+    const t=(i+0.5)*SPAWN_WINDOW/BASE_ITEMS;
+    const type=bombPositions.has(i)?'bomb':positives[(posIdx++)%positives.length];
+    plan.push({time:t,type});
+  }
+}
+function scheduleFrenzyExtra(){
+  if (frenzyScheduled) return;
+  const now=elapsed, windowEnd=SPAWN_WINDOW, remain=Math.max(windowEnd-now,0);
+  if (remain < 0.1) return;
+  const positives=['apple','banana','diamond'];
+  const interval=remain/EXTRA_ITEMS;
+  for(let k=0;k<EXTRA_ITEMS;k++){
+    const t=now+(k+0.5)*interval;
+    if (t>=windowEnd) break;
+    const type=positives[k%positives.length];
+    plan.push({time:t,type});
+  }
+  plan.sort((a,b)=>a.time-b.time);
+  frenzyScheduled=true;
+  frenzyBanner.style.display='block';
+  frenzyFlashUntil=now+2.5;
+}
+function trySpawnBySchedule(){
+  while(nextPlanIndex<plan.length && elapsed>=plan[nextPlanIndex].time){
+    spawnItem(plan[nextPlanIndex].type);
+    nextPlanIndex++;
+  }
+}
+function spawnItem(type){
+  const r=15;
+  let x=lastSpawnX+(Math.random()*2-1)*X_SPAN;
+  x=clamp(x,r,CANVAS_W-r); lastSpawnX=x;
+  const y=-r;
+  items.push({x,y,r,type, base:BASE_FALL_SPEED});
+}
+
+/* particles */
+function spawnParticles(x,y,color){
+  for(let i=0;i<12;i++){
+    particles.push({x,y,vx:(Math.random()*2-1)*120, vy:- (60+Math.random()*80), life:1, color});
+  }
+}
+function updateParticles(dt){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx*dt; p.y+=p.vy*dt; p.life-=0.9*dt;
+    if(p.life<=0) particles.splice(i,1);
+  }
+}
+function drawParticles(){
+  for(const p of particles){
+    ctx.globalAlpha=Math.max(p.life,0);
+    ctx.fillStyle=p.color==='gold'?'#ffd54f':'#000000';
+    ctx.beginPath(); ctx.arc(p.x,p.y,2.6,0,Math.PI*2); ctx.fill();
+    ctx.globalAlpha=1;
+  }
+}
+
+/* collision & clean */
+function checkCatch(){
+  items=items.filter(it=>{
+    if(it.y+it.r>=basket.y && it.x>basket.x && it.x<basket.x+basket.w){
+      const gain=TYPES[it.type].score;
+      score+=gain;
+      if(gain>0){ combo++; if(combo%5===0) score+=3; } else { combo=0; }
+      if(score>=60 && !frenzyScheduled) scheduleFrenzyExtra();
+      spawnParticles(it.x,it.y, gain>0?'gold':'black');
+      return false;
+    }
+    return it.y < CANVAS_H + it.r;
+  });
+}
+
+/* drawing */
+function drawBackground(){
+  if(imgReady(bgImg)) ctx.drawImage(bgImg,0,0,CANVAS_W,CANVAS_H);
+  else{ const g=ctx.createLinearGradient(0,0,0,CANVAS_H); g.addColorStop(0,"rgba(255,255,255,.95)"); g.addColorStop(1,"rgba(220,230,255,.85)"); ctx.fillStyle=g; ctx.fillRect(0,0,CANVAS_W,CANVAS_H); }
+}
+function drawBasket(){
+  if(imgReady(basketImg)) ctx.drawImage(basketImg,basket.x,basket.y,basket.w,basket.h);
+  else{ ctx.fillStyle='#8d6e63'; ctx.fillRect(basket.x,basket.y,basket.w,basket.h); ctx.strokeStyle='#5d4037'; ctx.lineWidth=2; ctx.strokeRect(basket.x,basket.y,basket.w,basket.h); }
+}
+function drawItems(){
+  for(const it of items){
+    const info=TYPES[it.type]; const img=itemImgMap[it.type];
+    if(imgReady(img)) ctx.drawImage(img,it.x-it.r,it.y-it.r,it.r*2,it.r*2);
+    else{ ctx.beginPath(); ctx.arc(it.x,it.y,it.r,0,Math.PI*2); ctx.fillStyle=info.color; ctx.fill(); }
+  }
+}
+
+/* main loop */
+function loop(ts){
+  if(!gameRunning) return;
+  if(!lastFrameT) lastFrameT=ts;
+  const dt=Math.min(0.05,(ts-lastFrameT)/1000); lastFrameT=ts;
+  elapsed+=dt;
+  const tLeft=Math.max(0, TOTAL_TIME - elapsed);
+  timerEl.textContent=Math.ceil(tLeft);
+
+  if(frenzyBanner.style.display==='block' && elapsed>frenzyFlashUntil) frenzyBanner.style.display='none';
+
+  basket.vx=(rightPressed?1:0)-(leftPressed?1:0);
+  basket.x+=basket.vx*BASKET_SPEED*dt;
+  basket.x=clamp(basket.x,0,CANVAS_W-basket.w);
+
+  trySpawnBySchedule();
+
+  const mul=speedMultiplierByTimeLeft(tLeft);
+  for(const it of items){ it.y += it.base * mul * dt; }
+
+  checkCatch();
+  updateParticles(dt);
+
+  drawBackground(); drawItems(); drawBasket(); drawParticles();
+  scoreEl.textContent=score;
+
+  if(elapsed>=TOTAL_TIME){ gameRunning=false; showResult(); return; }
+  requestAnimationFrame(loop);
+}
+
+/* 阻止上下箭头导致页面滚动（passive:false 以便可以 preventDefault） */
+window.addEventListener('keydown', function(e){
+  if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+    e.preventDefault();
+  }
+}, { passive: false });
+
+/* 输入处理：没有编辑器输入时生效 */
+function isTypingElement() {
+  const ae = document.activeElement;
+  if (!ae) return false;
+  return (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable);
+}
+document.addEventListener('keydown',e=>{
+  if (isTypingElement()) return;
+  if(!gameRunning) return;
+  if(e.key==='ArrowLeft') leftPressed=true;
+  if(e.key==='ArrowRight') rightPressed=true;
+});
+document.addEventListener('keyup',e=>{
+  if (isTypingElement()) return;
+  if(e.key==='ArrowLeft') leftPressed=false;
+  if(e.key==='ArrowRight') rightPressed=false;
+});
+
+/* 按钮钩子 */
+document.getElementById('startBtn').onclick = startGame;
+document.getElementById('restartBtn').onclick = ()=>{ document.getElementById('resultPanel').style.display='none'; startGame(); };
+
+/* start / result */
+function startGame(){
+  gameRunning=true; elapsed=0; lastFrameT=0;
+  items=[]; particles=[]; score=0; combo=0;
+  frenzyScheduled=false; frenzyFlashUntil=0;
+  leftPressed=rightPressed=false;
+  basket.x=CANVAS_W/2-basket.w/2;
+  lastSpawnX=CANVAS_W/2;
+  scoreEl.textContent='0'; timerEl.textContent=TOTAL_TIME.toString();
+  frenzyBanner.style.display='none';
+  buildBasePlan();
+  requestAnimationFrame(loop);
+}
+
+function showResult(){
+  let stars=0, rank='我这哪有烟啊，我自己抽还不够呢。';
+  if(score>=350){stars=3;rank='恭喜你，老爷爷给你一支烟！';}
+  else if(score>=300){stars=2;rank='小伙子，还要努力啊';}
+  else if(score>=250){stars=1;rank='运气一般啊小伙子';}
+  document.getElementById('finalScore').textContent=`得分：${score}`;
+  document.getElementById('rankText').textContent=rank;
+  const starElems=document.querySelectorAll('.star');
+  starElems.forEach((el,i)=>{el.classList.remove('active'); if(i<stars) setTimeout(()=>el.classList.add('active'), i*180);});
+  document.getElementById('resultPanel').style.display='flex';
+}
+</script>
+</body>
+</html>

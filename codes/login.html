@@ -499,6 +499,8 @@
     </style>
     <!-- BGM管理器 -->
     <script src="../bgm-manager.js"></script>
+    <!-- 游戏存档管理器 -->
+    <script src="../game-save-manager.js"></script>
 </head>
 <body>
     <!-- 背景音乐 -->
@@ -702,19 +704,110 @@
                     // 保存当前登录用户
                     localStorage.setItem('currentUser', usernameInput.value);
                     
-                    // 登录成功动画
-                    loginForm.innerHTML = `
-                        <div style="text-align: center; padding: 20px 0;">
-                            <div style="font-size: 50px; margin-bottom: 20px;">🚪</div>
-                            <p style="font-size: 1.2em; color: var(--primary-color);">登录成功</p>
-                            <p style="color: var(--text-gray); margin-top: 10px;">正在打开13号病房的门...</p>
-                        </div>
-                    `;
+                    // 检查用户是否有存档
+                    const tempSaveManager = new GameSaveManager();
+                    tempSaveManager.currentUser = usernameInput.value;
+                    const saveInfo = tempSaveManager.getUserSaveInfo();
                     
-                    // 延迟后跳转到游戏页面（这里暂时跳回主页）
-                    setTimeout(() => {
-                        window.location.href = '../index.html';
-                    }, 2000);
+                    if (saveInfo && saveInfo.saveCount > 0) {
+                        // 有存档，显示继续游戏选项
+                        const chapterName = saveInfo.currentChapter ? saveInfo.currentChapter.name : '未知章节';
+                        const lastPlayTime = new Date(saveInfo.lastSaved).toLocaleString();
+                        
+                        loginForm.innerHTML = `
+                            <div style="text-align: center; padding: 20px 0;">
+                                <div style="font-size: 50px; margin-bottom: 20px;">📁</div>
+                                <p style="font-size: 1.2em; color: var(--primary-color); margin-bottom: 15px;">欢迎回来！</p>
+                                <div style="background: rgba(93, 0, 30, 0.2); padding: 15px; border-radius: 8px; margin: 20px 0; text-align: left;">
+                                    <p style="color: var(--text-light); margin-bottom: 8px;"><strong>存档信息：</strong></p>
+                                    <p style="color: var(--text-gray); font-size: 0.9em;">📖 进度：${chapterName}</p>
+                                    <p style="color: var(--text-gray); font-size: 0.9em;">💾 存档：${saveInfo.saveCount} 个</p>
+                                    <p style="color: var(--text-gray); font-size: 0.9em;">⏰ 最后游戏：${lastPlayTime}</p>
+                                </div>
+                                <button id="continueGameBtn" style="width: 100%; padding: 14px; background: var(--primary-color); color: white; border: none; border-radius: 6px; font-size: 1.1em; margin-bottom: 10px; cursor: pointer; transition: all 0.3s ease;">继续游戏</button>
+                                <button id="newGameBtn" style="width: 100%; padding: 14px; background: rgba(255, 255, 255, 0.1); color: var(--text-light); border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 6px; font-size: 1em; cursor: pointer; transition: all 0.3s ease;">重新开始</button>
+                            </div>
+                        `;
+                        
+                        // 绑定继续游戏按钮
+                        document.getElementById('continueGameBtn').addEventListener('click', function() {
+                            this.style.background = 'var(--dark-red)';
+                            this.textContent = '正在加载存档...';
+                            
+                            setTimeout(() => {
+                                const currentChapter = saveInfo.currentChapter;
+                                let targetUrl = '../index.html';
+                                
+                                if (currentChapter && currentChapter.filename !== 'index.html') {
+                                    // 修复路径问题：添加正确的文件夹前缀并处理中文文件名
+                                    const encodedFilename = encodeURIComponent(currentChapter.filename);
+                                    targetUrl = encodedFilename;
+                                }
+                                
+                                console.log('跳转到:', targetUrl); // 调试日志
+                                
+                                // 添加错误处理
+                                try {
+                                    window.location.href = targetUrl;
+                                } catch (error) {
+                                    console.error('跳转失败:', error);
+                                    // 如果跳转失败，尝试跳转到序章
+                                    window.location.href = 'prologue.html';
+                                }
+                            }, 1500);
+                        });
+                        
+                        // 绑定重新开始按钮
+                        document.getElementById('newGameBtn').addEventListener('click', function() {
+                            if (confirm('重新开始将清空所有存档，确定要继续吗？')) {
+                                tempSaveManager.deleteSave();
+                                this.style.background = 'var(--primary-color)';
+                                this.textContent = '正在开始新游戏...';
+                                
+                                setTimeout(() => {
+                                    window.location.href = 'prologue.html';
+                                }, 1500);
+                            }
+                        });
+                        
+                        // 添加按钮悬停效果
+                        document.getElementById('continueGameBtn').addEventListener('mouseenter', function() {
+                            if (this.textContent === '继续游戏') {
+                                this.style.background = '#d62828';
+                                this.style.transform = 'translateY(-2px)';
+                            }
+                        });
+                        document.getElementById('continueGameBtn').addEventListener('mouseleave', function() {
+                            if (this.textContent === '继续游戏') {
+                                this.style.background = 'var(--primary-color)';
+                                this.style.transform = 'translateY(0)';
+                            }
+                        });
+                        
+                        document.getElementById('newGameBtn').addEventListener('mouseenter', function() {
+                            this.style.background = 'rgba(255, 255, 255, 0.2)';
+                            this.style.transform = 'translateY(-2px)';
+                        });
+                        document.getElementById('newGameBtn').addEventListener('mouseleave', function() {
+                            this.style.background = 'rgba(255, 255, 255, 0.1)';
+                            this.style.transform = 'translateY(0)';
+                        });
+                        
+                    } else {
+                        // 没有存档，显示新游戏提示
+                        loginForm.innerHTML = `
+                            <div style="text-align: center; padding: 20px 0;">
+                                <div style="font-size: 50px; margin-bottom: 20px;">🚪</div>
+                                <p style="font-size: 1.2em; color: var(--primary-color);">登录成功</p>
+                                <p style="color: var(--text-gray); margin-top: 10px;">欢迎来到13号病房，准备开始你的恐怖之旅...</p>
+                            </div>
+                        `;
+                        
+                        // 延迟后跳转到序章
+                        setTimeout(() => {
+                            window.location.href = 'prologue.html';
+                        }, 2000);
+                    }
                 }
             });
         });

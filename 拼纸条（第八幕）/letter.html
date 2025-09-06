@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诡异医院线索</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        // 调整为更亮的红色 (#B22222 比 #8B0000 更亮)
+                        blood: '#B22222',
+                        dark: '#121212',
+                        'dark-gray': '#1E1E1E',
+                    },
+                    fontFamily: {
+                        horror: ['"Special Elite"', 'Courier', 'monospace'],
+                    },
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.8);
+            }
+            /* 增加红色文字的亮度和对比度 */
+            .blood-bright {
+                color: #E53935;
+                text-shadow: 0 0 5px rgba(255, 255, 255, 0.2);
+            }
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Special+Elite&display=swap" rel="stylesheet">
+</head>
+<body class="bg-dark text-gray-200 min-h-screen flex flex-col items-center justify-center p-4">
+    <div class="container max-w-2xl">
+
+        <!-- 纸条内容容器 -->
+        <div class="bg-dark-gray p-6 md:p-8 rounded-lg shadow-lg border border-gray-700">
+            <!-- 正面血字 -->
+            <div class="mb-8">
+                <h2 class="text-lg md:text-xl font-horror blood-bright mb-4 flex items-center">
+                    <i class="fa fa-file-text-o font-bold mr-2"></i>对不起：
+                </h2>
+                <p class="font-horror font-bold text-base md:text-lg leading-relaxed">
+                    我是这个医院的一名普通医生，无意中进入了这个诡异的空间，把『它』放了出来。我不知道外面怎么样了，我出不去……该死的！后来者，我帮不了你，希望你不要放弃，坚定你的信念，向你的目的地前行，不要回头！
+                </p>
+            </div>
+
+            <!-- 纸条背后 -->
+            <div>
+                <p class="font-horror font-bold text-base md:text-lg mb-6">
+                    太平间是绝对安全的。
+                </p>
+
+                <!-- 警告血字 -->
+                <div class="border-l-2 border-blood pl-3 py-1 my-4">
+                    <div class="space-y-2 ml-2">
+                        <p class="text-xl md:text-2xl font-horror font-bold blood-bright animate-pulse">不</p>
+                        <p class="text-xl md:text-2xl font-horror font-bold blood-bright animate-pulse" style="animation-delay: 0.2s">要</p>
+                        <p class="text-xl md:text-2xl font-horror font-bold blood-bright animate-pulse" style="animation-delay: 0.4s">去</p>
+                        <p class="text-xl md:text-2xl font-horror font-bold blood-bright animate-pulse" style="animation-delay: 0.6s">太</p>
+                        <p class="text-xl md:text-2xl font-horror font-bold blood-bright animate-pulse" style="animation-delay: 0.8s">平</p>
+                        <p class="text-xl md:text-2xl font-horror font-bold blood-bright animate-pulse" style="animation-delay: 1s">间</p>
+                        <p class="text-2xl md:text-3xl font-horror font-bold blood-bright animate-pulse" style="animation-delay: 1.2s">！！！</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 底部提示 -->
+        <div class="text-center text-gray-500 text-xs mt-8">
+            <p>寒意顺着脊椎蔓延...</p>
+        </div>
+    </div>
+
+    <script>
+        // 内容渐入效果
+        document.addEventListener('DOMContentLoaded', () => {
+            const elements = document.querySelectorAll('.font-horror');
+            elements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(10px)';
+                el.style.transition = 'opacity 0.4s ease, transform 0.4s ease';
+                
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 200 + (index * 80));
+            });
+        });
+    </script>
+</body>
+</html>
+    

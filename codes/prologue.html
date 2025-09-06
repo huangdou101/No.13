@@ -245,12 +245,14 @@
     </div>
 
     <script src="../bgm-manager.js"></script>
+    <!-- 游戏存档管理器 -->
+    <script src="../game-save-manager.js"></script>
     <script>
         // 故事内容配置
         const storySteps = [
             {
                 text: "我永远都不会忘记那一次。",
-                background: "../pictures/black.jpg",
+                background: "#000000", // 使用纯黑色背景而不是图片
                 delay: 1000
             },
             {
@@ -279,6 +281,7 @@
         let isTyping = false;
         let bgmManager;
         let currentBackground = '';
+        let typewriterTimer = null; // 添加定时器引用
 
         // 页面元素
         const backgroundImage = document.getElementById('backgroundImage');
@@ -309,21 +312,33 @@
                 return;
             }
 
+            // 清除之前可能残留的打字效果
+            if (typewriterTimer) {
+                clearTimeout(typewriterTimer);
+                typewriterTimer = null;
+            }
+            isTyping = false;
+
             const step = storySteps[stepIndex];
             currentStep = stepIndex;
             
-            // 切换背景图片（只有不同图片才渐变）
+            // 切换背景（支持颜色和图片）
             if (currentBackground !== step.background) {
-                // 不同图片，使用渐变效果
                 backgroundImage.style.opacity = '0';
                 setTimeout(() => {
-                    backgroundImage.src = step.background;
-                    currentBackground = step.background;
-                    // 第一张图片需要从黑色背景淡入
-                    setTimeout(() => {
+                    if (step.background.startsWith('#') || step.background.startsWith('rgb')) {
+                        // 如果是颜色值，设置为body背景色
+                        document.body.style.backgroundColor = step.background;
+                        backgroundImage.src = '';
+                        backgroundImage.style.opacity = '0';
+                    } else {
+                        // 如果是图片路径
+                        document.body.style.backgroundColor = '#000';
+                        backgroundImage.src = step.background;
                         backgroundImage.style.opacity = '1';
-                    }, 100);
-                }, currentBackground ? 500 : 0); // 第一张图不需要等待淡出
+                    }
+                    currentBackground = step.background;
+                }, currentBackground ? 500 : 0);
             }
             
             // 隐藏继续按钮
@@ -335,21 +350,33 @@
 
         // 打字机效果
         function typewriterEffect(text, delay) {
+            // 清除之前的定时器
+            if (typewriterTimer) {
+                clearTimeout(typewriterTimer);
+                typewriterTimer = null;
+            }
+            
             isTyping = true;
             storyText.style.opacity = '0';
             storyText.textContent = '';
             
             setTimeout(() => {
+                if (!isTyping) return; // 检查是否已被中断
+                
                 storyText.style.opacity = '1';
                 let index = 0;
                 
                 function typeChar() {
+                    // 检查是否被中断
+                    if (!isTyping) return;
+                    
                     if (index < text.length) {
                         storyText.textContent += text.charAt(index);
                         index++;
-                        setTimeout(typeChar, 50); // 每个字符间隔50ms
+                        typewriterTimer = setTimeout(typeChar, 50); // 保存定时器引用
                     } else {
                         isTyping = false;
+                        typewriterTimer = null;
                         // 文本显示完成后，显示继续按钮
                         setTimeout(() => {
                             continueButton.style.opacity = '1';
@@ -366,8 +393,16 @@
             if (isTyping) {
                 // 如果正在打字，跳过打字效果
                 isTyping = false;
+                
+                // 清除定时器
+                if (typewriterTimer) {
+                    clearTimeout(typewriterTimer);
+                    typewriterTimer = null;
+                }
+                
                 const step = storySteps[currentStep];
                 storyText.textContent = step.text;
+                storyText.style.opacity = '1';
                 continueButton.style.opacity = '1';
                 return;
             }
@@ -411,8 +446,21 @@
         // 预加载图片
         function preloadImages() {
             storySteps.forEach(step => {
-                const img = new Image();
-                img.src = step.background;
+                // 只预加载图片路径，跳过颜色值
+                if (!step.background.startsWith('#') && !step.background.startsWith('rgb')) {
+                    const img = new Image();
+                    img.src = step.background;
+                    
+                    // 添加错误处理
+                    img.onerror = function() {
+                        console.warn('背景图片加载失败:', step.background);
+                        // 可以在这里设置默认背景或显示占位符
+                    };
+                    
+                    img.onload = function() {
+                        console.log('背景图片加载成功:', step.background);
+                    };
+                }
             });
         }
 

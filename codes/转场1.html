@@ -270,6 +270,8 @@
     </div>
 
     <script src="../bgm-manager.js"></script>
+    <!-- 游戏存档管理器 -->
+    <script src="../game-save-manager.js"></script>
     <script>
         // 故事内容配置
         const storySteps = [
@@ -470,11 +472,28 @@
             storySteps.forEach(step => {
                 const img = new Image();
                 img.src = step.background;
+                
+                // 添加错误处理
+                img.onerror = function() {
+                    console.warn('转场背景图片加载失败:', step.background);
+                    // 设置默认黑色背景
+                    step.background = '#000000';
+                };
+                
+                img.onload = function() {
+                    console.log('转场背景图片加载成功:', step.background);
+                };
             });
             
             // 预加载人物立绘
             const charImg = new Image();
             charImg.src = '../pictures/1.png';
+            charImg.onerror = function() {
+                console.warn('人物立绘加载失败: ../pictures/1.png');
+                // 隐藏人物立绘
+                const sprite = document.getElementById('characterSprite');
+                if (sprite) sprite.style.display = 'none';
+            };
         }
 
         // 页面加载完成后初始化

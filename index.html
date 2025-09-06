@@ -663,6 +663,8 @@
     </style>
     <!-- BGM管理器 -->
     <script src="bgm-manager.js"></script>
+    <!-- 游戏存档管理器 -->
+    <script src="game-save-manager.js"></script>
 </head>
 <body>
     <!-- 背景音乐 -->
@@ -707,6 +709,16 @@
                 <div class="cta-buttons">
                     <a href="#" id="startGameBtn" class="btn btn-primary">开始游戏</a>
                     <a href="codes/team.html" class="btn btn-secondary">关于团队</a>
+                </div>
+                
+                <!-- 游戏进度显示区域 -->
+                <div id="gameProgressSection" class="game-progress-section" style="display: none; margin-top: 40px; padding: 25px; background: rgba(13, 13, 13, 0.8); border: 1px solid var(--dark-red); border-radius: 10px; box-shadow: var(--shadow);">
+                    <h3 style="color: var(--primary-color); margin-bottom: 15px; text-align: center;">💾 游戏进度</h3>
+                    <div id="progressInfo"></div>
+                    <div class="progress-buttons" style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                        <button id="continueGameBtn" class="btn btn-primary" style="flex: 1; max-width: 200px;">继续游戏</button>
+                        <button id="newGameBtn" class="btn" style="flex: 1; max-width: 200px; background: rgba(255, 255, 255, 0.1); color: var(--text-light); border: 1px solid rgba(255, 255, 255, 0.3);">重新开始</button>
+                    </div>
                 </div>
             </div>
         </section>
@@ -779,18 +791,144 @@
         document.addEventListener('DOMContentLoaded', function() {
             document.body.classList.add('page-transition');
 
-            // "开始游戏"按钮登录判断
+            // "开始游戏"按钮逻辑
             const startBtn = document.getElementById('startGameBtn');
             if (startBtn) {
+                // 检查用户登录和存档状态
+                function updateGameStatus() {
+                    const currentUser = localStorage.getItem('currentUser');
+                    const gameProgressSection = document.getElementById('gameProgressSection');
+                    const progressInfo = document.getElementById('progressInfo');
+                    
+                    if (currentUser) {
+                        // 用户已登录，检查存档
+                        const tempSaveManager = new GameSaveManager();
+                        tempSaveManager.currentUser = currentUser;
+                        const saveInfo = tempSaveManager.getUserSaveInfo();
+                        
+                        if (saveInfo && saveInfo.saveCount > 0) {
+                            // 有存档，显示进度信息
+                            const chapterName = saveInfo.currentChapter ? saveInfo.currentChapter.name : '未知章节';
+                            const lastPlayTime = new Date(saveInfo.lastSaved).toLocaleDateString();
+                            const playTime = Math.floor((saveInfo.lastSaved - saveInfo.createdAt) / (1000 * 60)); // 游戏时长（分钟）
+                            
+                            progressInfo.innerHTML = `
+                                <div style="text-align: center; color: var(--text-light);">
+                                    <p style="margin-bottom: 8px;"><strong style="color: var(--accent);">欢迎回来，${currentUser}!</strong></p>
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 15px 0; font-size: 0.95em;">
+                                        <div style="background: rgba(93, 0, 30, 0.3); padding: 10px; border-radius: 6px;">
+                                            <span style="color: var(--accent);">📖</span> <strong>当前进度</strong><br>
+                                            <span style="color: var(--text-gray);">${chapterName}</span>
+                                        </div>
+                                        <div style="background: rgba(93, 0, 30, 0.3); padding: 10px; border-radius: 6px;">
+                                            <span style="color: var(--accent);">💾</span> <strong>存档数量</strong><br>
+                                            <span style="color: var(--text-gray);">${saveInfo.saveCount} 个</span>
+                                        </div>
+                                        <div style="background: rgba(93, 0, 30, 0.3); padding: 10px; border-radius: 6px;">
+                                            <span style="color: var(--accent);">⏰</span> <strong>最后游戏</strong><br>
+                                            <span style="color: var(--text-gray);">${lastPlayTime}</span>
+                                        </div>
+                                        <div style="background: rgba(93, 0, 30, 0.3); padding: 10px; border-radius: 6px;">
+                                            <span style="color: var(--accent);">🎮</span> <strong>游戏时长</strong><br>
+                                            <span style="color: var(--text-gray);">${playTime > 60 ? Math.floor(playTime/60) + '小时' + (playTime%60) + '分' : playTime + '分钟'}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            gameProgressSection.style.display = 'block';
+                            startBtn.textContent = '继续游戏';
+                            startBtn.style.background = 'linear-gradient(45deg, var(--primary-color), #d62828)';
+                            
+                            // 继续游戏按钮事件
+                            document.getElementById('continueGameBtn').addEventListener('click', function() {
+                                this.style.background = 'var(--dark-red)';
+                                this.textContent = '加载中...';
+                                
+                                setTimeout(() => {
+                                    const currentChapter = saveInfo.currentChapter;
+                                    let targetUrl = 'codes/prologue.html';
+                                    
+                                    console.log('Current chapter info:', currentChapter); // 调试日志
+                                    
+                                    if (currentChapter && currentChapter.filename !== 'index.html') {
+                                        // 对中文文件名进行URL编码处理
+                                        const encodedFilename = encodeURIComponent(currentChapter.filename);
+                                        targetUrl = 'codes/' + encodedFilename;
+                                    }
+                                    
+                                    console.log('Jumping to URL:', targetUrl); // 调试日志
+                                    
+                                    // 添加错误处理
+                                    try {
+                                        window.location.href = targetUrl;
+                                    } catch (error) {
+                                        console.error('跳转失败:', error);
+                                        // 如果跳转失败，尝试跳转到序章
+                                        window.location.href = 'codes/prologue.html';
+                                    }
+                                }, 800);
+                            });
+                            
+                            // 重新开始按钮事件
+                            document.getElementById('newGameBtn').addEventListener('click', function() {
+                                if (confirm('重新开始将清空所有存档，确定要继续吗？')) {
+                                    tempSaveManager.deleteSave();
+                                    this.style.background = 'var(--primary-color)';
+                                    this.textContent = '开始新游戏...';
+                                    
+                                    setTimeout(() => {
+                                        window.location.href = 'codes/prologue.html';
+                                    }, 800);
+                                }
+                            });
+                            
+                        } else {
+                            // 用户已登录但无存档
+                            gameProgressSection.style.display = 'none';
+                            startBtn.textContent = '开始游戏';
+                            startBtn.style.background = 'linear-gradient(45deg, var(--primary-color), var(--dark-red))';
+                        }
+                    } else {
+                        // 用户未登录
+                        gameProgressSection.style.display = 'none';
+                        startBtn.textContent = '开始游戏';
+                        startBtn.style.background = 'linear-gradient(45deg, var(--primary-color), var(--dark-red))';
+                    }
+                }
+                
+                // 初始化时更新状态
+                updateGameStatus();
+                
                 startBtn.addEventListener('click', function(e) {
-                    // 判断登录
+                    e.preventDefault();
+                    // 判断登录和存档状态
                     const currentUser = localStorage.getItem('currentUser');
                     let targetUrl = '';
+                    
                     if (currentUser) {
-                        targetUrl = 'codes/prologue.html';
+                        const tempSaveManager = new GameSaveManager();
+                        tempSaveManager.currentUser = currentUser;
+                        const saveInfo = tempSaveManager.getUserSaveInfo();
+                        
+                        if (saveInfo && saveInfo.saveCount > 0) {
+                            // 有存档，继续游戏
+                            const currentChapter = saveInfo.currentChapter;
+                            console.log('Start game - Current chapter:', currentChapter); // 调试日志
+                            // 对中文文件名进行URL编码处理
+                            const encodedFilename = encodeURIComponent(currentChapter.filename);
+                            targetUrl = currentChapter && currentChapter.filename !== 'index.html' 
+                                ? 'codes/' + encodedFilename 
+                                : 'codes/prologue.html';
+                        } else {
+                            // 无存档，开始新游戏
+                            targetUrl = 'codes/prologue.html';
+                        }
                     } else {
+                        // 未登录，跳转到登录页
                         targetUrl = 'codes/login.html';
                     }
+                    
                     // 动画后跳转
                     document.body.style.opacity = '0';
                     document.body.style.transition = 'opacity 0.5s ease-out';

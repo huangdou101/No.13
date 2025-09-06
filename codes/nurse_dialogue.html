@@ -1,0 +1,1050 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13号病房 - 护士对话</title>
+    <style>
+        :root {
+            --primary-color: #8B0000;
+            --dark-red: #5A0000;
+            --text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+            --bg-dark: #0d0d0d;
+            --bg-overlay: rgba(0, 0, 0, 0.88);
+            --text-light: #f8f9fa;
+            --text-gray: #d6d6d6;
+            --accent: #ffb703;
+            --shadow: 0 0 25px rgba(230, 57, 70, 0.25);
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #backgroundImage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 1s ease-in-out;
+            z-index: 1;
+            opacity: 0;
+        }
+        #storyOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(0,0,0,0.3) 0%,
+                rgba(0,0,0,0.5) 50%,
+                rgba(0,0,0,0.7) 100%
+            );
+            z-index: 2;
+        }
+        #storyContainer {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.5);
+            z-index: 3;
+            height: auto;
+            min-height: 220px;
+        }
+        #storyText {
+            font-size: 1.4em;
+            line-height: 1.8;
+            text-align: justify;
+            text-shadow: var(--text-shadow);
+            min-height: 120px;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+            max-height: 180px;
+            overflow-y: auto;
+            padding-right: 15px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) rgba(0,0,0,0.5);
+        }
+        #storyText::-webkit-scrollbar {
+            width: 8px;
+        }
+        #storyText::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+        #storyText::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 4px;
+        }
+        .story-text-visible {
+            opacity: 1 !important;
+        }
+        #continueButton {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(45deg, var(--primary-color), var(--dark-red));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+            opacity: 0;
+            animation: fadeInButton 0.5s ease-in-out 2s forwards;
+        }
+        #continueButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 0, 0, 0.5);
+            background: linear-gradient(45deg, #A00000, var(--primary-color));
+        }
+        #continueButton:active {
+            transform: translateY(0);
+        }
+        @keyframes fadeInButton {
+            to {
+                opacity: 1;
+            }
+        }
+        #skipButton {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        #skipButton:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+        #bgmToggle {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #bgmToggle:hover {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+        .story-title {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: var(--text-shadow);
+            font-weight: bold;
+        }
+        #characterSprite {
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            height: 80vh;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            filter: none;
+            -webkit-filter: none;
+        }
+        #nurseSprite {
+            position: absolute;
+            bottom: 0;
+            right: 5%;
+            height: 80vh;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            filter: none;
+            -webkit-filter: none;
+        }
+        #characterSprite.visible,
+        #nurseSprite.visible {
+            opacity: 1;
+        }
+        .dialogue-thought {
+            color: #FFD700;
+            font-style: italic;
+        }
+
+        /* 优化图形比例的结局页面样式 */
+        #endingContainer {
+            display: none; /* 初始隐藏 */
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: var(--bg-dark);
+            z-index: 100;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4vw; /* 使用相对单位 */
+            opacity: 0;
+            overflow-y: auto;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(139, 0, 0, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(139, 0, 0, 0.1) 0%, transparent 40%);
+        }
+        
+        /* 顶部装饰线 */
+        #endingContainer::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--primary-color) 20%, 
+                var(--accent) 50%, 
+                var(--primary-color) 80%, 
+                transparent 100%);
+            animation: linePulse 4s infinite;
+        }
+        
+        @keyframes linePulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+        
+        /* 结局图片容器 - 按比例调整 */
+        .ending-image-container {
+            position: relative;
+            margin-bottom: 5vh; /* 使用视口高度单位 */
+            padding: 0.8vw;
+            background: linear-gradient(135deg, var(--dark-red), var(--primary-color));
+            border-radius: 8px;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.4);
+            animation: imagePulse 6s infinite alternate;
+            width: 80vmin; /* 使用最小视口单位，确保在任何方向都合适 */
+            max-width: 800px;
+            max-height: 60vh;
+        }
+        
+        @keyframes imagePulse {
+            from { box-shadow: 0 0 20px rgba(139, 0, 0, 0.4); }
+            to { box-shadow: 0 0 40px rgba(139, 0, 0, 0.7); }
+        }
+        
+        #endingImage {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* 保持图片比例并填充容器 */
+            border: 3px solid #1a1a1a;
+            border-radius: 4px;
+            display: block;
+            transition: all 0.8s ease;
+            filter: contrast(1.1) brightness(0.9);
+        }
+        
+        .ending-image-container:hover #endingImage {
+            transform: scale(1.02);
+            filter: contrast(1.2) brightness(1);
+        }
+        
+        /* 结局标题样式 */
+        .ending-title {
+            color: var(--primary-color);
+            font-size: clamp(2.5em, 6vw, 4em); /* 响应式字体大小 */
+            margin-bottom: 1vh;
+            text-shadow: 0 0 15px rgba(230, 57, 70, 0.8), 
+                         0 0 30px rgba(230, 57, 70, 0.4);
+            animation: glitch 8s infinite, fadeInGlow 3s ease-out forwards;
+            position: relative;
+            letter-spacing: 2px;
+            width: 90%;
+        }
+        
+        .ending-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--primary-color) 30%, 
+                var(--accent) 50%, 
+                var(--primary-color) 70%, 
+                transparent 100%);
+        }
+        
+        @keyframes fadeInGlow {
+            from { text-shadow: 0 0 5px rgba(230, 57, 70, 0.3); }
+            to { text-shadow: 0 0 15px rgba(230, 57, 70, 0.8), 
+                             0 0 30px rgba(230, 57, 70, 0.4); }
+        }
+        
+        /* 规则违反提示 */
+        .rule-violation {
+            color: var(--accent);
+            font-weight: bold;
+            font-size: clamp(1.2em, 3vw, 1.8em);
+            margin: 3vh 0;
+            text-shadow: 0 0 10px rgba(255, 183, 3, 0.5);
+            position: relative;
+            padding: 15px 20px;
+            display: inline-block;
+        }
+        
+        .rule-violation::before,
+        .rule-violation::after {
+            content: '!';
+            color: var(--primary-color);
+            opacity: 0.7;
+            font-size: 1.2em;
+        }
+        
+        .rule-violation::before {
+            margin-right: 10px;
+        }
+        
+        .rule-violation::after {
+            margin-left: 10px;
+        }
+        
+        /* 结局文本容器 */
+        .ending-message-container {
+            background: rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(139, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 3vw;
+            width: 90vmin; /* 使用最小视口单位 */
+            max-width: 800px;
+            margin-bottom: 4vh;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+        
+        .ending-message-container::before,
+        .ending-message-container::after,
+        .ending-message-container .corner::before,
+        .ending-message-container .corner::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: var(--primary-color);
+            border-style: solid;
+            opacity: 0.5;
+        }
+        
+        .ending-message-container::before {
+            top: 10px;
+            left: 10px;
+            border-width: 2px 0 0 2px;
+        }
+        
+        .ending-message-container::after {
+            top: 10px;
+            right: 10px;
+            border-width: 2px 2px 0 0;
+        }
+        
+        .ending-message-container .corner {
+            position: absolute;
+            bottom: 10px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+        }
+        
+        .ending-message-container .corner::before {
+            border-width: 0 0 2px 2px;
+        }
+        
+        .ending-message-container .corner::after {
+            border-width: 0 2px 2px 0;
+        }
+        
+        .ending-message {
+            color: var(--text-gray);
+            font-size: clamp(1em, 2.5vw, 1.3em);
+            line-height: 2;
+            text-align: justify;
+            position: relative;
+        }
+        
+        /* 返回按钮 */
+        .back-button {
+            padding: clamp(12px, 3vw, 16px) clamp(30px, 8vw, 40px);
+            background: linear-gradient(135deg, var(--dark-red), var(--primary-color));
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: clamp(1em, 2.5vw, 1.2em);
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3),
+                        inset 0 0 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 5vh;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .back-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s ease, height 0.6s ease, opacity 0.8s ease;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(230, 57, 70, 0.4),
+                        inset 0 0 10px rgba(255, 255, 255, 0.1);
+        }
+        
+        .back-button:active {
+            transform: translateY(-2px);
+        }
+        
+        .back-button:active::after {
+            width: 400px;
+            height: 400px;
+            opacity: 0;
+        }
+        
+        /* 装饰元素 - 按屏幕比例调整大小 */
+        .ending-shape {
+            position: absolute;
+            opacity: 0.1;
+            filter: blur(2px);
+        }
+        
+        .shape-a {
+            width: 40vmin; /* 使用视口最小尺寸的百分比 */
+            height: 40vmin;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            top: -20vmin;
+            right: -20vmin;
+            animation: float 30s ease-in-out infinite;
+        }
+        
+        .shape-b {
+            width: 30vmin;
+            height: 30vmin;
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+            background-color: var(--accent);
+            bottom: -15vmin;
+            left: -15vmin;
+            animation: float 25s ease-in-out infinite 8s;
+        }
+        
+        .shape-c {
+            width: 20vmin;
+            height: 20vmin;
+            background-color: var(--primary-color);
+            transform: rotate(45deg);
+            top: 30%;
+            left: -10vmin;
+            animation: float 40s ease-in-out infinite 5s;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(5deg); }
+        }
+        
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+        }
+        
+        /* 心电图效果装饰 */
+        .heartbeat {
+            position: absolute;
+            bottom: 20px;
+            width: 100%;
+            height: 30px;
+            opacity: 0.3;
+            z-index: 101;
+        }
+        
+        .heartbeat::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 10px;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                transparent 20%,
+                var(--primary-color) 20%,
+                var(--primary-color) 22%,
+                transparent 22%,
+                transparent 24%,
+                var(--primary-color) 24%,
+                var(--primary-color) 26%,
+                transparent 26%,
+                transparent 28%,
+                var(--primary-color) 28%,
+                var(--primary-color) 30%,
+                transparent 30%,
+                transparent 40%,
+                var(--primary-color) 40%,
+                var(--primary-color) 42%,
+                transparent 42%,
+                transparent 100%);
+            animation: heartbeat 2s infinite;
+        }
+        
+        @keyframes heartbeat {
+            0%, 100% { background-position: 0 0; }
+            50% { background-position: -20px 0; }
+        }
+
+        /* 更精确的响应式调整 */
+        @media (max-width: 1024px) {
+            .ending-image-container,
+            .ending-message-container {
+                width: 85vmin;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            #storyContainer {
+                width: 95%;
+                padding: 20px;
+                bottom: 15%;
+                min-height: 180px;
+            }
+            #storyText {
+                font-size: 1.2em;
+                line-height: 1.6;
+                max-height: 140px;
+                padding-right: 10px;
+            }
+            .story-title {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+            #continueButton {
+                padding: 10px 20px;
+                font-size: 1em;
+                bottom: 20px;
+                right: 20px;
+            }
+            #bgmToggle, #skipButton {
+                top: 20px;
+            }
+            #bgmToggle {
+                left: 20px;
+                width: 45px;
+                height: 45px;
+            }
+            #skipButton {
+                right: 20px;
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+            #characterSprite, #nurseSprite {
+                height: 65vh;
+            }
+            #characterSprite {
+                left: 2%;
+            }
+            #nurseSprite {
+                right: 2%;
+            }
+            
+            /* 结局页面移动端适配 */
+            .ending-image-container,
+            .ending-message-container {
+                width: 90vmin;
+                margin-bottom: 3vh;
+            }
+            
+            .ending-image-container {
+                padding: 5px;
+                max-height: 45vh;
+            }
+            
+            .rule-violation {
+                margin: 2vh 0;
+                padding: 10px;
+            }
+            
+            .ending-message-container {
+                padding: 20px 15px;
+            }
+            
+            .back-button {
+                margin-bottom: 4vh;
+            }
+            
+            /* 调整小屏幕上的装饰元素 */
+            .shape-a {
+                width: 35vmin;
+                height: 35vmin;
+                top: -17vmin;
+                right: -17vmin;
+            }
+            
+            .shape-b {
+                width: 25vmin;
+                height: 25vmin;
+                bottom: -12vmin;
+                left: -12vmin;
+            }
+            
+            .shape-c {
+                width: 18vmin;
+                height: 18vmin;
+                left: -9vmin;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .ending-image-container {
+                max-height: 40vh;
+                margin-bottom: 2vh;
+            }
+            
+            .rule-violation {
+                margin: 1.5vh 0;
+            }
+            
+            .ending-message {
+                line-height: 1.8;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <img id="backgroundImage" src="" alt="背景">
+        
+        <img id="characterSprite" src="../pictures/1.png" alt="人物立绘">
+        <img id="nurseSprite" src="../pictures/nurse_nomask.png" alt="护士立绘">
+
+        <div id="storyOverlay"></div>
+        
+        <button id="bgmToggle">🔇</button>
+        
+        <button id="skipButton">跳过</button>
+        
+        <div id="storyContainer">
+            <div class="story-title">深夜密谈</div>
+            <div id="storyText"></div>
+            <button id="continueButton">继续</button>
+        </div>
+        
+        <!-- 优化图形比例的结局页面 -->
+        <div id="endingContainer">
+            <!-- 装饰元素 -->
+            <div class="ending-shape shape-a"></div>
+            <div class="ending-shape shape-b"></div>
+            <div class="ending-shape shape-c"></div>
+            <div class="heartbeat"></div>
+            
+            <!-- 结局图片容器 -->
+            <div class="ending-image-container">
+                <img id="endingImage" src="../pictures/ending1.jpg" alt="结局画面">
+            </div>
+            
+            <h2 class="ending-title">结局 1</h2>
+            
+            <p class="rule-violation">不遵守作息表的人，不能醒来</p>
+            
+            <!-- 结局文本容器 -->
+            <div class="ending-message-container">
+                <div class="ending-message">
+                    你违反了第二条规则："不要在非外出时间迈出你的病房"。<br><br>
+                    护士们粗暴地将你推回冰冷的病房，针头刺入皮肤的刺痛感逐渐消失，随之而来的是强烈的睡意。<br><br>
+                    意识模糊中，你听到她们说："又一个不遵守规则的实验体，看来只能用永久休眠方案了。"<br><br>
+                    黑暗彻底吞噬了你，再也没有醒来...
+                </div>
+                <div class="corner"></div>
+            </div>
+            
+            <!-- 返回首页按钮 -->
+            <button class="back-button" id="backToHome">返回首页</button>
+        </div>
+        
+        <audio id="bgmAudio" loop preload="auto">
+            <source src="../audio/Home bgm.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <script src="../bgm-manager.js"></script>
+    <script>
+        const storySteps = [
+            {
+                text: "护士1：再过15分钟该给B13号打药了吧，我估计他是不是快醒了",
+                background: "../pictures/black.jpg",
+                delay: 1000,
+                showNurse: true,
+                showCharacter: false
+            },
+            {
+                text: "护士2：应该是的，瑞医生让我再给B13试试新药",
+                background: "../pictures/black.jpg",
+                delay: 1200,
+                showNurse: true,
+                showCharacter: false
+            },
+            {
+                text: "护士1：那你一会注意点用药分量，B12那个都不能用了，B13今天刚来，院长这两天就要用他做实验，你们谁要是把他再弄报废了，就自己给我顶到手术台上去！",
+                background: "../pictures/black.jpg",
+                delay: 2000,
+                showNurse: true,
+                showCharacter: false
+            },
+            {
+                text: "护士2：知道了知道了，按院长那么搞，再好的实验体也撑不了几天吧",
+                background: "../pictures/black.jpg",
+                delay: 1500,
+                showNurse: true,
+                showCharacter: false
+            },
+            {
+                text: "护士1：时间很紧，实验再不成功，[它]就要控制不住了",
+                background: "../pictures/black.jpg",
+                delay: 1800,
+                showNurse: true,
+                showCharacter: false
+            },
+            {
+                text: "<span class='dialogue-thought'>不能用？这把病人形容的像耗材一样，毫无尊重！什么院长？什么实验？这家医院究竟怎么一回事？！</span>",
+                background: "../pictures/black.jpg",
+                delay: 2000,
+                showNurse: false,
+                showCharacter: true
+            },
+            {
+                text: "脚步声逐渐远去，走廊再次陷入死寂。而我心中的疑问却越来越多...",
+                background: "../pictures/black.jpg",
+                delay: 1500,
+                showNurse: false,
+                showCharacter: false
+            },
+            {
+                text: "\"轱辘\"\"轱辘\"",
+                background: "../pictures/走廊护士站.jpg",
+                delay: 1000,
+                showNurse: false,
+                showCharacter: false
+            },
+            {
+                text: "住院区一辆平车滚过，平车上被单鼓起了一块，车边悬挂着\"B12\"的挂牌，被单下一只手垂了下来，手肿胀青紫，看起来不像正常死亡",
+                background: "../pictures/B12.png",
+                delay: 2500,
+                showNurse: false,
+                showCharacter: false
+            },
+            {
+                text: "<span class='dialogue-thought'>这是.......</span>",
+                background: "../pictures/B12.png",
+                delay: 1500,
+                showNurse: false,
+                showCharacter: true
+            },
+            {
+                text: "护士1：B13...你为什么在这里？",
+                background: "../pictures/black.jpg",
+                delay: 1500,
+                showNurse: true,
+                showCharacter: false
+            },
+            {
+                text: "护士2：不遵守作息表的人......不能醒来!!!!!",
+                background: "../pictures/black.jpg",
+                delay: 1500,
+                showNurse: true,
+                showCharacter: false
+            },
+            {
+                text: "",
+                background: "../pictures/ending1.jpg",
+                delay: 500,
+                showNurse: false,
+                showCharacter: false
+            }
+        ];
+
+        let currentStep = 0;
+        let isTyping = false;
+        let bgmManager;
+        let currentBackground = '';
+        let typingTimer = null;
+
+        const backgroundImage = document.getElementById('backgroundImage');
+        const storyText = document.getElementById('storyText');
+        const continueButton = document.getElementById('continueButton');
+        const skipButton = document.getElementById('skipButton');
+        const characterSprite = document.getElementById('characterSprite');
+        const nurseSprite = document.getElementById('nurseSprite');
+        const endingContainer = document.getElementById('endingContainer');
+        const backToHomeButton = document.getElementById('backToHome');
+
+        function init() {
+            bgmManager = new BGMManager('bgmAudio', 'bgmToggle');
+            showStep(0);
+            continueButton.addEventListener('click', nextStep);
+            skipButton.addEventListener('click', skipSection);
+            backToHomeButton.addEventListener('click', backToHome);
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        function showStep(stepIndex) {
+            if (stepIndex >= storySteps.length) {
+                showEnding();
+                return;
+            }
+
+            const step = storySteps[stepIndex];
+            currentStep = stepIndex;
+            
+            characterSprite.classList.toggle('visible', step.showCharacter);
+            nurseSprite.classList.toggle('visible', step.showNurse);
+            
+            if (currentBackground !== step.background) {
+                backgroundImage.style.opacity = '0';
+                setTimeout(() => {
+                    backgroundImage.src = step.background;
+                    currentBackground = step.background;
+                    setTimeout(() => {
+                        backgroundImage.style.opacity = '1';
+                    }, 100);
+                }, currentBackground ? 500 : 0);
+            }
+            
+            continueButton.style.opacity = '0';
+            typewriterEffect(step.text, step.delay);
+        }
+
+        function typewriterEffect(text, delay) {
+            isTyping = true;
+            storyText.style.opacity = '0';
+            storyText.innerHTML = '';
+            storyText.scrollTop = 0;
+            
+            const fragments = parseTextWithTags(text);
+            let fragmentIndex = 0;
+            let charIndex = 0;
+
+            setTimeout(() => {
+                storyText.style.opacity = '1';
+                
+                function typeNext() {
+                    if (fragmentIndex >= fragments.length) {
+                        isTyping = false;
+                        storyText.scrollTop = storyText.scrollHeight;
+                        setTimeout(() => {
+                            continueButton.style.opacity = '1';
+                        }, 300);
+                        return;
+                    }
+
+                    const fragment = fragments[fragmentIndex];
+                    if (fragment.isTag) {
+                        storyText.innerHTML += fragment.content;
+                        fragmentIndex++;
+                        typingTimer = setTimeout(typeNext, 10);
+                    } else {
+                        if (charIndex < fragment.content.length && isTyping) {
+                            storyText.innerHTML += fragment.content.charAt(charIndex);
+                            charIndex++;
+                            storyText.scrollTop = storyText.scrollHeight;
+                            typingTimer = setTimeout(typeNext, 50);
+                        } else {
+                            charIndex = 0;
+                            fragmentIndex++;
+                            typingTimer = setTimeout(typeNext, 10);
+                        }
+                    }
+                }
+
+                typeNext();
+            }, delay);
+        }
+
+        function parseTextWithTags(text) {
+            const fragments = [];
+            const tagRegex = /<[^>]+>/g;
+            let lastIndex = 0;
+
+            text.replace(tagRegex, (match, index) => {
+                if (index > lastIndex) {
+                    fragments.push({
+                        content: text.substring(lastIndex, index),
+                        isTag: false
+                    });
+                }
+                fragments.push({
+                    content: match,
+                    isTag: true
+                });
+                lastIndex = index + match.length;
+                return match;
+            });
+
+            if (lastIndex < text.length) {
+                fragments.push({
+                    content: text.substring(lastIndex),
+                    isTag: false
+                });
+            }
+
+            return fragments;
+        }
+
+        function nextStep() {
+            if (isTyping) {
+                isTyping = false;
+                clearTimeout(typingTimer);
+                const step = storySteps[currentStep];
+                storyText.innerHTML = step.text;
+                storyText.scrollTop = storyText.scrollHeight;
+                continueButton.style.opacity = '1';
+                return;
+            }
+
+            if (currentStep < storySteps.length - 1) {
+                showStep(currentStep + 1);
+            } else {
+                showEnding();
+            }
+        }
+
+        function showEnding() {
+            // 隐藏故事相关元素
+            document.getElementById('storyContainer').style.display = 'none';
+            characterSprite.style.display = 'none';
+            nurseSprite.style.display = 'none';
+            skipButton.style.display = 'none';
+            
+            // 显示结局页面
+            endingContainer.style.display = 'flex';
+            // 等待一帧后再触发动画
+            requestAnimationFrame(() => {
+                endingContainer.style.opacity = '1';
+            });
+            
+            if (bgmManager) {
+                bgmManager.setVolume(0.3);
+            }
+        }
+
+        function backToHome() {
+            // 淡出效果
+            endingContainer.style.opacity = '0';
+            endingContainer.style.transition = 'opacity 0.8s ease-out';
+            
+            // 等待过渡完成后跳转
+            setTimeout(() => {
+                if (bgmManager) {
+                    bgmManager.setVolume(1);
+                }
+                window.location.href = '../index.html';
+            }, 800);
+        }
+
+        function handleKeyPress(e) {
+            if ((e.key === ' ' || e.key === 'Enter')) {
+                e.preventDefault();
+                nextStep();
+            } else if (e.key === 'Escape') {
+                skipSection();
+            }
+        }
+
+        function skipSection() {
+            if (confirm('确定要跳过吗？')) {
+                showEnding();
+            }
+        }
+
+        function preloadImages() {
+            storySteps.forEach(step => {
+                const img = new Image();
+                img.src = step.background;
+            });
+            
+            const endingImg = new Image();
+            endingImg.src = '../pictures/ending1.jpg';
+            
+            const charImg = new Image();
+            charImg.src = '../pictures/1.png';
+            
+            const nurseImg = new Image();
+            nurseImg.src = '../pictures/nurse_nomask.png';
+        }
+
+        window.addEventListener('load', () => {
+            preloadImages();
+            init();
+        });
+    </script>
+</body>
+</html>

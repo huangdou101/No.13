@@ -10,9 +10,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **This is a static HTML/CSS/JavaScript project with no build process.**
 
-- **Local Development**: Open any HTML file directly in a browser
+- **Local Development**: Open any HTML file directly in a browser (start with `index.html`)
 - **Testing**: Manual testing in browser (no automated test framework)
 - **Deployment**: Static hosting (GitHub Pages, Netlify, Vercel)
+- **Game Development**: Canvas-based chapters in `codes/part_*.html` files
+- **Audio Testing**: Ensure MP3 files in `audio/` folder are accessible
 
 No package manager, build tools, or test runners are used.
 
@@ -29,6 +31,7 @@ No package manager, build tools, or test runners are used.
 ```
 ├── index.html            # Main homepage
 ├── bgm-manager.js        # Audio management module
+├── game-save-manager.js  # Automatic save/load system
 ├── codes/                # Game pages and core functionality
 │   ├── login.html        # User login page
 │   ├── register.html     # User registration page
@@ -56,21 +59,37 @@ No package manager, build tools, or test runners are used.
 - Common scroll-triggered animation system
 - Responsive design patterns
 
-**BGM Manager**: Object-oriented audio management
-- Class-based architecture (`BGMManager`)
-- Handles play/pause controls, UI state sync, error handling
-- Integrated across all pages with consistent behavior
+**BGM Manager**: Centralized audio management system (`bgm-manager.js`)
+- Global `BGMManager` class with singleton pattern (`window.bgmManager`)
+- Automatic initialization on `DOMContentLoaded` event
+- Consistent UI state synchronization across all pages
+- Error handling for audio playback failures
+- Fixed position control button with hover animations and visual feedback
 
-**Canvas-based Game System**: Game chapters use HTML5 Canvas for 2D gameplay
-- Character animation with sprite sequences (walk1, walk2, walk3, stand1, stand2)
-- Real-time collision detection and player-object interactions
-- Inventory system with backpack UI for collecting story items
-- State management for game progression and item collection
+**Game Save System**: Automatic save/load functionality (`game-save-manager.js`)
+- **Auto-Save**: Automatic saves every 30 seconds, on page unload, and chapter transitions
+- **Multi-User Support**: Separate save slots for each registered user
+- **Progress Tracking**: Saves player position, backpack items, chapter progress, and game flags
+- **Save Management**: Up to 20 save points per user, automatic cleanup of old saves
+- **Data Structure**: JSON-based saves in localStorage with timestamp and metadata
+- **Recovery Features**: Import/export save data for backup and transfer
 
-**User Authentication System**: LocalStorage-based user management
-- Registration with validation (username uniqueness, password strength)
-- Login verification and session management
-- Persistent user state across page navigation
+**Canvas-based Game System**: Interactive 2D gameplay using HTML5 Canvas
+- **Character Animation**: Sprite-based system with predefined sequences:
+  - `WALK_ANIMATION_SEQUENCE = ['walk1', 'walk2', 'walk1', 'walk3']`
+  - `STAND_ANIMATION_SEQUENCE = ['stand1', 'stand2']`
+  - Frame-based animation with configurable timing (`FRAME_DURATION`, `FRAMES_PER_IMAGE`)
+- **Player Movement**: Keyboard input handling (WASD/Arrow keys) with direction-based sprite flipping
+- **Interaction System**: Distance-based highlighting and interaction with objects (`INTERACTION_DISTANCE`, `HIGHLIGHT_DISTANCE`)
+- **Inventory Management**: LocalStorage-persistent backpack system with item collection and display
+- **Game State**: Chapter progression with seamless transitions between HTML pages
+
+**User Authentication System**: Client-side authentication using LocalStorage
+- **User Storage**: JSON array in `localStorage.getItem('users')` with user objects
+- **Session Management**: Current user stored in `localStorage.getItem('currentUser')`
+- **Validation Logic**: Username uniqueness, password strength (min 6 chars), confirmation matching
+- **Navigation Flow**: Login required for game access, automatic redirection based on auth state
+- **Form UI**: Real-time validation with error message display and success animations
 
 ## Game Design Concept
 
@@ -93,18 +112,44 @@ No package manager, build tools, or test runners are used.
 
 **Adding New Pages**:
 1. Copy existing HTML structure template from `index.html` or `codes/` examples
-2. Include `bgm-manager.js` script via `<script src="bgm-manager.js"></script>`
-3. Add scroll-triggered animations with `.scroll-animate` classes
-4. Use CSS custom properties for consistent theming (`--primary-color`, `--dark-red`, etc.)
-5. Include navigation structure with proper `active` class
-6. Test responsive behavior on mobile devices
+2. Include BGM manager: `<script src="../bgm-manager.js"></script>` (adjust path for subdirectories)
+3. **Include Save Manager**: `<script src="../game-save-manager.js"></script>` for automatic save functionality
+4. Add required BGM HTML elements:
+   ```html
+   <audio id="bgmAudio" loop preload="auto">
+       <source src="../audio/Home bgm.mp3" type="audio/mpeg">
+   </audio>
+   <button id="bgmToggle" class="bgm-toggle">🔊</button>
+   ```
+5. Implement scroll animations: Add `.scroll-animate` classes and initialize with:
+   ```javascript
+   function handleScrollAnimation() {
+       // Check isInViewport() and update .visible/.fade-out classes
+   }
+   window.addEventListener('scroll', throttle(handleScrollAnimation));
+   ```
+6. Use CSS custom properties: `--primary-color`, `--dark-red`, `--bg-dark`, `--text-light`, etc.
+7. Include consistent navigation with proper `active` class highlighting
+8. Add page transition effects with `.page-transition` class and opacity animations
 
 **Adding New Game Chapters**:
-1. Use HTML5 Canvas for interactive gameplay (see `part_1_1.html` as reference)
-2. Implement character sprite animation system with predefined sequences
-3. Include inventory/backpack system for story progression
-4. Handle keyboard input (WASD/Arrow keys, Space for interaction)
-5. Manage game state transitions between chapters
+1. **Canvas Setup**: Create 1450x818 canvas with proper image rendering:
+   ```javascript
+   const canvas = document.getElementById('gameCanvas');
+   const ctx = canvas.getContext('2d');
+   canvas.style.imageRendering = 'pixelated';
+   ```
+2. **Asset Management**: Preload all images in hidden div with IDs matching sprite names
+3. **Animation System**: Use consistent animation constants and frame counters:
+   ```javascript
+   const TARGET_HEIGHT = 336; // Character height
+   const WALK_SPEED = 13; // Movement speed
+   const FRAME_DURATION = 80; // Animation timing
+   ```
+4. **Input Handling**: Implement keyboard state tracking with continuous movement
+5. **Game Loop**: Use `requestAnimationFrame()` with frame duration control
+6. **Inventory Integration**: Add items with `addToBackpack(id, name, imageSrc)`
+7. **Chapter Transitions**: Handle scene changes via `window.location.href`
 
 **BGM Integration**:
 All pages must include BGM controls:
@@ -118,39 +163,118 @@ All pages must include BGM controls:
 
 **Game Development Patterns**:
 ```javascript
-// Character animation system (from part_1_1.html)
+// Animation sequences and timing constants
 const WALK_ANIMATION_SEQUENCE = ['walk1', 'walk2', 'walk1', 'walk3'];
 const STAND_ANIMATION_SEQUENCE = ['stand1', 'stand2'];
+const FRAME_DURATION = 80;
+const INTERACTION_DISTANCE = 120;
+const HIGHLIGHT_DISTANCE = 180;
 
-// Inventory management pattern
-const backpack = {
-    items: [],
-    maxItems: 16,
-    hasNewItem: false
+// Player state management
+const player = {
+    x: canvas.width / 2, y: 0,
+    width: 0, height: 0,
+    direction: 'right', isMoving: false,
+    walkCurrentFrame: 0, walkFrameCounter: 0
 };
 
-// Canvas game loop structure
+// Backpack system with UI integration
+const backpack = { items: [], maxItems: 16, hasNewItem: false };
+function addToBackpack(id, name, image) {
+    // Add/update item, refresh UI, show notification
+}
+
+// Game loop with timing control
+let lastTime = 0;
 function gameLoop(timestamp) {
-    drawScene();
-    drawPaperBall();
-    updatePlayer();
-    drawPlayer();
+    if (timestamp - lastTime >= FRAME_DURATION) {
+        drawScene(); updatePlayer(); drawPlayer();
+        lastTime = timestamp;
+    }
     requestAnimationFrame(gameLoop);
+}
+
+// Save system usage patterns
+// Proper backpack initialization pattern - call immediately after image preloading:
+preloadImages().then(() => {
+    // Initialize player dimensions
+    player.width = images.walk1.naturalWidth * scaleRatio;
+    player.height = TARGET_HEIGHT;
+    player.y = canvas.height - player.height;
+    
+    // Initialize backpack system immediately (NO setTimeout)
+    const backpackInitialized = initializeBackpackWithSavedData();
+    if (!backpackInitialized) {
+        console.log('Using empty backpack - game start');
+    }
+    
+    // Start game loop
+    requestAnimationFrame(gameLoop);
+});
+
+// Manual save trigger
+function saveGameNow(customData = {}) {
+    if (window.gameSaveManager) {
+        return window.gameSaveManager.saveGame(customData);
+    }
 }
 ```
 
-## Current State & Limitations
+## Current Implementation Status
 
-**Present State**: Interactive game prototype with multiple chapters implemented
-- Working authentication system with LocalStorage persistence
-- Canvas-based gameplay with character animation and inventory system
-- Multiple game chapters (prologue, part_1_1, part_1_2, part_2, endings)
-- Team member showcase with individual profile pages
-**Missing Assets**: Several background images and team member photos referenced but not present
-**Audio Compatibility**: Only MP3 format provided (consider adding OGG for broader support)
+**Completed Features**:
+- **Authentication Flow**: Full registration/login system with LocalStorage persistence
+- **Auto-Save System**: Complete save/load functionality with 30-second intervals and chapter transitions
+- **Game Engine**: Canvas-based 2D gameplay with sprite animation and collision detection
+- **Chapter System**: Multiple game chapters with seamless transitions (prologue → part_1_1 → 转场1 → part_1_2 → part_2)
+- **Inventory System**: Persistent backpack with cross-chapter item persistence
+- **Progress Tracking**: User-specific save slots with chapter progress and game state persistence
+- **Audio Management**: Global BGM system with consistent UI controls
+- **Team Showcase**: Individual member pages with photo galleries
+- **Visual System**: Scroll animations, page transitions, responsive design
+- **Character Rendering**: Unified character display system with fallback blue rectangles
 
-**Future Development Areas**:
-- Game engine integration (consider Phaser.js)
-- Backend services if multiplayer features needed
-- Enhanced mobile optimization (PWA)
-- Extended audio system (sound effects, ambient audio)
+**Critical Issues and Solutions**:
+
+**Character Rendering Problems**:
+- **Issue**: Characters may disappear in part_1_2 and part_2
+- **Cause**: Inconsistent image validation logic
+- **Solution**: Use unified drawPlayer() pattern across all chapters:
+```javascript
+if (currentImage && (currentImage.tagName === 'CANVAS' || (currentImage.complete && currentImage.naturalWidth > 0))) {
+    ctx.drawImage(currentImage, drawX, drawY, player.width, player.height);
+} else {
+    // Fallback blue rectangle with white eyes
+    ctx.fillStyle = '#4a9eff';
+    ctx.fillRect(drawX, drawY, player.width, player.height);
+}
+```
+
+**Backpack Persistence Issues**:
+- **Issue**: Backpack items lost between chapters
+- **Cause**: Race conditions in initialization timing
+- **Solution**: Call `initializeBackpackWithSavedData()` immediately after image preloading, NOT with setTimeout
+
+**Text Display Issues**:
+- **Issue**: Duplicate text in prologue typewriter effect
+- **Cause**: Overlapping setTimeout calls
+- **Solution**: Use proper timer management with clearTimeout() and state checking
+
+**Asset Dependencies**:
+- **Required Images**: Character sprites (walk1-3, stand1-2), background images, UI elements
+- **Audio Files**: Currently MP3 only (`audio/Home bgm.mp3`)
+- **Team Photos**: Individual member photos in `pictures/` folder
+
+**Technical Limitations**:
+- **Browser Compatibility**: HTML5 Canvas and ES6+ JavaScript required
+- **Audio Support**: No fallback for browsers without MP3 support
+- **Mobile Experience**: Canvas touch controls not implemented
+- **Character Assets**: Character rendering depends on sprite image loading; fallback blue rectangles used when images fail
+- **File Paths**: Uses relative paths that may break if files are moved
+
+**Development Considerations**:
+- **Performance**: Canvas rendering optimized for 60fps gameplay
+- **Memory Management**: Image preloading prevents mid-game loading delays
+- **Error Handling**: Graceful degradation when assets fail to load
+- **Accessibility**: Keyboard-only navigation support implemented
+- **Debugging**: Console warnings provided for asset loading failures and rendering issues

@@ -493,6 +493,8 @@
     </style>
     <!-- BGM管理器 -->
     <script src="../bgm-manager.js"></script>
+    <!-- 游戏存档管理器 -->
+    <script src="../game-save-manager.js"></script>
 </head>
 <body>
     <!-- 背景音乐 -->
@@ -728,13 +730,13 @@
                         <div style="text-align: center; padding: 20px 0;">
                             <div style="font-size: 50px; margin-bottom: 20px;">✅</div>
                             <p style="font-size: 1.2em; color: var(--primary-color);">注册成功</p>
-                            <p style="color: var(--text-gray); margin-top: 10px;">正在进入13号病房...</p>
+                            <p style="color: var(--text-gray); margin-top: 10px;">欢迎来到13号病房，准备开始你的恐怖之旅...</p>
                         </div>
                     `;
                     
-                    // 延迟后跳转到游戏页面（这里暂时跳回主页）
+                    // 延迟后跳转到序章（新用户直接开始游戏）
                     setTimeout(() => {
-                        window.location.href = '../index.html';
+                        window.location.href = 'prologue.html';
                     }, 2000);
                 }
             });
