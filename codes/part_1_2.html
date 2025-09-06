@@ -495,6 +495,7 @@
                 document.getElementById('goBedBtn').addEventListener('click', () => {
                     document.getElementById('optionOverlay').style.display = 'none';
                     document.getElementById('gameCanvas').style.filter = 'none';
+                    window.location.href = 'part_1_3.html'; // 增加跳转逻辑
                 });
                 
                 requestAnimationFrame(gameLoop);

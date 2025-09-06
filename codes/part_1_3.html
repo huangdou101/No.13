@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>13号病房 - 密谋</title>
+    <style>
+        :root {
+            --primary-color: #8B0000;
+            --dark-red: #5A0000;
+            --text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'SimHei', sans-serif;
+            background: #000;
+            color: #fff;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #gameContainer {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #backgroundImage {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: opacity 1s ease-in-out;
+            z-index: 1;
+            opacity: 0;
+        }
+
+        #storyOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                to bottom,
+                rgba(0,0,0,0.3) 0%,
+                rgba(0,0,0,0.5) 50%,
+                rgba(0,0,0,0.7) 100%
+            );
+            z-index: 2;
+        }
+
+        #storyContainer {
+            position: absolute;
+            bottom: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 800px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 2px solid var(--primary-color);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.5);
+            z-index: 3;
+        }
+
+        #storyText {
+            font-size: 1.4em;
+            line-height: 1.8;
+            text-align: justify;
+            text-shadow: var(--text-shadow);
+            min-height: 120px;
+            opacity: 0;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        .story-text-visible {
+            opacity: 1 !important;
+        }
+
+        #continueButton {
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(45deg, var(--primary-color), var(--dark-red));
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(139, 0, 0, 0.3);
+            opacity: 0;
+            animation: fadeInButton 0.5s ease-in-out 2s forwards;
+        }
+
+        #continueButton:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(139, 0, 0, 0.5);
+            background: linear-gradient(45deg, #A00000, var(--primary-color));
+        }
+
+        #continueButton:active {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeInButton {
+            to {
+                opacity: 1;
+            }
+        }
+
+        #skipButton {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #ccc;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 8px 16px;
+            border-radius: 5px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+
+        #skipButton:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: #fff;
+        }
+
+        #bgmToggle {
+            position: absolute;
+            top: 30px;
+            left: 30px;
+            width: 50px;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #bgmToggle:hover {
+            background: var(--primary-color);
+            transform: scale(1.1);
+        }
+
+        .story-title {
+            color: var(--primary-color);
+            font-size: 1.8em;
+            text-align: center;
+            margin-bottom: 20px;
+            text-shadow: var(--text-shadow);
+            font-weight: bold;
+        }
+
+        /* 人物立绘样式（与第一个代码保持一致） */
+        #characterSprite {
+            position: absolute;
+            bottom: 0;
+            left: 5%;
+            height: 80vh;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            filter: none;
+            -webkit-filter: none;
+        }
+
+        #characterSprite.visible {
+            opacity: 1;
+        }
+
+        /* 护士立绘样式 - 关键修改：与第一个代码完全对齐 */
+        #nurseSprite {
+            position: absolute;
+            bottom: 0;
+            right: 5%;
+            height: 80vh; /* 原66.67vh，改为与第一个代码一致的80vh */
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            filter: none; /* 新增：与第一个代码保持一致 */
+            -webkit-filter: none; /* 新增：与第一个代码保持一致 */
+        }
+
+        #nurseSprite.visible {
+            opacity: 1;
+        }
+
+        /* 音效提示 */
+        .sound-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 3em;
+            opacity: 0;
+            z-index: 4;
+            animation: soundPulse 1.5s ease-in-out;
+        }
+
+        @keyframes soundPulse {
+            0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            50% { opacity: 0.7; transform: translate(-50%, -50%) scale(1.2); }
+            100% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+        }
+
+        /* 移动端适配 - 关键修改：护士立绘高度与第一个代码对齐 */
+        @media (max-width: 768px) {
+            #storyContainer {
+                width: 95%;
+                padding: 20px;
+                bottom: 15%;
+            }
+
+            #storyText {
+                font-size: 1.2em;
+                line-height: 1.6;
+            }
+
+            .story-title {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+
+            #continueButton {
+                padding: 10px 20px;
+                font-size: 1em;
+            }
+
+            #bgmToggle, #skipButton {
+                top: 20px;
+            }
+
+            #bgmToggle {
+                left: 20px;
+                width: 45px;
+                height: 45px;
+            }
+
+            #skipButton {
+                right: 20px;
+                padding: 6px 12px;
+                font-size: 0.8em;
+            }
+
+            #characterSprite {
+                height: 65vh; /* 原50vh，改为与第一个代码移动端一致的65vh */
+            }
+            
+            #nurseSprite {
+                height: 65vh; /* 原66.67vh，改为与第一个代码移动端一致的65vh */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <!-- 背景图片 -->
+        <img id="backgroundImage" src="" alt="背景">
+        
+        <!-- 人物立绘 -->
+        <img id="characterSprite" src="../pictures/1.png" alt="人物立绘">
+        
+        <!-- 护士立绘（图片源保持不变，仅调整尺寸/位置） -->
+        <img id="nurseSprite" src="../pictures/nurse_mask.png" alt="带口罩的护士立绘">
+        
+        <!-- 故事遮罩层 -->
+        <div id="storyOverlay"></div>
+        
+        <!-- 音效指示器 -->
+        <div id="soundIndicator" class="sound-indicator">👣</div>
+        
+        <!-- BGM控制按钮 -->
+        <button id="bgmToggle">🔇</button>
+        
+        <!-- 跳过按钮 -->
+        <button id="skipButton">跳过</button>
+        
+        <!-- 故事文本容器 -->
+        <div id="storyContainer">
+            <div class="story-title">13号病房</div>
+            <div id="storyText"></div>
+            <button id="continueButton">继续</button>
+        </div>
+        
+        <!-- BGM音频 -->
+        <audio id="bgmAudio" loop preload="auto">
+            <source src="../audio/Hospital bgm.mp3" type="audio/mpeg">
+        </audio>
+         
+         <!-- 脚步声音频 -->
+         <audio id="footstepAudio" preload="auto">
+            <source src="../audio/footsteps.mp3" type="audio/mpeg">
+        </audio>
+    </div>
+
+    <script src="../bgm-manager.js"></script>
+    <script>
+        // 故事内容配置（未修改）
+        const storySteps = [
+            {
+                text: "那个作息表怎么说的来着？6-22点在病房呆着，不管了，先遵守吧",
+                background: "../pictures/病房_night.jpg",
+                delay: 1000,
+                isCharacterSpeaking: true,
+                isNurseSpeaking: false
+            },
+            {
+                text: "我躺回病床上，不一会在昏昏沉沉中，我听到病房门被打开的声音",
+                background: "../pictures/病房_night.jpg",
+                delay: 1500,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: false
+            },
+    
+            {
+                text: "护士1：B13怎么还没醒？你30分钟后再来看看，要是醒了赶紧给他试试新药，瑞医生催的紧。",
+                background: "../pictures/病房_night.jpg",
+                delay: 1500,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: true
+            },
+            {
+                text: "护士2：知道了，还是用那个新药吧？",
+                background: "../pictures/病房_night.jpg",
+                delay: 1000,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: true
+            },
+            {
+                text: "护士1：是啊，你用药注意这点分量， B12已经不能用了，B13今天刚来，院长这两天就要用他做实验，你们谁要是把他再弄报废了，就自己给我顶到手术台上去！",
+                background: "../pictures/病房_night.jpg",
+                delay: 2500,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: true
+            },
+            {
+                text: "护士2：好的好的，我一定注意",
+                background: "../pictures/病房_night.jpg",
+                delay: 1000,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: true
+            },
+            {
+                text: "......",
+                background: "../pictures/病房_night.jpg",
+                delay: 500,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: false,
+                
+            },
+        
+            {
+                text: "做实验？这家医院有点古怪，我不能让她给我打药，还是得赶紧跑出去啊",
+                background: "../pictures/病房_night.jpg",
+                delay: 1500,
+                isCharacterSpeaking: true,
+                isNurseSpeaking: false
+            },
+            {
+                text: "以防万一，我还是等着门一侧的小钟表时间跳到22：00后悄悄迈出病房",
+                background: "../pictures/时间1.jpg",
+                delay: 2000,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: false
+            },
+            {
+                text: "......",
+                background: "../pictures/时间2.jpg",
+                delay: 2000,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: false
+            },
+            {
+                text: "",
+                background: "../pictures/走廊护士站1.jpg",
+                delay: 1000,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: false,
+                stageDirection: "住院区走廊，远处有护士站"
+            },
+            {
+                text: "您好，请问一下这里......",
+                background: "../pictures/走廊护士站1.jpg",
+                delay: 1000,
+                isCharacterSpeaking: true,
+                isNurseSpeaking: false
+            },
+            {
+                text: "...",
+                background: "../pictures/走廊护士站1.jpg",
+                delay: 1000,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: true
+            },
+            {
+                text: "不对！她还带了口罩，规则怎么说的来着？",
+                background: "../pictures/走廊护士站1.jpg",
+                delay: 1500,
+                isCharacterSpeaking: true,
+                isNurseSpeaking: false
+            },
+            {
+                text: "护士1：医生办公室在二楼，别走错了。记住，千万不要去四楼。",
+                background: "../pictures/走廊护士站1.jpg",
+                delay: 2000,
+                isCharacterSpeaking: false,
+                isNurseSpeaking: true
+            },
+            {
+                text: "好......好的。",
+                background: "../pictures/走廊护士站1.jpg",
+                delay: 1000,
+                isCharacterSpeaking: true,
+                isNurseSpeaking: false
+            }
+        ];
+
+        let currentStep = 0;
+        let isTyping = false;
+        let bgmManager;
+        let currentBackground = '';
+        let soundEffects = {};
+
+        // 页面元素（未修改）
+        const backgroundImage = document.getElementById('backgroundImage');
+        const storyText = document.getElementById('storyText');
+        const continueButton = document.getElementById('continueButton');
+        const skipButton = document.getElementById('skipButton');
+        const characterSprite = document.getElementById('characterSprite');
+        const nurseSprite = document.getElementById('nurseSprite');
+        const soundIndicator = document.getElementById('soundIndicator');
+
+        // 初始化（未修改）
+        function init() {
+            // 初始化BGM管理器
+            bgmManager = new BGMManager('bgmAudio', 'bgmToggle');
+            
+            // 初始化音效
+            soundEffects.footstep = document.getElementById('footstepAudio');
+            
+            // 开始第一步
+            showStep(0);
+            
+            // 绑定事件
+            continueButton.addEventListener('click', nextStep);
+            skipButton.addEventListener('click', skipSection);
+            
+            // 键盘事件
+            document.addEventListener('keydown', handleKeyPress);
+        }
+
+        // 显示指定步骤（未修改）
+        function showStep(stepIndex) {
+            if (stepIndex >= storySteps.length) {
+                endSection();
+                return;
+            }
+
+            const step = storySteps[stepIndex];
+            currentStep = stepIndex;
+            
+            // 控制人物立绘显示/隐藏
+            if (step.isCharacterSpeaking) {
+                characterSprite.classList.add('visible');
+            } else {
+                characterSprite.classList.remove('visible');
+            }
+            
+            // 控制护士立绘显示/隐藏
+            if (step.isNurseSpeaking) {
+                nurseSprite.classList.add('visible');
+            } else {
+                nurseSprite.classList.remove('visible');
+            }
+            
+            // 播放音效
+            if (step.playSound && soundEffects[step.playSound]) {
+                soundEffects[step.playSound].play();
+                // 显示音效指示器
+                soundIndicator.style.opacity = 0;
+                setTimeout(() => {
+                    soundIndicator.style.opacity = 1;
+                }, 10);
+            } else {
+                soundIndicator.style.opacity = 0;
+            }
+            
+            // 切换背景图片（只有不同图片才渐变）
+            if (currentBackground !== step.background) {
+                backgroundImage.style.opacity = '0';
+                setTimeout(() => {
+                    backgroundImage.src = step.background;
+                    currentBackground = step.background;
+                    setTimeout(() => {
+                        backgroundImage.style.opacity = '1';
+                    }, 100);
+                }, currentBackground ? 500 : 0);
+            }
+            
+            // 隐藏继续按钮
+            continueButton.style.opacity = '0';
+            
+            // 显示文本（打字机效果）
+            const displayText = step.stageDirection ? step.stageDirection : step.text;
+            typewriterEffect(displayText, step.delay);
+        }
+
+        // 打字机效果（未修改）
+        function typewriterEffect(text, delay) {
+            isTyping = true;
+            storyText.style.opacity = '0';
+            storyText.textContent = '';
+            
+            setTimeout(() => {
+                storyText.style.opacity = '1';
+                let index = 0;
+                
+                function typeChar() {
+                    if (index < text.length && isTyping) {
+                        storyText.textContent += text.charAt(index);
+                        index++;
+                        setTimeout(typeChar, 50);
+                    } else {
+                        isTyping = false;
+                        // 文本显示完成后，显示继续按钮
+                        setTimeout(() => {
+                            continueButton.style.opacity = '1';
+                        }, 300);
+                    }
+                }
+                
+                typeChar();
+            }, 300);
+        }
+
+        // 下一步（未修改）
+        function nextStep() {
+            if (isTyping) {
+                // 如果正在打字，跳过打字效果
+                isTyping = false;
+                const step = storySteps[currentStep];
+                const displayText = step.stageDirection ? step.stageDirection : step.text;
+                storyText.textContent = displayText;
+                continueButton.style.opacity = '1';
+                return;
+            }
+            
+            if (currentStep < storySteps.length - 1) {
+                showStep(currentStep + 1);
+            } else {
+                endSection();
+            }
+        }
+
+        // 键盘事件处理（未修改）
+        function handleKeyPress(e) {
+            if (e.key === ' ' || e.key === 'Enter') {
+                e.preventDefault();
+                nextStep();
+            } else if (e.key === 'Escape') {
+                skipSection();
+            }
+        }
+
+        // 跳过当前部分（未修改）
+        function skipSection() {
+            if (confirm('确定要跳过吗？')) {
+                endSection();
+            }
+        }
+
+        // 结束当前部分，跳转到下一页（带黑屏渐变）（未修改）
+        function endSection() {
+            // 渐变到黑屏
+            document.body.style.transition = 'opacity 1s ease-in-out';
+            document.body.style.opacity = '0';
+            
+            setTimeout(() => {
+                // 跳转到下一个页面
+                window.location.href = 'part_1_3.html';
+            }, 1000);
+        }
+
+        // 预加载图片（未修改）
+        function preloadImages() {
+            // 预加载背景图片
+            storySteps.forEach(step => {
+                const img = new Image();
+                img.src = step.background;
+            });
+            
+            // 预加载人物立绘
+            const charImg = new Image();
+            charImg.src = '../pictures/1.png';
+            
+            // 预加载护士立绘（带口罩的版本）
+            const nurseImg = new Image();
+            nurseImg.src = '../pictures/nurse_mask.png';
+        }
+
+        // 页面加载完成后初始化（未修改）
+        window.addEventListener('load', () => {
+            preloadImages();
+            init();
+        });
+    </script>
+</body>
+</html>

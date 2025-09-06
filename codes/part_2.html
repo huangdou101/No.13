@@ -36,36 +36,36 @@
 
         /* 简洁的操作提示UI */
         .controls {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.65);
-            padding: 12px;
-            border-radius: 8px;
-            z-index: 5;
-            max-width: 220px;
+    position: absolute;
+    top: 10px; /* 保持靠上位置 */
+    left: 20px;
+    background: rgba(0, 0, 0, 0.65);
+    padding: 6px; /* 进一步减小内边距 */
+    border-radius: 6px; /* 适当减小圆角 */
+    z-index: 5;
+    max-width: 150px; /* 进一步减小最大宽度 */
         }
 
         .control-item {
-            display: flex;
-            align-items: center;
-            margin: 6px 0;
-            font-size: 0.95em;
+    display: flex;
+    align-items: center;
+    margin: 3px 0; /* 进一步减小项间距 */
+    font-size: 0.75em; /* 进一步缩小字体 */
         }
 
         .key {
-            min-width: 28px;
-            height: 24px;
-            padding: 0 6px;
-            background: rgba(50, 50, 50, 0.8);
-            border: 1px solid #666;
-            border-radius: 4px;
-            margin: 0 5px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 0.9em;
+    min-width: 22px; /* 进一步减小按键宽度 */
+    height: 18px; /* 进一步减小按键高度 */
+    padding: 0 3px; /* 进一步减小按键内边距 */
+    background: rgba(50, 50, 50, 0.8);
+    border: 1px solid #666;
+    border-radius: 3px; /* 适当减小按键圆角 */
+    margin: 0 3px; /* 进一步减小按键边距 */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.7em; /* 进一步缩小按键字体 */
         }
 
         #preload {
@@ -270,11 +270,34 @@
             font-size: 1.8em;
             margin: 0;
         }
+
+        /* 对话气泡样式 */
+        #dialogBubble {
+            position: absolute;
+            right: 350px;  /* 护士站位置调整 */
+            top: 220px;
+            width: 120px;
+            height: auto;
+            display: none;
+            z-index: 5;
+            transition: opacity 0.3s ease;
+        }
+
+        #dialogBubble img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
     <div id="gameContainer">
         <canvas id="gameCanvas" width="1450" height="818"></canvas>
+        
+        <!-- 对话气泡 -->
+        <div id="dialogBubble">
+            <img src="../pictures/气泡.png" alt="对话提示">
+        </div>
         
         <!-- 极简操作提示 -->
         <div class="controls">
@@ -285,356 +308,399 @@
         
         <!-- 背包按钮 -->
         <div id="backpackButton">
-    <img src="../pictures/bag.png" id="bagIcon" alt="背包">
-    <span class="item-count" id="bagCount">1</span>
-    <!-- 将初始display从block改为none -->
-    <span class="new-item-indicator" id="newItemIndicator" style="display: none;"></span>
-</div>
-
-    <!-- 纸张展开遮罩层 -->
-    <div id="paperOverlay">
-        <div class="paper-content">
-            <img src="../pictures/folded_paper_1.png" id="unfoldedPaper" alt="展开的纸">
-            <button id="closePaper">关闭</button>
+            <img src="../pictures/bag.png" id="bagIcon" alt="背包">
+            <span class="item-count" id="bagCount">1</span>
+            <span class="new-item-indicator" id="newItemIndicator" style="display: none;"></span>
         </div>
-    </div>
-    
-    <!-- 背包界面 -->
-    <div id="backpackOverlay">
-        <div class="backpack-content">
-            <div class="backpack-header">
-                <h2>背包</h2>
-                <button id="closeBackpack">关闭</button>
+
+        <!-- 纸张展开遮罩层 -->
+        <div id="paperOverlay">
+            <div class="paper-content">
+                <img src="../pictures/folded_paper_1.png" id="unfoldedPaper" alt="展开的纸">
+                <button id="closePaper">关闭</button>
             </div>
-            <div id="backpackGrid"></div>
         </div>
-    </div>
+        
+        <!-- 背包界面 -->
+        <div id="backpackOverlay">
+            <div class="backpack-content">
+                <div class="backpack-header">
+                    <h2>背包</h2>
+                    <button id="closeBackpack">关闭</button>
+                </div>
+                <div id="backpackGrid"></div>
+            </div>
+        </div>
 
-    <!-- 预加载所有图片 -->
-    <div id="preload">
-        <!-- 背景图 -->
-        <img src="../pictures/走廊护士站.jpg" id="background" alt="走廊背景">
-        <!-- 行走动画 -->
-        <img src="../pictures/walk1.png" id="walk1" alt="行走状态1">
-        <img src="../pictures/walk2.png" id="walk2" alt="行走状态2">
-        <img src="../pictures/walk3.png" id="walk3" alt="行走状态3">
-        <!-- 待机动画 -->
-        <img src="../pictures/stand1.png" id="stand1" alt="待机动画1">
-        <img src="../pictures/stand2.png" id="stand2" alt="待机动画2">
-        <!-- 展开的纸图片 -->
-        <img src="../pictures/folded_paper_1.png" id="unfoldedPaper" alt="展开的纸">
-        <!-- 背包图标 -->
-        <img src="../pictures/bag.png" id="bagIconPreload" alt="背包图标">
-    </div>
+        <!-- 预加载所有图片 -->
+        <div id="preload">
+            <!-- 背景图 -->
+            <img src="../pictures/走廊护士站.jpg" id="background" alt="走廊背景">
+            <!-- 行走动画 -->
+            <img src="../pictures/walk1.png" id="walk1" alt="行走状态1">
+            <img src="../pictures/walk2.png" id="walk2" alt="行走状态2">
+            <img src="../pictures/walk3.png" id="walk3" alt="行走状态3">
+            <!-- 待机动画 -->
+            <img src="../pictures/stand1.png" id="stand1" alt="待机动画1">
+            <img src="../pictures/stand2.png" id="stand2" alt="待机动画2">
+            <!-- 展开的纸图片 -->
+            <img src="../pictures/folded_paper_1.png" id="unfoldedPaperImg" alt="展开的纸">
+            <!-- 背包图标 -->
+            <img src="../pictures/bag.png" id="bagIconPreload" alt="背包图标">
+            <!-- 对话气泡 -->
+            <img src="../pictures/气泡.png" id="bubbleImg" alt="对话气泡">
+        </div>
 
-    <script>
-        /*************************
-         *  配置与初始化
-         *************************/
-        const canvas = document.getElementById('gameCanvas');
-        const ctx = canvas.getContext('2d');
-        
-        const TARGET_HEIGHT = 336; 
-        const WALK_SPEED = 13;
-        const FRAME_DURATION = 80;
-        const FRAMES_PER_IMAGE = 3;
-        const STAND_FRAME_DURATION = 100;
-        const STAND_FRAMES_PER_IMAGE = 5;
-        
-        const WALK_ANIMATION_SEQUENCE = ['walk1', 'walk2', 'walk1', 'walk3'];
-        const STAND_ANIMATION_SEQUENCE = ['stand1', 'stand2'];
-        
-        const images = {
-            background: document.getElementById('background'),
-            walk1: document.getElementById('walk1'),
-            walk2: document.getElementById('walk2'),
-            walk3: document.getElementById('walk3'),
-            stand1: document.getElementById('stand1'),
-            stand2: document.getElementById('stand2'),
-            unfoldedPaper: document.getElementById('unfoldedPaper'),
-            bagIcon: document.getElementById('bagIconPreload')
-        };
-        
-        const player = {
-            x: 100,  // 人物初始位置在画面左侧
-            y: 0,
-            width: 0,
-            height: 0,
-            originalWidth: 0,
-            originalHeight: 0,
-            direction: 'right',
-            isMoving: false,
-            walkCurrentFrame: 0,
-            walkFrameCounter: 0,
-            standCurrentFrame: 0,
-            standFrameCounter: 0
-        };
-        
-        // 修改背包对象的初始hasNewItem属性
-        const backpack = {
-            items: [],
-            maxItems: 16,
-            hasNewItem: false  // 从true改为false，因为初始物品已看过
-        };
-        
-        const keys = {
-            left: false,
-            right: false,
-            space: false
-        };
+        <script>
+            /*************************
+             *  配置与初始化
+             *************************/
+            const canvas = document.getElementById('gameCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            const TARGET_HEIGHT = 336; 
+            const WALK_SPEED = 13;
+            const FRAME_DURATION = 80;
+            const FRAMES_PER_IMAGE = 3;
+            const STAND_FRAME_DURATION = 100;
+            const STAND_FRAMES_PER_IMAGE = 5;
+            
+            // 护士站交互区域
+            const NURSE_STATION_AREA = {
+                minX: 1000,  // 右侧护士站区域的X坐标范围
+                maxX: 1300,
+                interactionRange: 150  // 交互有效范围
+            };
+            
+            const WALK_ANIMATION_SEQUENCE = ['walk1', 'walk2', 'walk1', 'walk3'];
+            const STAND_ANIMATION_SEQUENCE = ['stand1', 'stand2'];
+            
+            const images = {
+                background: document.getElementById('background'),
+                walk1: document.getElementById('walk1'),
+                walk2: document.getElementById('walk2'),
+                walk3: document.getElementById('walk3'),
+                stand1: document.getElementById('stand1'),
+                stand2: document.getElementById('stand2'),
+                unfoldedPaper: document.getElementById('unfoldedPaperImg'),
+                bagIcon: document.getElementById('bagIconPreload'),
+                bubble: document.getElementById('bubbleImg')
+            };
+            
+            const player = {
+                x: 200,  // 人物初始位置在画面左侧
+                y: 0,
+                width: 0,
+                height: 0,
+                originalWidth: 0,
+                originalHeight: 0,
+                direction: 'right',
+                isMoving: false,
+                walkCurrentFrame: 0,
+                walkFrameCounter: 0,
+                standCurrentFrame: 0,
+                standFrameCounter: 0,
+                nearNurseStation: false  // 是否靠近护士站
+            };
+            
+            const backpack = {
+                items: [],
+                maxItems: 16,
+                hasNewItem: false
+            };
+            
+            const keys = {
+                left: false,
+                right: false,
+                space: false
+            };
 
-        /*************************
-         *  加载与初始化
-         *************************/
-        function init() {
-            Promise.all([
-                new Promise(resolve => images.background.onload = resolve),
-                new Promise(resolve => images.walk1.onload = resolve),
-                new Promise(resolve => images.walk2.onload = resolve),
-                new Promise(resolve => images.walk3.onload = resolve),
-                new Promise(resolve => images.stand1.onload = resolve),
-                new Promise(resolve => images.stand2.onload = resolve),
-                new Promise(resolve => images.unfoldedPaper.onload = resolve),
-                new Promise(resolve => images.bagIcon.onload = resolve)
-            ]).then(() => {
-                player.originalWidth = images.walk1.naturalWidth;
-                player.originalHeight = images.walk1.naturalHeight;
-                const scaleRatio = TARGET_HEIGHT / player.originalHeight;
-                
-                player.width = player.originalWidth * scaleRatio;
-                player.height = TARGET_HEIGHT;
-                // 人物位置向上调整（原为 canvas.height - player.height）
-                player.y = canvas.height - player.height - 50;
-                
-                // 初始化时添加已收集的纸条
-                backpack.items.push({
-                    id: 'paper1',
-                    name: '病房笔记',
-                    image: '../pictures/纸团.png',
-                    count: 1
+            /*************************
+             *  加载与初始化
+             *************************/
+            function init() {
+                Promise.all([
+                    new Promise(resolve => images.background.onload = resolve),
+                    new Promise(resolve => images.walk1.onload = resolve),
+                    new Promise(resolve => images.walk2.onload = resolve),
+                    new Promise(resolve => images.walk3.onload = resolve),
+                    new Promise(resolve => images.stand1.onload = resolve),
+                    new Promise(resolve => images.stand2.onload = resolve),
+                    new Promise(resolve => images.unfoldedPaper.onload = resolve),
+                    new Promise(resolve => images.bagIcon.onload = resolve),
+                    new Promise(resolve => images.bubble.onload = resolve)  // 加载对话气泡图片
+                ]).then(() => {
+                    player.originalWidth = images.walk1.naturalWidth;
+                    player.originalHeight = images.walk1.naturalHeight;
+                    const scaleRatio = TARGET_HEIGHT / player.originalHeight;
+                    
+                    player.width = player.originalWidth * scaleRatio;
+                    player.height = TARGET_HEIGHT;
+                    player.y = canvas.height - player.height - 50;
+                    
+                    // 初始化时添加已收集的纸条
+                    backpack.items.push({
+                        id: 'paper1',
+                        name: '病房笔记',
+                        image: '../pictures/纸团.png',
+                        count: 1
+                    });
+                    
+                    document.getElementById('closePaper').addEventListener('click', closePaper);
+                    document.getElementById('closeBackpack').addEventListener('click', closeBackpack);
+                    document.getElementById('backpackButton').addEventListener('click', openBackpack);
+                    
+                    // 初始化背包UI
+                    updateBackpackUI();
+                    updateBackpackButton();
+                    
+                    requestAnimationFrame(gameLoop);
+                }).catch(err => {
+                    console.error("图片加载失败:", err);
+                    alert("请确保所有图片文件（包括走廊护士站.jpg、folded_paper_1.png、bag.png和气泡.png）在正确路径");
                 });
+            }
+            
+            /*************************
+             *  背包系统功能
+             *************************/
+            
+            function updateBackpackButton() {
+                const count = backpack.items.reduce((total, item) => total + item.count, 0);
+                document.getElementById('bagCount').textContent = count;
+            }
+            
+            function updateBackpackUI() {
+                const grid = document.getElementById('backpackGrid');
+                grid.innerHTML = '';
                 
-                document.getElementById('closePaper').addEventListener('click', closePaper);
-                document.getElementById('closeBackpack').addEventListener('click', closeBackpack);
-                document.getElementById('backpackButton').addEventListener('click', openBackpack);
-                
-                // 初始化背包UI
+                backpack.items.forEach(item => {
+                    const itemElement = document.createElement('div');
+                    itemElement.className = 'backpack-item';
+                    itemElement.title = `${item.name} x${item.count}`;
+                    
+                    const img = document.createElement('img');
+                    img.src = item.image;
+                    img.alt = item.name;
+                    
+                    const countBadge = document.createElement('div');
+                    countBadge.className = 'item-count-badge';
+                    countBadge.textContent = item.count;
+                    
+                    itemElement.appendChild(img);
+                    itemElement.appendChild(countBadge);
+                    
+                    itemElement.addEventListener('click', () => {
+                        showPaper(item.id);
+                    });
+                    
+                    grid.appendChild(itemElement);
+                });
+            }
+            
+            function showPaper(paperId) {
+                closeBackpack();
+                document.getElementById('paperOverlay').style.display = 'flex';
+                document.getElementById('gameCanvas').style.filter = 'blur(5px)';
+            }
+            
+            function openBackpack() {
+                document.getElementById('backpackOverlay').style.display = 'flex';
                 updateBackpackUI();
-                updateBackpackButton();
+                
+                // 清除新物品提示
+                if (backpack.hasNewItem) {
+                    backpack.hasNewItem = false;
+                    document.getElementById('newItemIndicator').style.display = 'none';
+                }
+            }
+            
+            function closeBackpack() {
+                document.getElementById('backpackOverlay').style.display = 'none';
+            }
+            
+            /*************************
+             *  关闭展开的纸
+             *************************/
+            function closePaper() {
+                document.getElementById('paperOverlay').style.display = 'none';
+                document.getElementById('gameCanvas').style.filter = 'none';
+            }
+
+            /*************************
+             *  护士站交互功能
+             *************************/
+            function checkNurseStationProximity() {
+                // 检查玩家是否在护士站附近
+                const isNear = player.x > (NURSE_STATION_AREA.minX - NURSE_STATION_AREA.interactionRange) && 
+                              player.x < (NURSE_STATION_AREA.maxX + NURSE_STATION_AREA.interactionRange);
+                
+                // 显示或隐藏对话气泡
+                const dialogBubble = document.getElementById('dialogBubble');
+                if (isNear) {
+                    dialogBubble.style.display = 'block';
+                    player.nearNurseStation = true;
+                } else {
+                    dialogBubble.style.display = 'none';
+                    player.nearNurseStation = false;
+                }
+            }
+            
+            function handleNurseInteraction() {
+                // 跳转到护士对话页面
+                window.location.href = 'nurse_dialogue.html';
+            }
+
+            /*************************
+             *  绘制场景
+             *************************/
+            function drawScene() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.drawImage(images.background, 0, 0, canvas.width, canvas.height);
+            }
+
+            /*************************
+             *  绘制人物
+             *************************/
+            function drawPlayer() {
+                let currentImageName;
+                if (player.isMoving) {
+                    currentImageName = WALK_ANIMATION_SEQUENCE[player.walkCurrentFrame];
+                } else {
+                    currentImageName = STAND_ANIMATION_SEQUENCE[player.standCurrentFrame];
+                }
+                const currentImage = images[currentImageName];
+                
+                ctx.save();
+                
+                let drawX = player.x - player.width / 2;
+                const drawY = player.y;
+                
+                if (player.direction === 'left') {
+                    ctx.translate(player.x + player.width / 2, 0);
+                    ctx.scale(-1, 1);
+                    drawX = 0;
+                }
+                
+                ctx.drawImage(currentImage, drawX, drawY, player.width, player.height);
+                
+                ctx.restore();
+            }
+
+            /*************************
+             *  更新人物状态与动画
+             *************************/
+            function updatePlayer() {
+                if (keys.left) {
+                    player.direction = 'left';
+                    player.isMoving = true;
+                    if (player.x > player.width / 2) {
+                        player.x -= WALK_SPEED;
+                    }
+                    
+                    player.walkFrameCounter++;
+                    if (player.walkFrameCounter >= FRAMES_PER_IMAGE) {
+                        player.walkFrameCounter = 0;
+                        player.walkCurrentFrame = (player.walkCurrentFrame + 1) % WALK_ANIMATION_SEQUENCE.length;
+                    }
+                } else if (keys.right) {
+                    player.direction = 'right';
+                    player.isMoving = true;
+                    if (player.x < canvas.width - player.width / 2) {
+                        player.x += WALK_SPEED;
+                    }
+                    
+                    player.walkFrameCounter++;
+                    if (player.walkFrameCounter >= FRAMES_PER_IMAGE) {
+                        player.walkFrameCounter = 0;
+                        player.walkCurrentFrame = (player.walkCurrentFrame + 1) % WALK_ANIMATION_SEQUENCE.length;
+                    }
+                } else {
+                    player.isMoving = false;
+                    
+                    player.standFrameCounter++;
+                    if (player.standFrameCounter >= STAND_FRAMES_PER_IMAGE) {
+                        player.standFrameCounter = 0;
+                        player.standCurrentFrame = (player.standCurrentFrame + 1) % STAND_ANIMATION_SEQUENCE.length;
+                    }
+                }
+                
+                // 检查是否靠近护士站
+                checkNurseStationProximity();
+                
+                // 处理交互
+                if (keys.space && player.nearNurseStation) {
+                    handleNurseInteraction();
+                    keys.space = false; // 防止重复触发
+                }
+            }
+
+            /*************************
+             *  游戏主循环
+             *************************/
+            let lastTime = 0;
+            function gameLoop(timestamp) {
+                const frameDuration = player.isMoving ? FRAME_DURATION : STAND_FRAME_DURATION;
+                
+                if (!lastTime || timestamp - lastTime >= frameDuration) {
+                    lastTime = timestamp;
+                    
+                    drawScene();
+                    updatePlayer();
+                    drawPlayer();
+                }
                 
                 requestAnimationFrame(gameLoop);
-            }).catch(err => {
-                console.error("图片加载失败:", err);
-                alert("请确保所有图片文件（包括走廊护士站.jpg、folded_paper_1.png和bag.png）在同一文件夹");
+            }
+
+            /*************************
+             *  键盘事件
+             *************************/
+            document.addEventListener('keydown', (e) => {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                    e.preventDefault();
+                }
+                
+                switch(e.key) {
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        keys.left = true;
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        keys.right = true;
+                        break;
+                    case ' ':
+                        keys.space = true;
+                        break;
+                }
             });
-        }
-        
-        /*************************
-         *  背包系统功能
-         *************************/
-        
-        function updateBackpackButton() {
-            const count = backpack.items.reduce((total, item) => total + item.count, 0);
-            document.getElementById('bagCount').textContent = count;
-        }
-        
-        function updateBackpackUI() {
-            const grid = document.getElementById('backpackGrid');
-            grid.innerHTML = '';
-            
-            backpack.items.forEach(item => {
-                const itemElement = document.createElement('div');
-                itemElement.className = 'backpack-item';
-                itemElement.title = `${item.name} x${item.count}`;
-                
-                const img = document.createElement('img');
-                img.src = item.image;
-                img.alt = item.name;
-                
-                const countBadge = document.createElement('div');
-                countBadge.className = 'item-count-badge';
-                countBadge.textContent = item.count;
-                
-                itemElement.appendChild(img);
-                itemElement.appendChild(countBadge);
-                
-                itemElement.addEventListener('click', () => {
-                    showPaper(item.id);
-                });
-                
-                grid.appendChild(itemElement);
+
+            document.addEventListener('keyup', (e) => {
+                switch(e.key) {
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        keys.left = false;
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        keys.right = false;
+                        break;
+                    case ' ':
+                        keys.space = false;
+                        break;
+                }
             });
-        }
-        
-        function showPaper(paperId) {
-            closeBackpack();
-            document.getElementById('paperOverlay').style.display = 'flex';
-            document.getElementById('gameCanvas').style.filter = 'blur(5px)';
-        }
-        
-        function openBackpack() {
-            document.getElementById('backpackOverlay').style.display = 'flex';
-            updateBackpackUI();
-            
-            // 清除新物品提示
-            if (backpack.hasNewItem) {
-                backpack.hasNewItem = false;
-                document.getElementById('newItemIndicator').style.display = 'none';
-            }
-        }
-        
-        function closeBackpack() {
-            document.getElementById('backpackOverlay').style.display = 'none';
-        }
-        
-        /*************************
-         *  关闭展开的纸
-         *************************/
-        function closePaper() {
-            document.getElementById('paperOverlay').style.display = 'none';
-            document.getElementById('gameCanvas').style.filter = 'none';
-        }
 
-        /*************************
-         *  绘制场景
-         *************************/
-        function drawScene() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.drawImage(images.background, 0, 0, canvas.width, canvas.height);
-        }
-
-        /*************************
-         *  绘制人物
-         *************************/
-        function drawPlayer() {
-            let currentImageName;
-            if (player.isMoving) {
-                currentImageName = WALK_ANIMATION_SEQUENCE[player.walkCurrentFrame];
-            } else {
-                currentImageName = STAND_ANIMATION_SEQUENCE[player.standCurrentFrame];
-            }
-            const currentImage = images[currentImageName];
-            
-            ctx.save();
-            
-            let drawX = player.x - player.width / 2;
-            const drawY = player.y;
-            
-            if (player.direction === 'left') {
-                ctx.translate(player.x + player.width / 2, 0);
-                ctx.scale(-1, 1);
-                drawX = 0;
-            }
-            
-            ctx.drawImage(currentImage, drawX, drawY, player.width, player.height);
-            
-            ctx.restore();
-        }
-
-        /*************************
-         *  更新人物状态与动画
-         *************************/
-        function updatePlayer() {
-            if (keys.left) {
-                player.direction = 'left';
-                player.isMoving = true;
-                if (player.x > player.width / 2) {
-                    player.x -= WALK_SPEED;
-                }
-                
-                player.walkFrameCounter++;
-                if (player.walkFrameCounter >= FRAMES_PER_IMAGE) {
-                    player.walkFrameCounter = 0;
-                    player.walkCurrentFrame = (player.walkCurrentFrame + 1) % WALK_ANIMATION_SEQUENCE.length;
-                }
-            } else if (keys.right) {
-                player.direction = 'right';
-                player.isMoving = true;
-                if (player.x < canvas.width - player.width / 2) {
-                    player.x += WALK_SPEED;
-                }
-                
-                player.walkFrameCounter++;
-                if (player.walkFrameCounter >= FRAMES_PER_IMAGE) {
-                    player.walkFrameCounter = 0;
-                    player.walkCurrentFrame = (player.walkCurrentFrame + 1) % WALK_ANIMATION_SEQUENCE.length;
-                }
-            } else {
-                player.isMoving = false;
-                
-                player.standFrameCounter++;
-                if (player.standFrameCounter >= STAND_FRAMES_PER_IMAGE) {
-                    player.standFrameCounter = 0;
-                    player.standCurrentFrame = (player.standCurrentFrame + 1) % STAND_ANIMATION_SEQUENCE.length;
-                }
-            }
-        }
-
-        /*************************
-         *  游戏主循环
-         *************************/
-        let lastTime = 0;
-        function gameLoop(timestamp) {
-            const frameDuration = player.isMoving ? FRAME_DURATION : STAND_FRAME_DURATION;
-            
-            if (!lastTime || timestamp - lastTime >= frameDuration) {
-                lastTime = timestamp;
-                
-                drawScene();
-                updatePlayer();
-                drawPlayer();
-            }
-            
-            requestAnimationFrame(gameLoop);
-        }
-
-        /*************************
-         *  键盘事件
-         *************************/
-        document.addEventListener('keydown', (e) => {
-            if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
-                e.preventDefault();
-            }
-            
-            switch(e.key) {
-                case 'ArrowLeft':
-                case 'a':
-                case 'A':
-                    keys.left = true;
-                    break;
-                case 'ArrowRight':
-                case 'd':
-                case 'D':
-                    keys.right = true;
-                    break;
-                case ' ':
-                    keys.space = true;
-                    break;
-            }
-        });
-
-        document.addEventListener('keyup', (e) => {
-            switch(e.key) {
-                case 'ArrowLeft':
-                case 'a':
-                case 'A':
-                    keys.left = false;
-                    break;
-                case 'ArrowRight':
-                case 'd':
-                case 'D':
-                    keys.right = false;
-                    break;
-                case ' ':
-                    keys.space = false;
-                    break;
-            }
-        });
-
-        /*************************
-         *  启动游戏
-         *************************/
-        init();
-    </script>
+            /*************************
+             *  启动游戏
+             *************************/
+            init();
+        </script>
+    </div>
 </body>
 </html>
