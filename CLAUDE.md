@@ -38,11 +38,15 @@ No package manager, build tools, or test runners are used.
 │   ├── team.html         # Development team showcase
 │   ├── prologue.html     # Game opening sequence
 │   ├── part_1_1.html     # First game chapter (canvas-based)
-│   ├── part_1_2.html     # Second game chapter
-│   ├── part_2.html       # Third game chapter
+│   ├── part_1_2.html     # Second game chapter (canvas-based)
+│   ├── part_1_3.html     # Third game chapter continuation
+│   ├── part_2.html       # Fourth game chapter (canvas-based)
+│   ├── 转场1.html         # Transition scene between chapters
+│   ├── Fifth-main.html   # Fifth chapter - story-driven dialogue system
+│   ├── 拉*.html          # Additional story sequences (拉6, 拉7, etc.)
+│   ├── nurse_dialogue.html # NPC interaction system
 │   ├── endings.html      # Multiple game endings
-│   ├── 转场1.html         # Transition scene
-│   └── [member].html     # Individual team member pages (lhl, wcr, wjp, etc.)
+│   └── [member].html     # Individual team member pages (lhl, wcr, wjp, wsy, wzx, zxn)
 ├── audio/                # Audio assets (MP3 format)
 ├── pictures/             # Game assets and team photos
 │   ├── [character].jpg   # Team member photos
@@ -83,6 +87,13 @@ No package manager, build tools, or test runners are used.
 - **Interaction System**: Distance-based highlighting and interaction with objects (`INTERACTION_DISTANCE`, `HIGHLIGHT_DISTANCE`)
 - **Inventory Management**: LocalStorage-persistent backpack system with item collection and display
 - **Game State**: Chapter progression with seamless transitions between HTML pages
+
+**Dialogue System**: Story-driven interactive narrative system (Fifth-main.html pattern)
+- **Character Sprites**: Positioned sprite system with visibility controls (`#characterMe`, `#characterDoctor`)
+- **Story Container**: Centralized text display with speaker identification and typewriter effects
+- **Background Integration**: Full-screen background images with overlay gradients
+- **Narrative Flow**: Sequential story progression with character positioning and dialogue timing
+- **CSS Custom Properties**: Theme consistency using `--primary-color`, `--dark-red`, `--text-shadow` variables
 
 **User Authentication System**: Client-side authentication using LocalStorage
 - **User Storage**: JSON array in `localStorage.getItem('users')` with user objects
@@ -150,6 +161,20 @@ No package manager, build tools, or test runners are used.
 5. **Game Loop**: Use `requestAnimationFrame()` with frame duration control
 6. **Inventory Integration**: Add items with `addToBackpack(id, name, imageSrc)`
 7. **Chapter Transitions**: Handle scene changes via `window.location.href`
+
+**Adding New Dialogue Scenes**:
+1. **HTML Structure**: Use full-screen container pattern with `#gameContainer`, `#backgroundImage`, `#storyOverlay`
+2. **Character Setup**: Position sprites with `.sprite` class, use `#characterMe` (left) and `#characterDoctor` (right) IDs
+3. **Story Container**: Implement `#storyContainer` with `#speakerName` and `#storyText` elements
+4. **CSS Variables**: Use consistent theming with `--primary-color: #8B0000`, `--dark-red: #5A0000`, `--text-shadow`
+5. **Background Integration**: Apply `object-fit: cover` for full-screen backgrounds with gradient overlays
+6. **Responsive Design**: Use viewport units (`vh`, `vw`) for consistent scaling across devices
+
+**Chapter Transition Patterns**:
+- **Direct Navigation**: Use `window.location.href = 'next-chapter.html'` for immediate transitions
+- **Conditional Logic**: Implement branching narratives with player choice or item-based progression
+- **State Preservation**: Ensure backpack and game state persist across chapter transitions
+- **Asset Preloading**: Load next chapter assets during current chapter for seamless transitions
 
 **BGM Integration**:
 All pages must include BGM controls:
@@ -226,13 +251,15 @@ function saveGameNow(customData = {}) {
 - **Authentication Flow**: Full registration/login system with LocalStorage persistence
 - **Auto-Save System**: Complete save/load functionality with 30-second intervals and chapter transitions
 - **Game Engine**: Canvas-based 2D gameplay with sprite animation and collision detection
-- **Chapter System**: Multiple game chapters with seamless transitions (prologue → part_1_1 → 转场1 → part_1_2 → part_2)
+- **Chapter System**: Multiple game chapters with seamless transitions (prologue → part_1_1 → 转场1 → part_1_2 → part_1_3 → part_2 → Fifth-main)
+- **Dialogue System**: Story-driven interactive narrative system with character sprites and typewriter effects
 - **Inventory System**: Persistent backpack with cross-chapter item persistence
 - **Progress Tracking**: User-specific save slots with chapter progress and game state persistence
 - **Audio Management**: Global BGM system with consistent UI controls
 - **Team Showcase**: Individual member pages with photo galleries
 - **Visual System**: Scroll animations, page transitions, responsive design
 - **Character Rendering**: Unified character display system with fallback blue rectangles
+- **Narrative Branching**: Multiple story paths and interactive dialogue sequences
 
 **Critical Issues and Solutions**:
 

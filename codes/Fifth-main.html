@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>第五章 · 走廊与办公室（Fifth-main）</title>
+<style>
+:root {
+  --primary-color: #8B0000; /* 暗红 */
+  --dark-red: #5A0000;
+  --text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body,html { height:100%; background:#000; color:#fff; font-family:"Microsoft YaHei","SimHei",sans-serif; overflow:hidden; }
+
+#gameContainer { position:relative; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; }
+
+/* 背景图 */
+#backgroundImage { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:opacity 1s; z-index:1; opacity:0; }
+#storyOverlay { position:absolute; inset:0; background:linear-gradient(to bottom,rgba(0,0,0,0.3)0%,rgba(0,0,0,0.5)50%,rgba(0,0,0,0.7)100%); z-index:2; }
+
+/* 立绘 */
+.sprite { position:absolute; bottom:0; height:78vh; z-index:3; opacity:0; transition:opacity .5s; }
+.sprite.visible { opacity:1; }
+#characterMe { left:4%; }
+#characterDoctor { right:4%; }
+
+/* 文本框 */
+#storyContainer {
+  position:absolute; bottom:15%; left:50%; transform:translateX(-50%);
+  width:90%; max-width:880px;
+  background:rgba(0,0,0,0.82);
+  border:2px solid var(--primary-color);
+  border-radius:15px;
+  padding:22px 28px;
+  box-shadow:0 0 30px rgba(139,0,0,0.5);
+  z-index:4;
+}
+.story-title {
+  color:var(--primary-color);
+  font-size:1.7em;
+  text-align:center;
+  margin-bottom:14px;
+  font-weight:800;
+  text-shadow:var(--text-shadow);
+}
+#speakerBar { display:none; }
+#speakerName {
+  font-weight:800; color:var(--primary-color);
+  background:rgba(255,255,255,0.05);
+  padding:6px 14px;
+  border-radius:999px;
+  visibility:hidden;
+}
+#storyText {
+  font-size:1.25em; line-height:1.8;
+  text-align:justify;
+  text-shadow:var(--text-shadow);
+  min-height:120px;
+  opacity:0; transition:opacity .6s;
+  white-space:pre-wrap;
+}
+
+/* 按钮 */
+#continueButton {
+  position:absolute; right:24px; bottom:24px;
+  background:linear-gradient(45deg,var(--primary-color),var(--dark-red));
+  border:0; border-radius:8px;
+  padding:10px 18px;
+  color:#fff; font-weight:700;
+  cursor:pointer;
+  box-shadow:0 4px 14px rgba(0,0,0,0.4);
+  transition:all .3s;
+}
+#continueButton:hover { transform:translateY(-2px); box-shadow:0 6px 20px rgba(139,0,0,0.6); }
+
+#skipButton {
+  position:absolute; top:22px; right:22px;
+  background:rgba(255,255,255,0.1);
+  border:1px solid rgba(255,255,255,0.3);
+  color:#ccc; padding:6px 12px;
+  border-radius:6px; cursor:pointer;
+  z-index:10;
+}
+#skipButton:hover { background:rgba(255,255,255,0.2); color:#fff; }
+
+#bgmToggle {
+  position:absolute; top:22px; left:22px;
+  width:50px; height:50px;
+  border-radius:50%; border:2px solid var(--primary-color);
+  background:rgba(0,0,0,0.7); color:#fff;
+  display:flex; align-items:center; justify-content:center;
+  font-size:1.2em; cursor:pointer; z-index:10;
+}
+#bgmToggle:hover { background:var(--primary-color); transform:scale(1.05); }
+
+/* 缩略图 */
+#thumbWrap { display:none; gap:10px; position:absolute; top:6%; left:50%; transform:translateX(-50%); z-index:5; }
+.thumb-item { display:flex; flex-direction:column; align-items:center; }
+.thumb { width:220px; border:3px solid #fff; border-radius:8px; cursor:pointer; transition:transform .15s; }
+.thumb:hover { transform:translateY(-4px) scale(1.02); }
+.thumb-label { margin-top:4px; font-size:.95em; font-weight:700; color:#ffd; text-shadow:var(--text-shadow); }
+
+/* Modal */
+#paperModal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75); align-items:center; justify-content:center; z-index:999; }
+#paperModal img { max-width:86vw; max-height:82vh; border:3px solid #fff; border-radius:8px; }
+#paperModalClose { position:absolute; top:20px; right:20px; background:rgba(255,255,255,0.08); border:0; padding:6px 12px; border-radius:6px; cursor:pointer; color:#fff; }
+</style>
+</head>
+<body>
+<div id="gameContainer">
+  <img id="backgroundImage" src="" alt="背景">
+  <div id="storyOverlay"></div>
+
+  <!-- 立绘 -->
+  <img id="characterMe" class="sprite" src="../pictures/1.png" alt="我">
+  <img id="characterDoctor" class="sprite" src="../pictures/doctor.png" alt="瑞雪医生">
+
+  <!-- 控件 -->
+  <button id="bgmToggle">🔇</button>
+  <button id="skipButton">跳过</button>
+
+  <!-- 缩略图 -->
+  <div id="thumbWrap">
+    <div class="thumb-item">
+      <img id="paperThumb" class="thumb" src="" alt="缩略图">
+      <div id="thumbLabel"></div>
+    </div>
+  </div>
+
+  <!-- 文本框 -->
+  <div id="storyContainer">
+    <div class="story-title">第五章 · 走廊与办公室</div>
+    <div id="speakerBar"><span id="speakerName"></span></div>
+    <div id="storyText"></div>
+    <button id="continueButton">继续</button>
+  </div>
+
+  <!-- Modal -->
+  <div id="paperModal"><button id="paperModalClose">关闭</button><img id="paperModalImg" src=""></div>
+
+  <!-- BGM -->
+  <audio id="bgmAudio" loop preload="auto"><source src="../audio/Home bgm.mp3" type="audio/mpeg"></audio>
+</div>
+
+<script>
+const storySteps = [
+  { speaker:"我", text:"再按一次二楼试试呢", bg:"../pictures/elevator.jpg" , sprite:"me" },
+
+  { speaker:null, text:"（转场：办公室外的走廊）", bg:"../pictures/corridor.jpg" },
+  { speaker:"我", text:"欸，这次居然真的来到了二楼？", bg:"../pictures/corridor.jpg", sprite:"me" },
+  { speaker:"我", text:"规则里说了，二楼……不乱想了，还是小心为上吧……", bg:"../pictures/corridor.jpg" , sprite:"me" },
+  { speaker:"我", text:"“瑞雪”？我主治医生的办公室吗？我是不是应该敲敲门……", bg:"../pictures/rxoffice.jpg", sprite:"me"  },
+
+  { speaker:null, text:"“叩叩”，无人应答。", bg:"../pictures/rxoffice.jpg" },
+  { speaker:"我", text:"……（试着转动门把手）", bg:"../pictures/rxopendoor.jpg", sprite:"me" },
+  { speaker:"我", text:"我去，竟然没锁！", bg:"../pictures/rxopendoor.jpg" , sprite:"me" },
+
+  { speaker:null, text:"（转场：瑞雪医生的办公室）", bg:"../pictures/doctor_office.jpg" },
+  { speaker:"我", text:"瑞医生？您在吗？我是您新收的患者。", bg:"../pictures/doctor_office.jpg", sprite:"me" },
+  { speaker:"我", text:"没人吗……", bg:"../pictures/doctor_office.jpg", sprite:"me"  },
+
+  { speaker:null, text:"我走到办公桌前，桌上散落着不少纸张。", bg:"../pictures/records_table.jpg" },
+  { speaker:"我", text:"病历单？嘶……好像写的都是病人的身体情况啊，我看看……", bg:"../pictures/records_table.jpg" , sprite:"me" },
+
+  // 病历单一 高亮
+  { speaker: null, text: "病历单一：编号 B12", bg: "../pictures/records_table.jpg",
+  paperImage: "../pictures/medical_1.jpg", paperKey: "paper1", paperLabel: "病历单一（B12） — 点击放大" },
+
+{ speaker: null, text: "入院时间：2025/8/25", bg: "../pictures/records_table.jpg", paperKey: "paper1" },
+
+{ speaker: null, text: "注射药剂：8.25 3ml HL-DD2.1 → 手术后昏迷40分钟，无排异现象。可短暂操控 3 分钟。", bg: "../pictures/records_table.jpg", paperKey: "paper1" },
+
+{ speaker: null, text: "注射药剂：8.27 5ml HL-DD2.1 → 手术后浑身肿胀发紫，个体死亡。", bg: "../pictures/records_table.jpg", paperKey: "paper1" },
+
+{ speaker: null, text: "结论：实验失败。", bg: "../pictures/records_table.jpg", paperKey: "paper1", endHighlight: true },
+
+  // 病历单二 高亮
+ { speaker: null, text: "病历单二：编号 B10", bg: "../pictures/records_table.jpg",
+  paperImage: "../pictures/medical_2.jpg", paperKey: "paper2", paperLabel: "病历单二（B10） — 点击放大" },
+
+{ speaker: null, text: "入院时间：2025/8/13", bg: "../pictures/records_table.jpg", paperKey: "paper2" },
+
+{ speaker: null, text: "注射药剂：8.13 3ml HL-DD1 → 手术后昏迷20分钟，无排异现象，清醒后无反应。", bg: "../pictures/records_table.jpg", paperKey: "paper2" },
+
+{ speaker: null, text: "注射药剂：8.15 5ml HL-DD1 → 手术后昏迷30分钟，无排异现象，清醒后失去神智。", bg: "../pictures/records_table.jpg", paperKey: "paper2" },
+
+{ speaker: null, text: "注射药剂：8.17 麻醉剂 + 1ml HL-DD2 → 手术后昏迷40分钟，清醒后神智清醒，但无法操控。", bg: "../pictures/records_table.jpg", paperKey: "paper2" },
+
+{ speaker: null, text: "注射药剂：8.19 麻醉剂 + 3ml HL-DD2 → 手术后昏迷60分钟，心力衰竭死亡。", bg: "../pictures/records_table.jpg", paperKey: "paper2" },
+
+{ speaker: null, text: "结论：实验失败。", bg: "../pictures/records_table.jpg", paperKey: "paper2", endHighlight: true },
+
+
+  { speaker:"我", text:"实验失败，实验失败，都是实验失败……", bg:"../pictures/records_table.jpg", sprite:"me"  },
+  { speaker:"我", text:"我：“神智清醒”“短暂操控”……这到底是在做什么？？", bg:"../pictures/records_table.jpg", sprite:"me" },
+
+  { speaker:null, text:"（转场：办公桌旁的书柜）", bg:"../pictures/bookcase.jpg" },
+  { speaker:"我", text:"诶，那个书柜里有东西？", bg:"../pictures/bookcase.jpg" , sprite:"me" },
+  { speaker:"我", text:"诶，这个柜子怎么是锁着的，而且钥匙就插在锁上啊？", bg:"../pictures/touchlock.jpg", sprite:"me"  },
+  { speaker:"我", text:"嘎吱……嘎吱……(用力拧钥匙)", bg:"../pictures/lockedlock.png", sprite:"me"  },
+  { speaker:"我", text:"这锁怎么这么难开，是有什么诀窍吗？", bg:"../pictures/lockedlock.png" , sprite:"me" },
+  { speaker:"我", text:"让我看看怎么回事……", bg:"../pictures/lockedlock.png", sprite:"me",jumpTo:"打开柜子小游戏.html?from=fifth-main&step=afterLock" },
+
+  { speaker:null, text:"咔哒。", bg:"../pictures/openedlock.png" },
+  { speaker:"我", text:"呼………………这破锁终于打开了", bg:"../pictures/openedlock.png" , sprite:"me" },
+  { speaker:null, text:"打开书柜，取出报道。", bg: "../pictures/bookcase.jpg",
+  paperImage: "../pictures/report_highlight.png", paperKey: "report", paperLabel: "报道摘录 — 点击放大" },
+
+{ speaker: null, text: "外国某实验室近期发现切除人类部分大脑组织可使其保留神志的同时为切除者所操控！", bg: "../pictures/bookcase.jpg", paperKey: "report" },
+{ speaker: "我", text: "什么玩意？？？切除脑组织？？？", bg: "../pictures/bookcase.jpg", paperKey: "report" , sprite:"me" },
+
+{ speaker: "我", text: "“战争机器？”", bg: "../pictures/bookcase.jpg", paperKey: "report" , sprite:"me" },
+
+{ speaker: "我", text: "“打败它的唯一方法？”", bg: "../pictures/bookcase.jpg", paperKey: "report", sprite:"me", endHighlight: true },
+
+  { speaker:"我", text:"这……这简直丧失人性！我一定要逃出去。", bg:"../pictures/bookcase.jpg", sprite:"me" }
+];
+
+/* DOM */
+let currentStep = 0; // 当前步骤
+let currentHighlightKey = null; // 当前正在高亮显示的 key（null 表示没有高亮）
+let isTyping = false;
+let currentBG = "";
+const bgEl=document.getElementById('backgroundImage');
+const textEl=document.getElementById('storyText');
+const speakerEl=document.getElementById('speakerName');
+const contBtn=document.getElementById('continueButton');
+const spriteMe=document.getElementById('characterMe');
+const spriteDoctor=document.getElementById('characterDoctor');
+const thumbWrap=document.getElementById('thumbWrap');
+const paperThumb=document.getElementById('paperThumb');
+const thumbLabel=document.getElementById('thumbLabel');
+const paperModal=document.getElementById('paperModal');
+const paperModalImg=document.getElementById('paperModalImg');
+const paperModalClose=document.getElementById('paperModalClose');
+const skipBtn=document.getElementById('skipButton');
+const bgmToggle=document.getElementById('bgmToggle');
+const audio=document.getElementById('bgmAudio');
+
+/* BGM */
+let bgmMuted=true;
+bgmToggle.onclick=()=>{bgmMuted=!bgmMuted; audio.muted=bgmMuted; bgmToggle.textContent=bgmMuted?'🔇':'🔊';};
+audio.muted=bgmMuted; audio.play().catch(()=>{});
+
+/* 背景切换 */
+function setBackground(src){
+  if(!src || currentBG===src) return;
+  currentBG=src; bgEl.style.opacity=0;
+  setTimeout(()=>{ bgEl.src=src; setTimeout(()=>bgEl.style.opacity=1,80); }, 400);
+}
+
+/* 打字机 */
+function typewriter(text){
+  isTyping=true; textEl.style.opacity=0; textEl.textContent='';
+  setTimeout(()=>{ textEl.style.opacity=1; let i=0;
+    function tick(){ if(!isTyping) return;
+      if(i<text.length){ textEl.textContent+=text.charAt(i++); setTimeout(tick,28);}
+      else isTyping=false; }
+    tick();
+  },200);
+}
+
+/* 显示缩略图 */
+function showThumb(step) {
+  // 先判断是否需要关闭高亮
+  if (step && step.endHighlight) {
+    currentHighlightKey = null;
+    paperThumb.src = '';
+    thumbLabel.textContent = '';
+    thumbWrap.style.display = 'none';
+    return;
+  }
+
+  // 开始新的高亮
+  if (step && step.paperImage && step.paperKey) {
+    paperThumb.src = step.paperImage;
+    thumbLabel.textContent = step.paperLabel || '';
+    thumbWrap.style.display = 'flex';
+    currentHighlightKey = step.paperKey;
+
+    // 存档“收集到”的标记
+    if (!collected[step.paperKey]) {
+      collected[step.paperKey] = true;
+      localStorage.setItem('collected_' + step.paperKey, '1');
+    }
+    return;
+  }
+
+  // 在同一高亮段中继续保持显示
+  if (step && step.paperKey && currentHighlightKey === step.paperKey) {
+    thumbWrap.style.display = 'flex';
+    return;
+  }
+
+  // 如果当前没有高亮 → 确保隐藏
+  if (!currentHighlightKey) {
+    paperThumb.src = '';
+    thumbLabel.textContent = '';
+    thumbWrap.style.display = 'none';
+  } else {
+    // 否则继续显示（直到遇到 endHighlight）
+    thumbWrap.style.display = 'flex';
+  }
+}
+
+
+/* modal */
+paperThumb.onclick=()=>{ if(paperThumb.src) { paperModalImg.src=paperThumb.src; paperModal.style.display='flex'; } };
+paperModalClose.onclick=()=>{paperModal.style.display='none';};
+
+/* 展示步骤 */
+function showStep(i){
+  if(i>=storySteps.length){ endChapter(); return; }
+  currentStep=i; const step=storySteps[i];
+  
+  // 检查是否需要跳转到小游戏
+  if(step.jumpTo) {
+    window.location.href = step.jumpTo;
+    return;
+  }
+  
+  setBackground(step.bg);
+
+  // 控制立绘
+  spriteMe.classList.remove('visible');
+  spriteDoctor.classList.remove('visible');
+  if(step.sprite==="me") spriteMe.classList.add('visible');
+  if(step.sprite==="doctor") spriteDoctor.classList.add('visible');
+
+  // 控制说话人 - 不再单独显示，将在文本中显示
+  speakerEl.style.visibility='hidden';
+
+  // 打字机文字 - 如果有说话人，在文本前显示角色名
+  let displayText = step.text;
+  if(step.speaker) {
+    displayText = `${step.speaker}：${step.text}`;
+  }
+  typewriter(displayText);
+
+  // 缩略图/高亮
+  showThumb(step);
+}
+
+/* 下一步 */
+function nextStep(){
+  if(isTyping){ isTyping=false; textEl.textContent=storySteps[currentStep].text; return; }
+  showStep(currentStep+1);
+}
+
+contBtn.onclick=nextStep;
+document.addEventListener('keydown',e=>{
+  if(e.code==="Space" || e.code==="Enter"){ e.preventDefault(); nextStep(); }
+});
+
+/* 跳过按钮 */
+skipBtn.onclick=()=>{ endChapter(); };
+
+/* 章节结束 */
+function endChapter(){
+  window.location.href="拉6.html";
+}
+
+/* 初始化 */
+// 检查URL参数，如果从小游戏返回则跳转到对应步骤
+const urlParams = new URLSearchParams(window.location.search);
+const resumeFrom = urlParams.get('resumeFrom');
+
+if (resumeFrom === 'afterLock') {
+  // 找到开锁后的步骤索引（"咔哒。"那一步）
+  const afterLockStepIndex = storySteps.findIndex(step => step.text === '咔哒。');
+  if (afterLockStepIndex !== -1) {
+    showStep(afterLockStepIndex);
+  } else {
+    showStep(0); // 如果找不到，从头开始
+  }
+} else {
+  showStep(0);
+}
+</script>
+</body>
+</html>

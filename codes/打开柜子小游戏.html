@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>钥匙开锁游戏 - 经典 puzzle 挑战</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#3B82F6',
+            secondary: '#10B981',
+            accent: '#F59E0B',
+            dark: '#1F2937',
+            light: '#F3F4F6'
+          },
+          fontFamily: {
+            game: ['"Press Start 2P"', 'system-ui', 'sans-serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+  <style>
+    /* 固定棋盘和格子，避免抖动/大小变化 */
+    #board-wrapper { width: 500px; height: 500px; }
+    #game-container {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      grid-template-rows: repeat(10, 1fr);
+      width: 100%; height: 100%;
+      gap: 0; user-select: none;
+    }
+    #game-container > div { width: 100%; height: 100%; box-sizing: border-box; }
+    .no-anim { transition: none !important; animation: none !important; }
+
+    /* 更明显的高亮：渐变底 + 放射状光环 + 呼吸动画 */
+    .glow {
+      position: relative;
+      overflow: visible;
+      border-radius: 6px;
+      background: linear-gradient(135deg, rgba(226, 245, 11, 0.6), rgba(230, 243, 255, 0.4));
+      /* box-shadow:
+        0 0 0 3px rgba(11, 245, 245, 0.16),
+        0 6px 18px rgba(245,158,11,0.08),
+        0 0 18px rgba(245,158,11,0.06) inset; */
+      transform-origin: center;
+      animation: glowPulse 1.6s ease-in-out infinite;
+    }
+    .glow::after {
+      content: '';
+      position: absolute;
+      left: 50%; top: 50%;
+      width: 140%; height: 140%;
+      transform: translate(-50%, -50%);
+      border-radius: 8px;
+      filter: blur(8px);
+      background: radial-gradient(circle at center, rgba(245,158,11,0.4), rgba(245,158,11,0.15) 40%, transparent 80%);
+      z-index: -1;
+      animation: halo 1.8s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.02); }
+      100% { transform: scale(1); }
+    }
+    @keyframes halo {
+      0% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.98); }
+      50% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
+      100% { opacity: 0.7; transform: translate(-50%, -50%) scale(0.98); }
+    }
+
+    /* 弹窗样式与动画 */
+    .modal-backdrop {
+      position: fixed; inset: 0; display: none;
+      align-items: center; justify-content: center;
+      background: rgba(0,0,0,0.45); z-index: 50;
+    }
+    .modal-card {
+      width: 92%; max-width: 420px;
+      background: linear-gradient(180deg,#0f1724,#111827);
+      border-radius: 12px; padding: 18px;
+      box-shadow: 0 10px 30px rgba(2,6,23,0.7);
+      color: #e6eef8; font-size: 14px;
+      transform-origin: center;
+    }
+    .modal-title { font-weight: 700; color: #f59e0b; margin-bottom: 8px; font-family: "Press Start 2P", sans-serif; font-size: 16px; }
+    .modal-text { color: #cfe7ff; line-height: 1.4; margin-bottom: 12px; }
+
+    @keyframes modalFadeIn {
+      from { opacity: 0; } to { opacity: 1; }
+    }
+    @keyframes modalPop {
+      0% { transform: translateY(8px) scale(0.96); opacity: 0; }
+      60% { transform: translateY(-6px) scale(1.02); opacity: 1; }
+      100% { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    .modal-backdrop.show { display: flex; animation: modalFadeIn .18s ease-out both; }
+    .modal-card.show { animation: modalPop .28s cubic-bezier(.2,.9,.2,1) both; }
+
+    .modal-actions { display:flex; gap:8px; justify-content:flex-end; margin-top:8px; }
+    .btn-modal { background:#0b1220; color:#fff; border:1px solid rgba(255,255,255,0.06); padding:8px 12px; border-radius:8px; cursor:pointer; }
+    .btn-modal.primary { background: #f59e0b; color: #0b1220; font-weight:700; }
+  </style>
+</head>
+
+<body class="bg-gradient-to-br from-dark to-slate-800 min-h-screen text-light flex flex-col items-center justify-start pt-4 md:pt-8 pb-8 px-4">
+  <!-- 标题 -->
+  <header class="w-full max-w-4xl text-center mb-4 md:mb-6">
+    <h1 class="text-[clamp(1.5rem,5vw,2.5rem)] font-game text-primary drop-shadow-lg tracking-wider">
+       <span class="text-accent">KEY MASTER</span>
+    </h1>
+    <p class="text-slate-300 mt-2 text-sm md:text-base">将钥匙推到对应颜色的锁上，通关以打开书柜！</p>
+  </header>
+
+  <main class="w-full max-w-6xl flex flex-col lg:flex-row gap-6 items-center lg:items-start justify-center">
+    <!-- 信息面板 -->
+    <div class="w-full lg:w-72 bg-slate-700/50 backdrop-blur-sm rounded-xl p-4 shadow-xl order-2 lg:order-1">
+      <div class="mb-6">
+        <h2 class="text-lg font-bold text-center mb-3 border-b border-slate-500 pb-2">游戏状态</h2>
+        <div class="space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300"><i class="fa fa-signal mr-2 text-accent"></i>步数:</span>
+            <span id="moves" class="font-game text-secondary">0</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-slate-300"><i class="fa fa-key mr-2 text-accent"></i>完成度:</span>
+            <span id="progress" class="font-game text-secondary">0/3</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="mb-6">
+        <h2 class="text-lg font-bold text-center mb-3 border-b border-slate-500 pb-2">操作说明</h2>
+        <ul class="text-sm text-slate-300 space-y-2">
+          <li><i class="fa fa-keyboard-o mr-2 text-accent"></i>方向键: 移动玩家</li>
+          <li><i class="fa fa-refresh mr-2 text-accent"></i>R键: 重新开始</li>
+          <li><i class="fa fa-undo mr-2 text-accent"></i>Z键: 悔棋一步</li>
+        </ul>
+      </div>
+
+      <div class="mb-6">
+        <h2 class="text-lg font-bold text-center mb-3 border-b border-slate-500 pb-2">步数限制</h2>
+        <div class="flex justify-between items-center">
+          <span class="text-slate-300"><i class="fa fa-clock-o mr-2 text-accent"></i>剩余步数:</span>
+          <span id="remaining-moves" class="font-game text-secondary">70</span>
+        </div>
+        <div class="w-full h-2 bg-slate-600 rounded-full mt-2 overflow-hidden">
+          <div id="moves-progress-bar" class="h-full bg-secondary transition-all duration-300" style="width: 100%"></div>
+        </div>
+      </div>
+
+      <!-- 横向排列的按钮组 - 确保不超出边界 -->
+      <div class="mb-4">
+        <div class="flex flex-wrap justify-center gap-3 w-full p-2 box-border">
+          <!-- 提示按钮 -->
+          <button id="hint-btn" class="bg-amber-500 hover:bg-amber-500/90 text-white py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-bold shadow active:translate-y-[2px] flex-shrink-0 min-w-[80px] h-11">
+            <i class="fa fa-lightbulb-o"></i>
+            <span>提示</span>
+          </button>
+
+          
+          
+          <button id="undo-btn" class="bg-accent hover:bg-accent/80 text-white py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-bold shadow active:translate-y-[2px] flex-shrink-0 min-w-[80px] h-11">
+            <i class="fa fa-undo"></i>
+            <span>悔棋</span>
+          </button>
+
+          <button id="restart-btn" class="bg-primary hover:bg-primary/80 text-white py-2.5 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2 font-bold shadow active:translate-y-[2px] flex-shrink-0 min-w-[80px] h-11">
+            <i class="fa fa-refresh"></i>
+            <span>重开</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 棋盘区域 -->
+    <div id="board-wrapper" class="relative w-full max-w-md bg-slate-800 rounded-xl overflow-hidden shadow-xl order-1 lg:order-2">
+      <div id="game-container" class="no-anim"></div>
+
+      <!-- 通关提示 -->
+      <div id="success-message" class="hidden absolute inset-0 bg-dark/80 backdrop-blur-sm flex flex-col items-center justify-center gap-4">
+        <div class="text-5xl text-accent mb-2"><i class="fa fa-trophy"></i></div>
+        <h2 class="text-2xl md:text-3xl font-game text-center text-light">恭喜你！</h2>
+        <p class="text-slate-300 text-center">你成功完成了关卡</p>
+        <p class="text-secondary font-game">总步数: <span id="final-moves">0</span></p>
+        <button id="play-again" class="mt-2 bg-primary hover:bg-primary/80 text-white py-2 px-6 rounded-lg transition-all duration-200 font-bold shadow active:translate-y-[2px]">
+          打开书柜
+        </button>
+      </div>
+    </div>
+
+    <!-- 移动端方向按钮 -->
+    <div class="lg:hidden w-full max-w-xs grid grid-cols-3 gap-2 order-3">
+      <div class="col-start-2">
+        <button id="btn-up" class="w-full h-16 bg-slate-700/70 hover:bg-slate-600 rounded-lg flex items-center justify-center text-2xl shadow active:translate-y-[2px]">
+          <i class="fa fa-arrow-up"></i>
+        </button>
+      </div>
+      <div class="col-start-1 row-start-2">
+        <button id="btn-left" class="w-full h-16 bg-slate-700/70 hover:bg-slate-600 rounded-lg flex items-center justify-center text-2xl shadow active:translate-y-[2px]">
+          <i class="fa fa-arrow-left"></i>
+        </button>
+      </div>
+      <div class="col-start-2 row-start-2">
+        <button id="btn-down" class="w-full h-16 bg-slate-700/70 hover:bg-slate-600 rounded-lg flex items-center justify-center text-2xl shadow active:translate-y-[2px]">
+          <i class="fa fa-arrow-down"></i>
+        </button>
+      </div>
+      <div class="col-start-3 row-start-2">
+        <button id="btn-right" class="w-full h-16 bg-slate-700/70 hover:bg-slate-600 rounded-lg flex items-center justify-center text-2xl shadow active:translate-y-[2px]">
+          <i class="fa fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- 自定义美化提示弹窗（初始隐藏） -->
+  <div id="hint-modal" class="modal-backdrop" aria-hidden="true">
+    <div id="hint-card" class="modal-card" role="dialog" aria-modal="true">
+      <div class="modal-title">提示</div>
+      <div class="modal-text">试试先将蓝色钥匙移动到图中高亮处，再绕过蓝色钥匙，用绿色钥匙打开绿锁；</div>
+      <div class="modal-actions">
+        <button id="hint-close" class="btn-modal">关闭</button>
+        <button id="hint-gotit" class="btn-modal primary">好，我知道了</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- <footer class="mt-8 text-center text-slate-400 text-sm">
+    <p>钥匙开锁游戏 &copy; 2023 | 使用键盘方向键或屏幕按钮控制</p>
+  </footer> -->
+
+  <script>
+    // ---------- 游戏配置与状态 ----------
+    const game = {
+      // 0: 空地, 1: 墙,
+      // 2: 红锁, 3: 绿锁, 4: 蓝锁,
+      // 5: 红钥, 6: 绿钥, 7: 蓝钥,
+      // 8: 玩家,
+      // 9: 红钥在红锁, 10: 绿钥在绿锁, 11: 蓝钥在蓝锁,
+      // 12: 玩家在红锁, 13: 玩家在绿锁, 14: 玩家在蓝锁
+      map: [
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+        [1, 0, 0, 5, 0, 0, 1, 7, 0, 1],
+        [1, 1, 0, 0, 1, 1, 1, 0, 0, 1],
+        [1, 2, 0, 0, 8, 0, 0, 0, 3, 1],
+        [1, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 0, 1, 1, 1, 6, 1, 1],
+        [1, 0, 0, 4, 0, 0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+      ],
+      originalMap: [],
+      player: { x: 0, y: 0 },
+      moves: 0,
+      keys: 0,
+      completedKeys: 0,
+      isCompleted: false,
+      moveHistory: [],
+      maxMoves: 70
+    };
+
+    // ---------- DOM ----------
+    const gameContainer = document.getElementById('game-container');
+    const movesElement = document.getElementById('moves');
+    const progressElement = document.getElementById('progress');
+    const restartButton = document.getElementById('restart-btn');
+    const undoButton = document.getElementById('undo-btn');
+    const hintButton = document.getElementById('hint-btn');
+    const playAgainButton = document.getElementById('play-again');
+    const successMessage = document.getElementById('success-message');
+    const finalMovesElement = document.getElementById('final-moves');
+    const remainingMovesElement = document.getElementById('remaining-moves');
+    const movesProgressBar = document.getElementById('moves-progress-bar');
+    const controlButtons = {
+      up: document.getElementById('btn-up'),
+      down: document.getElementById('btn-down'),
+      left: document.getElementById('btn-left'),
+      right: document.getElementById('btn-right')
+    };
+
+    const hintModal = document.getElementById('hint-modal');
+    const hintCard = document.getElementById('hint-card');
+    const hintClose = document.getElementById('hint-close');
+    const hintGotIt = document.getElementById('hint-gotit');
+
+    function deepCopyMap(m) { return JSON.parse(JSON.stringify(m)); }
+
+    // ---------- 提示高亮状态 ----------
+    // 仅高亮 (5,5)（基于 0-index）
+    let hintHighlights = [];
+
+    function setHintHighlights(arr) {
+      // 设置并保持（不再自动清除）
+      hintHighlights = arr.slice();
+      renderGame();
+    }
+    function clearHintHighlights() {
+      hintHighlights = [];
+      renderGame();
+    }
+
+    // ---------- 初始化 ----------
+    function initGame() {
+      game.originalMap = deepCopyMap(game.map);
+      findPlayerPosition();
+      countKeys();
+      game.moves = 0;
+      game.completedKeys = 0;
+      game.isCompleted = false;
+      game.moveHistory = [];
+      movesElement.textContent = '0';
+      progressElement.textContent = `0/${game.keys}`;
+      remainingMovesElement.textContent = game.maxMoves.toString();
+      movesProgressBar.style.width = '100%';
+      movesProgressBar.classList.remove('bg-red-500', 'bg-yellow-500');
+      movesProgressBar.classList.add('bg-secondary');
+      successMessage?.classList.add('hidden');
+      // 注意：不再清除 hintHighlights，保持“点击后一直亮”
+      
+      // 尝试播放背景音乐（需要用户交互）
+      try {
+        bgMusic.currentTime = 0;
+        // 由于浏览器限制，背景音乐需要在用户交互后才能播放
+        // 将在第一个用户操作时开始播放
+      } catch(e) {
+        console.log('背景音乐初始化失败:', e);
+      }
+      
+      renderGame();
+    }
+
+    function findPlayerPosition() {
+      for (let y = 0; y < game.map.length; y++) {
+        for (let x = 0; x < game.map[y].length; x++) {
+          const v = game.map[y][x];
+          if (v === 8 || v === 12 || v === 13 || v === 14) {
+            game.player.x = x; game.player.y = y; return;
+          }
+        }
+      }
+    }
+
+    function countKeys() {
+      game.keys = 0;
+      for (let y = 0; y < game.map.length; y++) {
+        for (let x = 0; x < game.map[y].length; x++) {
+          const v = game.map[y][x];
+          if (v === 5 || v === 6 || v === 7 || v === 9 || v === 10 || v === 11) game.keys++;
+        }
+      }
+    }
+
+    // ---------- 渲染 ----------
+    function renderGame() {
+      gameContainer.innerHTML = '';
+      for (let y = 0; y < game.map.length; y++) {
+        for (let x = 0; x < game.map[y].length; x++) {
+          const cell = document.createElement('div');
+          cell.className = 'relative flex items-center justify-center no-anim';
+          const v = game.map[y][x];
+
+          // 底色
+          if (v === 1) cell.classList.add('bg-slate-600','border','border-slate-700');
+          else cell.classList.add('bg-slate-800');
+
+          // 内容
+          const wrap = document.createElement('div');
+          wrap.className = 'w-10 h-10 flex items-center justify-center';
+          const i = document.createElement('i');
+
+          if (v === 2 || v === 12) { i.className = 'fa fa-lock text-red-500 text-2xl'; }
+          if (v === 3 || v === 13) { i.className = 'fa fa-lock text-green-500 text-2xl'; }
+          if (v === 4 || v === 14) { i.className = 'fa fa-lock text-blue-500 text-2xl'; }
+
+          if (v === 5) { i.className = 'fa fa-key text-red-400 text-xl'; }
+          if (v === 6) { i.className = 'fa fa-key text-green-400 text-xl'; }
+          if (v === 7) { i.className = 'fa fa-key text-blue-400 text-xl'; }
+
+          if (v === 8) {
+            const p = document.createElement('div');
+            p.className = 'w-9 h-9 bg-secondary rounded-full shadow-md flex items-center justify-center';
+            const pu = document.createElement('i');
+            pu.className = 'fa fa-user text-white text-lg';
+            p.appendChild(pu);
+            wrap.appendChild(p);
+          } else if (v >= 2 && v <= 4) {
+            wrap.appendChild(i);
+          } else if (v >= 12 && v <= 14) {
+            const lock = document.createElement('div');
+            lock.className = 'absolute inset-0 flex items-center justify-center';
+            const li = document.createElement('i');
+            if (v === 12) li.className = 'fa fa-lock text-red-500 text-2xl';
+            if (v === 13) li.className = 'fa fa-lock text-green-500 text-2xl';
+            if (v === 14) li.className = 'fa fa-lock text-blue-500 text-2xl';
+            lock.appendChild(li);
+            const p = document.createElement('div');
+            p.className = 'w-9 h-9 bg-secondary rounded-full shadow-md flex items-center justify-center relative z-10';
+            const pu = document.createElement('i');
+            pu.className = 'fa fa-user text-white text-lg';
+            p.appendChild(pu);
+            cell.appendChild(lock);
+            wrap.appendChild(p);
+          } else if (v >= 9 && v <= 11) {
+            const ui = document.createElement('i');
+            if (v === 9) ui.className = 'fa fa-unlock text-red-500 text-2xl';
+            if (v === 10) ui.className = 'fa fa-unlock text-green-500 text-2xl';
+            if (v === 11) ui.className = 'fa fa-unlock text-blue-500 text-2xl';
+            wrap.appendChild(ui);
+          }
+
+          if (wrap.children.length === 0 && i.className) wrap.appendChild(i);
+          cell.appendChild(wrap);
+
+          // 如果该格在 hintHighlights 列表中，则加上 glow（并保持）
+          if (hintHighlights.some(h => h.x === x && h.y === y)) {
+            cell.classList.add('glow');
+          }
+
+          gameContainer.appendChild(cell);
+        }
+      }
+    }
+
+    // ---------- 进度 ----------
+    function updateKeyProgress() {
+      let c = 0;
+      for (let y = 0; y < game.map.length; y++) {
+        for (let x = 0; x < game.map[y].length; x++) {
+          const v = game.map[y][x];
+          if (v === 9 || v === 10 || v === 11) c++;
+        }
+      }
+      game.completedKeys = c;
+      progressElement.textContent = `${game.completedKeys}/${game.keys}`;
+    }
+
+    function checkCompletion() {
+      if (game.completedKeys === game.keys && game.keys > 0 && game.moves <= game.maxMoves) {
+        game.isCompleted = true;
+        finalMovesElement.textContent = game.moves.toString();
+        successMessage.classList.remove('hidden');
+      }
+    }
+    
+    // ---------- 单步移动（真实执行） ----------
+    function movePlayer(dx, dy) {
+      // 现在不再清除提示高亮：点击提示后高亮会一直保留
+
+      if (game.isCompleted) return false;
+      if (game.moves >= game.maxMoves) { alert('步数已用完！请重新开始游戏。'); return false; }
+
+      const currentState = {
+        map: deepCopyMap(game.map),
+        player: { ...game.player },
+        moves: game.moves,
+        completedKeys: game.completedKeys
+      };
+      game.moveHistory.push(currentState);
+
+      const newX = game.player.x + dx;
+      const newY = game.player.y + dy;
+
+      // 撞墙或撞“已开锁的钥匙”（不可推动）
+      if (game.map[newY][newX] === 1 || (game.map[newY][newX] >= 9 && game.map[newY][newX] <= 11)) {
+        game.moveHistory.pop(); return false;
+      }
+
+      // 只允许推动 5/6/7，9/10/11 视为固定障碍
+      const movableKeys = [5, 6, 7];
+      if (movableKeys.includes(game.map[newY][newX])) {
+        const keyNewX = newX + dx;
+        const keyNewY = newY + dy;
+        const target = game.map[keyNewY][keyNewX];
+        const validPositions = [0, 2, 3, 4]; // 只能推到空地或锁
+        if (!validPositions.includes(target)) {
+          game.moveHistory.pop(); return false;
+        }
+
+        const keyType = game.map[newY][newX]; // 5/6/7
+        if (target >= 2 && target <= 4) {
+          // 5->2, 6->3, 7->4
+          if (keyType - 3 === target) game.map[keyNewY][keyNewX] = target + 7;
+          else game.map[keyNewY][keyNewX] = keyType;
+        } else {
+          game.map[keyNewY][keyNewX] = keyType;
+        }
+        updateKeyProgress();
+      }
+
+      // 旧位置还原
+      if (game.map[game.player.y][game.player.x] === 8) game.map[game.player.y][game.player.x] = 0;
+      else if (game.map[game.player.y][game.player.x] >= 12 && game.map[game.player.y][game.player.x] <= 14) {
+        game.map[game.player.y][game.player.x] -= 10;
+      }
+
+      // 新位置
+      if (game.map[newY][newX] === 0 || (game.map[newY][newX] >= 5 && game.map[newY][newX] <= 7)) {
+        game.map[newY][newX] = 8;
+      } else if (game.map[newY][newX] >= 2 && game.map[newY][newX] <= 4) {
+        game.map[newY][newX] = game.map[newY][newX] + 10;
+      }
+
+      game.player.x = newX; game.player.y = newY;
+
+      game.moves++;
+      movesElement.textContent = game.moves.toString();
+      remainingMovesElement.textContent = (game.maxMoves - game.moves).toString();
+
+      const progressPercentage = ((game.maxMoves - game.moves) / game.maxMoves) * 100;
+      movesProgressBar.style.width = progressPercentage + '%';
+      if (progressPercentage < 20) {
+        movesProgressBar.classList.remove('bg-secondary'); movesProgressBar.classList.add('bg-red-500');
+      } else if (progressPercentage < 50) {
+        movesProgressBar.classList.remove('bg-secondary','bg-red-500'); movesProgressBar.classList.add('bg-yellow-500');
+      } else {
+        movesProgressBar.classList.remove('bg-red-500','bg-yellow-500'); movesProgressBar.classList.add('bg-secondary');
+      }
+
+      renderGame();
+      checkCompletion();
+      return true;
+    }
+
+    // ---------- 悔棋 ----------
+    function undoMove() {
+      // 现在不再清除提示高亮：点击提示后高亮会一直保留
+
+      if (game.moveHistory.length === 0) return;
+      const prev = game.moveHistory.pop();
+      game.map = prev.map;
+      game.player = { ...prev.player };
+      game.moves = prev.moves;
+      game.completedKeys = prev.completedKeys;
+
+      movesElement.textContent = game.moves.toString();
+      progressElement.textContent = `${game.completedKeys}/${game.keys}`;
+      remainingMovesElement.textContent = (game.maxMoves - game.moves).toString();
+
+      const progressPercentage = ((game.maxMoves - game.moves) / game.maxMoves) * 100;
+      movesProgressBar.style.width = progressPercentage + '%';
+      if (progressPercentage < 20) {
+        movesProgressBar.classList.remove('bg-secondary'); movesProgressBar.classList.add('bg-red-500');
+      } else if (progressPercentage < 50) {
+        movesProgressBar.classList.remove('bg-secondary','bg-red-500'); movesProgressBar.classList.add('bg-yellow-500');
+      } else {
+        movesProgressBar.classList.remove('bg-red-500','bg-yellow-500'); movesProgressBar.classList.add('bg-secondary');
+      }
+
+      renderGame();
+    }
+
+    // ---------- 重置 ----------
+    function resetGame() {
+      // 注意：保持 hintHighlights（提示高亮不会自动消失）
+      game.map = deepCopyMap(game.originalMap);
+      initGame();
+    }
+
+    // ---------- 提示按钮逻辑（现在用自定义弹窗） ----------
+    // 弹窗文本（已按你要求删除了额外那句）
+    const hintMessage = '试试先将蓝色钥匙移动到图中高亮处，再移动绿色钥匙；';
+
+    // 仅标亮 (5,5)
+    const hintTargets = [ { x: 5, y: 5 } ];
+
+    hintButton.addEventListener('click', () => {
+      // 弹窗显示并播放入场动画
+      hintModal.classList.add('show');
+      hintCard.classList.add('show');
+      hintModal.setAttribute('aria-hidden', 'false');
+
+      // 设置高亮（并保持高亮直到手动清除页面或调用 clearHintHighlights）
+      setHintHighlights(hintTargets);
+    });
+
+    function closeHintModal() {
+      // 退场动画（简单移除 show，会触发 CSS；保持 display: flex 的瞬间效果）
+      hintCard.classList.remove('show');
+      hintModal.classList.remove('show');
+      hintModal.setAttribute('aria-hidden', 'true');
+    }
+
+    hintClose.addEventListener('click', () => {
+      closeHintModal();
+    });
+    hintGotIt.addEventListener('click', () => {
+      closeHintModal();
+    });
+
+    // 点击遮罩空白处也关闭弹窗
+    hintModal.addEventListener('click', (e) => {
+      if (e.target === hintModal) closeHintModal();
+    });
+
+    // ---------- 触摸滑动（移动端） & 其它事件 ----------
+    function setupEventListeners() {
+      
+      document.addEventListener('keydown', (e) => {
+        switch (e.key) {
+          case 'ArrowUp': movePlayer(0, -1); e.preventDefault(); break;
+          case 'ArrowDown': movePlayer(0, 1); e.preventDefault(); break;
+          case 'ArrowLeft': movePlayer(-1, 0); e.preventDefault(); break;
+          case 'ArrowRight': movePlayer(1, 0); e.preventDefault(); break;
+          case 'r': case 'R': resetGame(); e.preventDefault(); break;
+          case 'z': case 'Z': undoMove(); e.preventDefault(); break;
+        }
+      });
+
+      restartButton.addEventListener('click', () => {
+        resetGame();
+      });
+      undoButton.addEventListener('click', () => {
+        undoMove();
+      });
+      playAgainButton?.addEventListener('click', () => {
+        // 检查URL参数，如果是从Fifth-main来的，则返回
+        const urlParams = new URLSearchParams(window.location.search);
+        const fromPage = urlParams.get('from');
+        const step = urlParams.get('step');
+        
+        if (fromPage === 'fifth-main' && step === 'afterLock') {
+          // 返回到Fifth-main.html并跳转到开锁后的步骤
+          window.location.href = 'Fifth-main.html?resumeFrom=afterLock';
+        } else {
+          // 默认行为：重置游戏
+          resetGame();
+        }
+      });
+
+      controlButtons.up.addEventListener('click', () => {
+        movePlayer(0, -1);
+      });
+      controlButtons.down.addEventListener('click', () => {
+        movePlayer(0, 1);
+      });
+      controlButtons.left.addEventListener('click', () => {
+        movePlayer(-1, 0);
+      });
+      controlButtons.right.addEventListener('click', () => {
+        movePlayer(1, 0);
+      });
+
+      // 触摸滑动（移动端）
+      let touchStartX = 0, touchStartY = 0;
+      gameContainer.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      }, false);
+
+      gameContainer.addEventListener('touchend', (e) => {
+        if (!touchStartX || !touchStartY) return;
+        const endX = e.changedTouches[0].clientX;
+        const endY = e.changedTouches[0].clientY;
+        const dx = endX - touchStartX;
+        const dy = endY - touchStartY;
+
+        if (Math.abs(dx) > Math.abs(dy)) {
+          if (dx > 50) movePlayer(1, 0);
+          else if (dx < -50) movePlayer(-1, 0);
+        } else {
+          if (dy > 50) movePlayer(0, 1);
+          else if (dy < -50) movePlayer(0, -1);
+        }
+        touchStartX = 0; touchStartY = 0;
+      }, false);
+    }
+
+    // ---------- 启动 ----------
+    window.addEventListener('DOMContentLoaded', () => {
+      initGame();
+      setupEventListeners();
+    });
+  </script>
+</body>
+</html>
